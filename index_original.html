@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบลงทะเบียนชุมนุม - โรงเรียนมหาชัยพิทยาคาร</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --primary-color: #800020;
+            --primary-light: #9E1B32;
+            --primary-dark: #4A0011;
+            --bg-color: #f4f6f9;
+            --text-main: #2b2b2b;
+            --sidebar-width: 260px;
+        }
+
+        body { font-family: 'Kanit', sans-serif; background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; margin: 0; padding: 0; }
+
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.9); z-index: 9999; display: none; justify-content: center; align-items: center; flex-direction: column; }
+        .spinner-custom { width: 3.5rem; height: 3.5rem; color: var(--primary-color); }
+
+        #wrapper { display: block; position: relative; min-height: 100vh; }
+        
+        #sidebar { width: var(--sidebar-width); background: #ffffff; height: 100vh; box-shadow: 4px 0 15px rgba(0,0,0,0.05); position: fixed; top: 0; left: 0; z-index: 1040; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .sidebar-header { padding: 24px 20px; background: var(--primary-color); color: #ffffff; text-align: center; font-weight: 600; letter-spacing: 0.5px; }
+        .sidebar-logo { max-width: 80px; height: auto; margin-bottom: 15px; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.2)); border-radius: 50%; }
+        
+        .sidebar-menu { padding: 15px 0; }
+        .sidebar-menu a { padding: 14px 24px; display: block; color: #555555; text-decoration: none; font-weight: 400; transition: all 0.2s ease; border-left: 4px solid transparent; }
+        .sidebar-menu a:hover, .sidebar-menu a.active { background: #fff0f2; color: var(--primary-color); font-weight: 500; border-left-color: var(--primary-color); }
+
+        #page-content { margin-left: var(--sidebar-width); min-height: 100vh; display: flex; flex-direction: column; transition: margin-left 0.3s ease; }
+        .top-navbar { background: #ffffff; padding: 15px 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1030; }
+        
+        .btn-primary-custom { background-color: var(--primary-color); border-color: var(--primary-color); color: white; font-weight: 500; padding: 8px 20px; border-radius: 6px; transition: all 0.2s; }
+        .btn-primary-custom:hover { background-color: var(--primary-dark); border-color: var(--primary-dark); color: white; }
+
+        .dash-card { border-radius: 12px; color: #ffffff; padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); position: relative; overflow: hidden; }
+        .dash-card i { position: absolute; right: 15px; bottom: 15px; font-size: 3.5rem; opacity: 0.15; }
+        .bg-grad-1 { background: linear-gradient(135deg, #800020 0%, #b31035 100%); }
+        .bg-grad-2 { background: linear-gradient(135deg, #1e5631 0%, #2ed162 100%); }
+        .bg-grad-3 { background: linear-gradient(135deg, #a30000 0%, #ff4d4d 100%); }
+        .bg-grad-4 { background: linear-gradient(135deg, #1c3b57 0%, #4182b8 100%); }
+
+        .club-card { border-radius: 12px; overflow: hidden; background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.04); transition: transform 0.25s ease; height: 100%; border: 1px solid #eaedf1; }
+        .club-card:hover { transform: translateY(-6px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
+        .club-img { width: 100%; height: 190px; object-fit: cover; }
+        .club-content { padding: 20px; }
+
+        .view-section { display: none; padding: 30px; flex: 1; }
+        .view-section.active { display: block; }
+        .table-responsive { background: #ffffff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow-x: auto; }
+        
+        #sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1035; display: none; }
+        footer { background: #ffffff; text-align: center; padding: 18px; border-top: 1px solid #eaedf1; font-size: 0.9rem; color: #777777; margin-top: auto; }
+
+        @media (max-width: 991.98px) {
+            #sidebar { transform: translateX(-100%); }
+            #sidebar.active { transform: translateX(0); display: block; }
+            #sidebar-overlay.active { display: block; }
+            #page-content { margin-left: 0 !important; }
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-overlay">
+        <div class="spinner-border spinner-custom mb-3" role="status"></div>
+        <h5 class="fw-medium text-secondary" id="loading-text">กำลังโหลดข้อมูล...</h5>
+    </div>
+
+    <div id="sidebar-overlay" onclick="toggleMobileMenu()"></div>
+
+    <div id="wrapper">
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <img src="https://lh3.googleusercontent.com/d/19aXvolxpVK5GndtRSMFP6sEdl7oa5PzN" alt="โลโก้โรงเรียน" class="sidebar-logo">
+                <h5 class="mb-0 fw-bold">ระบบลงทะเบียนชุมนุม<br>โรงเรียนมหาชัยพิทยาคาร</h5>
+            </div>
+            <div class="sidebar-menu" id="menu-items"></div>
+        </nav>
+
+        <div id="page-content">
+            <div class="top-navbar">
+                <button class="btn btn-light border" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
+                <h5 class="mb-0 fw-bold d-none d-sm-block" style="color: var(--primary-color);">โรงเรียนมหาชัยพิทยาคาร สำนักงานเขตพื้นที่การศึกษามัธยมศึกษามหาสารคาม</h5> 
+                <div id="auth-buttons"></div>
+            </div>
+
+            <div id="view-home" class="view-section active">
+                <div class="row g-3 mb-4">
+                    <div class="col-xl-3 col-sm-6"><div class="dash-card bg-grad-1"><h6>ชุมนุมทั้งหมด</h6><h2 id="dash-total-clubs" class="fw-bold mb-0">0</h2><i class="fas fa-cubes"></i></div></div>
+                    <div class="col-xl-3 col-sm-6"><div class="dash-card bg-grad-4"><h6>นักเรียนที่ลงทะเบียนทั้งหมด</h6><h2 id="dash-total-students" class="fw-bold mb-0">0</h2><i class="fas fa-user-graduate"></i></div></div>
+                    <div class="col-xl-3 col-sm-6"><div class="dash-card bg-grad-3"><h6>ชุมนุมที่เต็มแล้ว</h6><h2 id="dash-full-clubs" class="fw-bold mb-0">0</h2><i class="fas fa-lock"></i></div></div>
+                    <div class="col-xl-3 col-sm-6"><div class="dash-card bg-grad-2"><h6>ชุมนุมที่ยังไม่เต็ม</h6><h2 id="dash-avail-clubs" class="fw-bold mb-0">0</h2><i class="fas fa-lock-open"></i></div></div>
+                </div>
+
+                <div class="alert alert-custom shadow-sm bg-white border-0 mb-4 p-3" style="border-left: 5px solid var(--primary-color) !important;">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div>
+                            <h6 class="mb-1 fw-bold text-dark"><i class="fas fa-business-time text-danger me-2"></i> กำหนดการลงทะเบียนประจำปีการศึกษา</h6>
+                            <p class="mb-0 text-muted small" id="reg-period-text">รอโหลดข้อมูล...</p>
+                        </div>
+                        <div><span id="reg-status-badge" class="badge rounded-pill fs-6 px-3 py-2">กำลังตรวจสอบ</span></div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-list-check me-2 text-secondary"></i>รายการกลุ่มกิจกรรมชุมนุม</h5>
+                </div>
+                <div class="row g-4" id="public-club-grid"></div>
+            </div>
+
+            <div id="view-workspace" class="view-section">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="fw-bold mb-0" id="workspace-title">หน้าจัดการระบบ</h4>
+                    <div id="workspace-action-btn"></div>
+                </div>
+                <div id="workspace-content"></div>
+            </div>
+
+            <footer>ระบบลงทะเบียนชุมนุม โรงเรียนมหาชัยพิทยาคาร สำนักงานเขตพื้นที่การศึกษามัธยมศึกษามหาสารคาม พัฒนาโดย นายก้องนที อุ่นเจริญ ครู โรงเรียนมหาชัยพิทยาคาร</footer>
+        </div>
+    </div>
+
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header text-white" style="background: var(--primary-color);">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-shield-alt me-2"></i> เข้าสู่ระบบบัญชี</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="loginForm">
+                        <div class="mb-3"><label class="form-label small fw-medium">ชื่อผู้ใช้งาน (Username)</label><input type="text" id="loginUser" class="form-control" required></div>
+                        <div class="mb-4"><label class="form-label small fw-medium">รหัสผ่าน (Password)</label><input type="password" id="loginPass" class="form-control" required></div>
+                        <button type="submit" class="btn btn-primary-custom w-100 py-2">ยืนยันเข้าสู่ระบบ</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="registerModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header text-white" style="background: var(--primary-color);">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-id-card me-2"></i> ลงทะเบียนเข้าร่วม: <span id="regClubName"></span></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="studentRegForm">
+                        <input type="hidden" id="regClubId">
+                        <div class="mb-3">
+                            <label class="form-label small fw-medium">ระดับชั้นเรียน</label>
+                            <select id="stuClass" class="form-select" required></select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small fw-medium">ชื่อ - นามสกุล นักเรียน</label>
+                            <div class="input-group">
+                                <select class="form-select bg-light" id="stuPrefix" style="max-width: 120px;" required>
+                                    <option value="" disabled selected>คำนำหน้า</option>
+                                    <option value="เด็กชาย">เด็กชาย</option>
+                                    <option value="เด็กหญิง">เด็กหญิง</option>
+                                    <option value="นาย">นาย</option>
+                                    <option value="นางสาว">นางสาว</option>
+                                </select>
+                                <input type="text" id="stuName" class="form-control" required placeholder="ระบุชื่อและนามสกุล">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 py-2 fw-medium"><i class="fas fa-user-plus me-2"></i> บันทึกข้อมูลการลงทะเบียน</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="crudModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header text-white" style="background: var(--primary-color);">
+                    <h5 class="modal-title fw-bold" id="crudModalTitle">จัดการข้อมูล</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" id="crudModalBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let dbCache = null; 
+        let currentUser = JSON.parse(sessionStorage.getItem('currentRegUser')) || null;
+        let activePage = 'home';
+
+        const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+        const registerModal = new bootstrap.Modal(document.getElementById('registerModal'));
+        const crudModal = new bootstrap.Modal(document.getElementById('crudModal'));
+
+        function getDatabase() { return dbCache; }
+
+        function saveDatabase(db, callback) {
+            triggerLoading('show', 'กำลังบันทึกลงสเปรดชีต...');
+            google.script.run.withSuccessHandler(function(updatedDb) {
+                dbCache = updatedDb;
+                triggerLoading('hide');
+                if (callback) callback();
+            }).withFailureHandler(function(err) {
+                triggerLoading('hide');
+                Swal.fire('ข้อผิดพลาด', err.message, 'error');
+            }).saveDatabaseToSheet(db);
+        }
+
+        function triggerLoading(action, text = 'กำลังดำเนินการ...') {
+            const overlay = document.getElementById('loading-overlay');
+            const loadText = document.getElementById('loading-text');
+            if (loadText) loadText.innerText = text;
+            if (action === 'show') overlay.style.display = 'flex';
+            else setTimeout(() => overlay.style.display = 'none', 350);
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('sidebar-overlay').classList.toggle('active');
+        }
+
+        function verifyTimeWindow() {
+            const db = getDatabase();
+            if(!db) return { valid: false, msg: 'โหลดข้อมูลไม่สำเร็จ', badge: 'bg-danger' };
+            const now = new Date();
+            const start = db.settings.startPeriod ? new Date(db.settings.startPeriod) : null;
+            const end = db.settings.endPeriod ? new Date(db.settings.endPeriod) : null;
+
+            if (!start || !end) return { valid: false, msg: 'ยังไม่มีการตั้งค่าช่วงเวลาเปิดระบบ', badge: 'bg-secondary' };
+            if (now < start) return { valid: false, msg: 'ยังไม่ถึงกำหนดเวลาเริ่มลงทะเบียน', badge: 'bg-warning text-dark' };
+            if (now > end) return { valid: false, msg: 'หมดเขตการลงทะเบียนตามกำหนดเวลาแล้ว', badge: 'bg-danger' };
+            return { valid: true, msg: 'ระบบเปิดให้ลงทะเบียนกิจกรรมชุมนุมตามเวลาปกติ', badge: 'bg-success' };
+        }
+
+        function toThaiDateString(isoStr) {
+            if (!isoStr) return '-';
+            const date = new Date(isoStr);
+            return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' }) + ' เวลา ' + 
+                   date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
+        }
+
+        function updateUINavigation() {
+            const menuContainer = document.getElementById('menu-items');
+            const authContainer = document.getElementById('auth-buttons');
+            let menuHTML = `<a href="#" id="nav-home" onclick="navigateTo('home')"><i class="fas fa-home me-2"></i> หน้าแรกระบบ</a>`;
+
+            if (currentUser) {
+                if (currentUser.role === 'admin') {
+                    menuHTML += `<a href="#" id="nav-adm-users" onclick="navigateTo('adm_users')"><i class="fas fa-users-cog me-2"></i> จัดการผู้ใช้งาน</a><a href="#" id="nav-adm-classes" onclick="navigateTo('adm_classes')"><i class="fas fa-layer-group me-2"></i> จัดการชั้นเรียน</a><a href="#" id="nav-adm-clubs" onclick="navigateTo('adm_clubs')"><i class="fas fa-cubes me-2"></i> จัดการชุมนุม (ทั้งหมด)</a><a href="#" id="nav-adm-reports" onclick="navigateTo('adm_reports')"><i class="fas fa-clipboard-list me-2"></i> สรุปผลลงทะเบียน</a><a href="#" id="nav-adm-settings" onclick="navigateTo('adm_settings')"><i class="fas fa-sliders-h me-2"></i> ตั้งค่าเวลาลงทะเบียน</a>`;
+                } else if (currentUser.role === 'teacher') {
+                    menuHTML += `<a href="#" id="nav-tch-profile" onclick="navigateTo('tch-profile')"><i class="fas fa-user-circle me-2"></i> แก้ไขข้อมูลส่วนตัว</a><a href="#" id="nav-tch-clubs" onclick="navigateTo('tch-clubs')"><i class="fas fa-folder-open me-2"></i> จัดการชุมนุมตนเอง</a><a href="#" id="nav-tch-reports" onclick="navigateTo('tch-reports')"><i class="fas fa-chart-pie me-2"></i> รายชื่อผู้ลงทะเบียน</a><a href="#" id="nav-tch-settings" onclick="navigateTo('tch-settings')"><i class="fas fa-sliders-h me-2"></i> ตั้งค่าเวลาลงทะเบียน</a>`;
+                }
+                authContainer.innerHTML = `<span class="fw-medium me-3 small text-dark"><i class="fa-solid fa-user-lock text-burgundy me-1"></i> ${currentUser.name} (${currentUser.role === 'admin' ? 'ผู้ดูแล' : 'ครู'})</span><button class="btn btn-outline-danger btn-sm" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</button>`;
+            } else {
+                authContainer.innerHTML = `<button class="btn btn-primary-custom btn-sm" onclick="loginModal.show()"><i class="fas fa-sign-in-alt me-1"></i> เข้าสู่ระบบบุคลากร</button>`;
+            }
+            menuContainer.innerHTML = menuHTML;
+            document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+            const activeLink = document.getElementById('nav-' + activePage.replace('_', '-'));
+            if (activeLink) activeLink.classList.add('active');
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            triggerLoading('show', 'ตรวจสอบบัญชี...');
+            const userVal = document.getElementById('loginUser').value.trim();
+            const passVal = document.getElementById('loginPass').value;
+            const db = getDatabase();
+
+            setTimeout(() => {
+                const matchedUser = db.users.find(u => u.username === userVal && u.password === passVal);
+                triggerLoading('hide');
+                if (matchedUser) {
+                    sessionStorage.setItem('currentRegUser', JSON.stringify(matchedUser));
+                    currentUser = matchedUser;
+                    loginModal.hide();
+                    document.getElementById('loginForm').reset();
+                    Swal.fire({ icon: 'success', title: 'เข้าสู่ระบบสำเร็จ', showConfirmButton: false, timer: 1500 });
+                    updateUINavigation(); navigateTo('home');
+                } else {
+                    Swal.fire({ icon: 'error', title: 'เข้าสู่ระบบล้มเหลว', text: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
+                }
+            }, 400);
+        });
+
+        function handleLogout() {
+            Swal.fire({ title: 'ยืนยันออกจากระบบ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#800020', confirmButtonText: 'ออกจากระบบ', cancelButtonText: 'ยกเลิก' }).then((result) => {
+                if (result.isConfirmed) {
+                    sessionStorage.removeItem('currentRegUser');
+                    currentUser = null;
+                    updateUINavigation(); navigateTo('home');
+                }
+            });
+        }
+
+        function navigateTo(pageTarget) {
+            activePage = pageTarget;
+            document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+            updateUINavigation();
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('sidebar-overlay').classList.remove('active');
+
+            if (pageTarget === 'home') {
+                document.getElementById('view-home').classList.add('active');
+                renderPublicHome();
+            } else {
+                document.getElementById('view-workspace').classList.add('active');
+                renderWorkspace(pageTarget);
+            }
+        }
+
+        function renderPublicHome() {
+            const db = getDatabase();
+            if(!db) return;
+            const timeCheck = verifyTimeWindow();
+            const totalClubsCount = db.clubs.length;
+            const totalRegStudentsCount = db.registrations.length;
+            
+            let fullClubsCount = 0; let availableClubsCount = 0;
+            const clubRegMap = {};
+            db.registrations.forEach(r => { clubRegMap[r.clubId] = (clubRegMap[r.clubId] || 0) + 1; });
+
+            db.clubs.forEach(c => {
+                let count = clubRegMap[c.id] || 0;
+                if (count >= c.capacity) fullClubsCount++; else availableClubsCount++;
+            });
+
+            document.getElementById('dash-total-clubs').innerText = totalClubsCount;
+            document.getElementById('dash-total-students').innerText = totalRegStudentsCount;
+            document.getElementById('dash-full-clubs').innerText = fullClubsCount;
+            document.getElementById('dash-avail-clubs').innerText = availableClubsCount;
+
+            document.getElementById('reg-period-text').innerHTML = `ระยะเวลาระบบเปิด: <strong class="text-success">${toThaiDateString(db.settings.startPeriod)}</strong> ถึง <strong class="text-danger">${toThaiDateString(db.settings.endPeriod)}</strong>`;
+            const statusBadge = document.getElementById('reg-status-badge');
+            statusBadge.className = `badge rounded-pill fs-6 px-3 py-2 ${timeCheck.badge}`;
+            statusBadge.innerText = timeCheck.valid ? 'เปิดระบบรับลงทะเบียนออนไลน์' : timeCheck.msg;
+
+            const gridContainer = document.getElementById('public-club-grid');
+            gridContainer.innerHTML = '';
+
+            if (db.clubs.length === 0) {
+                gridContainer.innerHTML = `<div class="col-12 text-center py-5 text-muted"><i class="fa-solid fa-folder-open fs-2 mb-2"></i><br>ไม่พบรายการข้อมูลชุมนุมในระบบ</div>`;
+                return;
+            }
+
+            db.clubs.forEach(club => {
+                const currentCount = clubRegMap[club.id] || 0;
+                const isFull = currentCount >= club.capacity;
+                const teacherObj = db.users.find(u => u.id == club.teacherId);
+                const teacherName = teacherObj ? teacherObj.name : 'ไม่ระบุผู้สอน';
+
+                let actionBtnHTML = '';
+                if (!timeCheck.valid) {
+                    actionBtnHTML = `<button class="btn btn-secondary w-100 disabled mt-2" disabled><i class="fas fa-clock me-1"></i> ปิดระบบลงทะเบียน</button>`;
+                } else if (isFull) {
+                    actionBtnHTML = `<button class="btn btn-danger w-100 disabled mt-2" disabled><i class="fas fa-ban me-1"></i> ลงทะเบียนเต็มแล้ว</button>`;
+                } else {
+                    actionBtnHTML = `<button class="btn btn-primary-custom w-100 mt-2" onclick="openStudentRegModal(${club.id}, '${club.name}')"><i class="fas fa-edit me-1"></i> เลือกลงทะเบียนชุมนุมนี้</button>`;
+                }
+
+                gridContainer.innerHTML += `
+                    <div class="col-lg-4 col-md-6 col-sm-12">
+                        <div class="club-card">
+                            <img src="${club.cover}" class="club-img" onerror="this.src='https://via.placeholder.com/600x400?text=No+Image'">
+                            <div class="club-content">
+                                <h6 class="fw-bold text-truncate text-burgundy mb-2">${club.name}</h6>
+                                <p class="text-muted mb-3 small"><i class="fas fa-chalkboard-teacher me-2"></i>ครูผู้ดูแล: ${teacherName}</p>
+                                <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded">
+                                    <span class="small fw-medium text-secondary">ที่นั่งลงทะเบียนแล้ว:</span>
+                                    <span class="badge ${isFull ? 'bg-danger' : 'bg-success'} px-2 py-1">${currentCount} / ${club.capacity} คน</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2 px-1">
+                                    <span class="small text-muted">สถานะกลุ่ม:</span>
+                                    <span class="small fw-bold ${isFull ? 'text-danger' : 'text-success'}">${isFull ? 'เต็ม' : 'ว่าง'}</span>
+                                </div>
+                                ${actionBtnHTML}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function openStudentRegModal(clubId, clubName) {
+            const db = getDatabase();
+            const timeCheck = verifyTimeWindow();
+            if (!timeCheck.valid) { Swal.fire({ icon: 'error', title: 'ไม่สามารถดำเนินการได้', text: timeCheck.msg }); return; }
+
+            document.getElementById('regClubId').value = clubId;
+            document.getElementById('regClubName').innerText = clubName;
+            const dropdownClass = document.getElementById('stuClass');
+            dropdownClass.innerHTML = '<option value="" selected disabled>-- เลือกชั้นเรียนของนักเรียน --</option>';
+            db.classes.forEach(c => { dropdownClass.innerHTML += `<option value="${c.id}">${c.name}</option>`; });
+            document.getElementById('studentRegForm').reset();
+            registerModal.show();
+        }
+
+        document.getElementById('studentRegForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const timeCheck = verifyTimeWindow();
+            if (!timeCheck.valid) { Swal.fire({ icon: 'error', title: 'หมดสิทธิ์ลงทะเบียน', text: 'ระบบปิดรับข้อมูลแล้ว' }); registerModal.hide(); return; }
+
+            const db = getDatabase();
+            const clubId = parseInt(document.getElementById('regClubId').value);
+            const classId = parseInt(document.getElementById('stuClass').value);
+            const prefix = document.getElementById('stuPrefix').value;
+            const stuName = document.getElementById('stuName').value.trim();
+            const fullStudentName = prefix + stuName; 
+
+            const isDuplicate = db.registrations.some(r => r.studentName === fullStudentName);
+            if (isDuplicate) { Swal.fire({ icon: 'error', title: 'ไม่สามารถลงทะเบียนได้', text: `พบชื่อ "${fullStudentName}" ได้ทำการลงทะเบียนเรียบร้อยแล้ว!` }); return; }
+
+            const activeRegsCount = db.registrations.filter(r => r.clubId === clubId).length;
+            const clubObj = db.clubs.find(c => c.id === clubId);
+            if (activeRegsCount >= clubObj.capacity) {
+                Swal.fire({ icon: 'warning', title: 'ชุมนุมเต็มแล้ว', text: 'มีผู้ลงทะเบียนเต็มจำนวนโควตาแล้ว' });
+                registerModal.hide(); renderPublicHome(); return;
+            }
+
+            db.registrations.push({
+                id: Date.now(), studentName: fullStudentName, classId: classId, clubId: clubId, timestamp: new Date().toISOString()
+            });
+
+            saveDatabase(db, function() {
+                registerModal.hide();
+                Swal.fire({ icon: 'success', title: 'ลงทะเบียนชุมนุมสำเร็จ', text: 'บันทึกข้อมูลเรียบร้อยแล้ว', timer: 2000 });
+                renderPublicHome();
+            });
+        });
+
+        function renderWorkspace(viewKey) {
+            const titleNode = document.getElementById('workspace-title');
+            const actionNode = document.getElementById('workspace-action-btn');
+            const contentNode = document.getElementById('workspace-content');
+            actionNode.innerHTML = ''; contentNode.innerHTML = '';
+            const db = getDatabase();
+            const wrapTableContainer = (innerHtml) => `<div class="table-responsive"><table class="table table-striped table-hover table-bordered text-center align-middle mb-0">${innerHtml}</table></div>`;
+
+            if (viewKey === 'adm_users') {
+                titleNode.innerText = 'เมนูจัดการผู้ใช้งานระบบ';
+                actionNode.innerHTML = `<button class="btn btn-primary-custom" onclick="openUserModal(null)"><i class="fas fa-plus-circle me-1"></i> เพิ่มผู้ใช้งาน</button>`;
+                let rowsHTML = '';
+                db.users.forEach((u, i) => { rowsHTML += `<tr><td>${i + 1}</td><td><strong>${u.username}</strong></td><td>\u2022\u2022\u2022\u2022\u2022\u2022</td><td>${u.name}</td><td><span class="badge ${u.role === 'admin' ? 'bg-dark' : 'bg-info'}">${u.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ครู'}</span></td><td><button class="btn btn-sm btn-warning mb-1" onclick="openUserModal(${u.id})"><i class="fas fa-edit"></i></button> <button class="btn btn-sm btn-danger mb-1" onclick="deleteUserEntity(${u.id})"><i class="fas fa-trash"></i></button></td></tr>`; });
+                contentNode.innerHTML = wrapTableContainer(`<thead><tr><th>ลำดับ</th><th>Username</th><th>Password</th><th>ชื่อ-นามสกุล</th><th>สิทธิ์การใช้งาน</th><th>จัดการ</th></tr></thead><tbody>${rowsHTML || '<tr><td colspan="6">ไม่พบข้อมูล</td></tr>'}</tbody>`);
+            }
+            else if (viewKey === 'adm_classes') {
+                titleNode.innerText = 'เมนูจัดการชั้นเรียน';
+                actionNode.innerHTML = `<button class="btn btn-primary-custom" onclick="openClassModal(null)"><i class="fas fa-plus-circle me-1"></i> เพิ่มชั้นเรียน</button>`;
+                let rowsHTML = '';
+                db.classes.forEach((c, i) => { rowsHTML += `<tr><td>${i + 1}</td><td><strong>${c.name}</strong></td><td><button class="btn btn-sm btn-warning" onclick="openClassModal(${c.id})"><i class="fas fa-edit"></i></button> <button class="btn btn-sm btn-danger" onclick="deleteClassEntity(${c.id})"><i class="fas fa-trash"></i></button></td></tr>`; });
+                contentNode.innerHTML = wrapTableContainer(`<thead><tr><th style="width:15%">ลำดับ</th><th>ชื่อชั้นเรียน</th><th style="width:25%">จัดการ</th></tr></thead><tbody>${rowsHTML || '<tr><td colspan="3">ไม่พบข้อมูล</td></tr>'}</tbody>`);
+            }
+            else if (viewKey === 'adm_clubs' || viewKey === 'tch-clubs') {
+                const isTeacherView = (viewKey === 'tch-clubs');
+                titleNode.innerText = isTeacherView ? 'เมนูจัดการชุมนุม (ของคุณครู)' : 'เมนูจัดการชุมนุม (ทั้งหมด)';
+                actionNode.innerHTML = `<button class="btn btn-primary-custom" onclick="openClubModal(null, ${isTeacherView})"><i class="fas fa-plus-circle me-1"></i> เพิ่มข้อมูลชุมนุม</button>`;
+                const clubRegMap = {}; db.registrations.forEach(r => { clubRegMap[r.clubId] = (clubRegMap[r.clubId] || 0) + 1; });
+                let targetedClubs = isTeacherView ? db.clubs.filter(c => c.teacherId == currentUser.id) : db.clubs;
+                let rowsHTML = '';
+                targetedClubs.forEach((c, i) => {
+                    const currentCount = clubRegMap[c.id] || 0;
+                    const isFull = currentCount >= c.capacity;
+                    const teacherObj = db.users.find(u => u.id == c.teacherId);
+                    rowsHTML += `<tr><td>${i + 1}</td><td><img src="${c.cover}" style="width: 70px; height: 45px; object-fit: cover; border-radius:4px;"></td><td class="text-start"><strong>${c.name}</strong></td>${!isTeacherView ? `<td>${teacherObj ? teacherObj.name : '-'}</td>` : ''}<td><span class="badge bg-secondary fs-6">${currentCount} / ${c.capacity}</span></td><td><span class="badge ${isFull ? 'bg-danger' : 'bg-success'}">${isFull ? 'เต็ม' : 'ว่าง'}</span></td><td><button class="btn btn-sm btn-warning mb-1" onclick="openClubModal(${c.id}, ${isTeacherView})"><i class="fas fa-edit"></i></button> <button class="btn btn-sm btn-danger mb-1" onclick="deleteClubEntity(${c.id}, '${viewKey}')"><i class="fas fa-trash"></i></button></td></tr>`;
+                });
+                contentNode.innerHTML = wrapTableContainer(`<thead><tr><th>ลำดับ</th><th>รูปหน้าปก</th><th>ชื่อชุมนุม</th>${!isTeacherView ? '<th>ชื่อครูประจำชุมนุม</th>' : ''}<th>จำนวนลงทะเบียน</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody>${rowsHTML || '<tr><td colspan="7">ไม่พบข้อมูล</td></tr>'}</tbody>`);
+            }
+            else if (viewKey === 'adm_reports' || viewKey === 'tch-reports') {
+                const isTeacherScope = (viewKey === 'tch-reports');
+                titleNode.innerText = 'เมนูสรุปผลรายงานการลงทะเบียน';
+                let clubOptions = '<option value="all">-- แสดงรายชื่อนักเรียนจากทุกชุมนุมที่เป็นเจ้าของ --</option>';
+                let filteredScopeClubs = isTeacherScope ? db.clubs.filter(c => c.teacherId == currentUser.id) : db.clubs;
+                filteredScopeClubs.forEach(c => {
+                    const teacherObj = db.users.find(u => u.id == c.teacherId);
+                    clubOptions += `<option value="${c.id}">${c.name} [ครู: ${teacherObj ? teacherObj.name : '-'}]</option>`;
+                });
+                
+                contentNode.innerHTML = `
+                    <div class="card card-body border-0 shadow-sm mb-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-10 mb-2 mb-md-0">
+                                <label class="form-label small fw-bold text-secondary">กรองข้อมูลแยกตามชื่อชุมนุมและครูประจำชุมนุม</label>
+                                <div class="d-flex gap-2">
+                                    <select id="reportFilterClub" class="form-select" onchange="executeReportFilterTable('${viewKey}')">
+                                        ${clubOptions}
+                                    </select>
+                                    <button class="btn btn-danger text-nowrap shadow-sm" onclick="exportToPDF()"><i class="fas fa-file-pdf me-1"></i> ดาวน์โหลด PDF</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="report-table-wrapper"></div>
+                `;
+                executeReportFilterTable(viewKey);
+            }
+            else if (viewKey === 'adm_settings' || viewKey === 'tch-settings') {
+                titleNode.innerText = 'เมนูตั้งค่าระบบลงทะเบียน';
+                contentNode.innerHTML = `<div class="card border-0 shadow-sm" style="max-width: 600px;"><div class="card-body p-4"><form id="systemSettingsForm" onsubmit="handleSaveSettings(event)"><div class="mb-3"><label class="form-label fw-bold small">วันที่เวลาเริ่มต้น เปิดระบบรับสมัคร</label><input type="datetime-local" id="setStartPeriod" class="form-control" value="${db.settings.startPeriod || ''}"></div><div class="mb-4"><label class="form-label fw-bold small">วันที่เวลาสิ้นสุด หมดเขตลงทะเบียน</label><input type="datetime-local" id="setEndPeriod" class="form-control" value="${db.settings.endPeriod || ''}"></div><button type="submit" class="btn btn-primary-custom w-100 py-2"><i class="fas fa-save me-1"></i> อัพเดทแก้ไขกำหนดการ</button></form></div></div>`;
+            }
+            else if (viewKey === 'tch-profile') {
+                titleNode.innerText = 'แก้ไขข้อมูลส่วนตัวบุคลากร';
+                contentNode.innerHTML = `<div class="card border-0 shadow-sm" style="max-width: 550px;"><div class="card-body p-4"><form id="profileTeacherForm" onsubmit="handleSaveProfile(event)"><div class="mb-3"><label class="form-label small fw-medium">ชื่อผู้ใช้งาน (Username)</label><input type="text" id="profUser" class="form-control" value="${currentUser.username}" required></div><div class="mb-3"><label class="form-label small fw-medium">รหัสผ่านใหม่ (Password)</label><input type="password" id="profPass" class="form-control" value="${currentUser.password}" required></div><div class="mb-4"><label class="form-label small fw-medium">ชื่อ - นามสกุลจริง</label><input type="text" id="profName" class="form-control" value="${currentUser.name}" required></div><button type="submit" class="btn btn-primary-custom w-100 py-2"><i class="fas fa-check-double me-1"></i> ยืนยันบันทึกข้อมูลส่วนตัว</button></form></div></div>`;
+            }
+        }
+
+        function executeReportFilterTable(viewKey) {
+            const selectedClubId = document.getElementById('reportFilterClub').value;
+            const db = getDatabase();
+            const wrapper = document.getElementById('report-table-wrapper');
+            let targetRegs = db.registrations;
+
+            if (viewKey === 'tch-reports') {
+                const myClubIds = db.clubs.filter(c => c.teacherId == currentUser.id).map(c => c.id);
+                targetRegs = targetRegs.filter(r => myClubIds.includes(r.clubId));
+            }
+            if (selectedClubId !== 'all') { targetRegs = targetRegs.filter(r => r.clubId == parseInt(selectedClubId)); }
+
+            targetRegs.sort((a, b) => {
+                if (a.classId !== b.classId) return a.classId - b.classId;
+                return a.studentName.localeCompare(b.studentName, 'th');
+            });
+
+            let rowsHTML = '';
+            targetRegs.forEach((r, i) => {
+                const classObj = db.classes.find(c => c.id == r.classId);
+                const clubObj = db.clubs.find(c => c.id == r.clubId);
+                rowsHTML += `<tr><td>${i + 1}</td><td class="text-start">${r.studentName}</td><td><span class="badge bg-secondary">${classObj ? classObj.name : '-'}</span></td><td class="text-muted small">${clubObj ? clubObj.name : '-'}</td><td><button class="btn btn-sm btn-light border text-danger" onclick="deleteRegistrationEntity(${r.id}, '${viewKey}')"><i class="fas fa-user-minus"></i> ถอนสิทธิ์</button></td></tr>`;
+            });
+
+            wrapper.innerHTML = `<div class="table-responsive"><table class="table table-bordered table-hover bg-white text-center align-middle"><thead class="table-dark"><tr><th>ลำดับ</th><th>ชื่อ-นามสกุล นักเรียน</th><th>ชั้นเรียน</th><th>ชื่อกลุ่มกิจกรรมชุมนุม</th><th>จัดการ</th></tr></thead><tbody>${rowsHTML || '<tr><td colspan="5" class="text-muted py-4">ไม่พบรายชื่อนักเรียน</td></tr>'}</tbody></table></div>`;
+        }
+
+        // ฟังก์ชันสร้างเอกสาร PDF 
+        function exportToPDF() {
+            const clubSelect = document.getElementById('reportFilterClub');
+            const clubName = clubSelect.options[clubSelect.selectedIndex].text;
+            const tableWrapper = document.getElementById('report-table-wrapper');
+            
+            if (tableWrapper.innerText.includes('ไม่พบรายชื่อ')) {
+                Swal.fire({ icon: 'warning', title: 'ไม่มีข้อมูล', text: 'ไม่พบรายชื่อนักเรียนสำหรับออกรายงาน' });
+                return;
+            }
+
+            const tableHtml = tableWrapper.innerHTML;
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+            
+            const pri = iframe.contentWindow;
+            pri.document.open();
+            pri.document.write(`
+                <!DOCTYPE html>
+                <html lang="th">
+                <head>
+                    <title>รายงานลงทะเบียน_${clubName}</title>
+                    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+                    <style>
+                        body { font-family: 'Kanit', sans-serif; padding: 20px; background-color: #fff; color: #000; }
+                        h4 { text-align: center; margin-bottom: 20px; font-weight: bold; color: #000; }
+                        .table { width: 100%; border-collapse: collapse; margin-bottom: 0; }
+                        .table th, .table td { border: 1px solid #000 !important; padding: 8px; text-align: center; color: #000 !important; vertical-align: middle; }
+                        .table th, .table-dark th { background-color: #f0f0f0 !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                        .table th:last-child, .table td:last-child { display: none !important; }
+                        .text-start { text-align: left !important; }
+                        .badge { color: #000 !important; background: none !important; font-size: 14px; font-weight: normal; padding: 0; }
+                        @page { size: A4 portrait; margin: 15mm; }
+                    </style>
+                </head>
+                <body>
+                    <h4>สรุปรายชื่อนักเรียนลงทะเบียน<br>${clubName}</h4>
+                    ${tableHtml}
+                </body>
+                </html>
+            `);
+            pri.document.close();
+            
+            triggerLoading('show', 'กำลังสร้าง PDF...');
+            
+            setTimeout(() => {
+                triggerLoading('hide');
+                pri.focus();
+                pri.print();
+                setTimeout(() => { document.body.removeChild(iframe); }, 1000);
+            }, 1000);
+        }
+
+        function openUserModal(userId) {
+            const db = getDatabase();
+            const isEdit = userId !== null;
+            const uData = isEdit ? db.users.find(u => u.id == userId) : { username:'', password:'', name:'', role:'teacher' };
+            document.getElementById('crudModalTitle').innerText = isEdit ? 'แก้ไขข้อมูลผู้ใช้งาน' : 'เพิ่มผู้ใช้งานระบบใหม่';
+            document.getElementById('crudModalBody').innerHTML = `<form id="modalUserForm"><div class="mb-3"><label class="form-label small">Username</label><input type="text" id="muUser" class="form-control" value="${uData.username}" required></div><div class="mb-3"><label class="form-label small">Password</label><input type="password" id="muPass" class="form-control" value="${uData.password}" required></div><div class="mb-3"><label class="form-label small">ชื่อ-นามสกุลจริง</label><input type="text" id="muName" class="form-control" value="${uData.name}" required></div><div class="mb-4"><label class="form-label small">สิทธิ์ระดับการใช้งาน</label><select id="muRole" class="form-select"><option value="teacher" ${uData.role === 'teacher' ? 'selected' : ''}>ครูประจำชุมนุม (Teacher)</option><option value="admin" ${uData.role === 'admin' ? 'selected' : ''}>ผู้ดูแลระบบสูงสุด (Admin)</option></select></div><button type="submit" class="btn btn-primary-custom w-100">บันทึกข้อมูล</button></form>`;
+
+            document.getElementById('modalUserForm').onsubmit = function(e) {
+                e.preventDefault();
+                const dbLatest = getDatabase();
+                if (isEdit) {
+                    const idx = dbLatest.users.findIndex(u => u.id == userId);
+                    dbLatest.users[idx] = { id: userId, username: document.getElementById('muUser').value, password: document.getElementById('muPass').value, name: document.getElementById('muName').value, role: document.getElementById('muRole').value };
+                } else {
+                    dbLatest.users.push({ id: Date.now(), username: document.getElementById('muUser').value, password: document.getElementById('muPass').value, name: document.getElementById('muName').value, role: document.getElementById('muRole').value });
+                }
+                saveDatabase(dbLatest, function() { crudModal.hide(); Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ', timer: 1000, showConfirmButton: false }); renderWorkspace('adm_users'); });
+            };
+            crudModal.show();
+        }
+
+        function deleteUserEntity(id) {
+            Swal.fire({ title: 'ยืนยันลบ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'ลบ' }).then((res) => {
+                if (res.isConfirmed) { const db = getDatabase(); db.users = db.users.filter(u => u.id != id); saveDatabase(db, function() { renderWorkspace('adm_users'); }); }
+            });
+        }
+
+        function openClassModal(classId) {
+            const db = getDatabase();
+            const isEdit = classId !== null;
+            const cName = isEdit ? db.classes.find(c => c.id == classId).name : '';
+            document.getElementById('crudModalTitle').innerText = isEdit ? 'แก้ไขชื่อระดับชั้นเรียน' : 'เพิ่มระดับชั้นเรียนใหม่';
+            document.getElementById('crudModalBody').innerHTML = `<form id="modalClassForm"><div class="mb-4"><label class="form-label small">ชื่อชั้นเรียน</label><input type="text" id="mcName" class="form-control" value="${cName}" placeholder="เช่น ม.4/1" required></div><button type="submit" class="btn btn-primary-custom w-100">บันทึกชั้นเรียน</button></form>`;
+
+            document.getElementById('modalClassForm').onsubmit = function(e) {
+                e.preventDefault();
+                const dbLatest = getDatabase();
+                if (isEdit) { const idx = dbLatest.classes.findIndex(c => c.id == classId); dbLatest.classes[idx].name = document.getElementById('mcName').value.trim(); } 
+                else { dbLatest.classes.push({ id: Date.now(), name: document.getElementById('mcName').value.trim() }); }
+                saveDatabase(dbLatest, function() { crudModal.hide(); renderWorkspace('adm_classes'); });
+            };
+            crudModal.show();
+        }
+
+        function deleteClassEntity(id) {
+            Swal.fire({ title: 'ลบชั้นเรียน?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'ลบ' }).then((res) => {
+                if (res.isConfirmed) { const db = getDatabase(); db.classes = db.classes.filter(c => c.id != id); saveDatabase(db, function() { renderWorkspace('adm_classes'); }); }
+            });
+        }
+
+        function openClubModal(clubId, isTeacherView) {
+            const db = getDatabase();
+            const isEdit = clubId !== null;
+            const clubData = isEdit ? db.clubs.find(c => c.id == clubId) : { name:'', cover:'', teacherId: (isTeacherView ? currentUser.id : ''), capacity: 30 };
+            let tOptions = ''; db.users.filter(u => u.role === 'teacher').forEach(u => { tOptions += `<option value="${u.id}" ${u.id == clubData.teacherId ? 'selected' : ''}>${u.name}</option>`; });
+
+            document.getElementById('crudModalTitle').innerText = isEdit ? 'แก้ไขชุมนุม' : 'เพิ่มชุมนุมใหม่';
+            document.getElementById('crudModalBody').innerHTML = `<form id="modalClubForm"><div class="mb-3"><label class="form-label small">ชื่อชุมนุมกิกรรม</label><input type="text" id="mclName" class="form-control" value="${clubData.name}" required></div><div class="mb-3"><label class="form-label small">ลิงก์อัพโหลดรูปภาพหน้าปก (URL)</label><input type="url" id="mclCover" class="form-control" value="${clubData.cover}" required></div>${!isTeacherView ? `<div class="mb-3"><label class="form-label small">ครูประจำชุมนุม</label><select id="mclTeacher" class="form-select" required><option value="" disabled selected>-- เลือกบุคลากร --</option>${tOptions}</select></div>` : `<input type="hidden" id="mclTeacher" value="${currentUser.id}">`}<div class="mb-4"><label class="form-label small">จำนวนรับสูงสุด (คน)</label><input type="number" id="mclCap" class="form-control" min="1" value="${clubData.capacity}" required></div><button type="submit" class="btn btn-primary-custom w-100">บันทึกข้อมูลชุมนุม</button></form>`;
+
+            document.getElementById('modalClubForm').onsubmit = function(e) {
+                e.preventDefault();
+                const dbLatest = getDatabase();
+                const payload = { id: isEdit ? clubId : Date.now(), name: document.getElementById('mclName').value.trim(), cover: document.getElementById('mclCover').value.trim(), teacherId: parseInt(document.getElementById('mclTeacher').value), capacity: parseInt(document.getElementById('mclCap').value) };
+                if (isEdit) { const idx = dbLatest.clubs.findIndex(c => c.id == clubId); dbLatest.clubs[idx] = payload; } else { dbLatest.clubs.push(payload); }
+                saveDatabase(dbLatest, function() { crudModal.hide(); renderWorkspace(isTeacherView ? 'tch-clubs' : 'adm_clubs'); });
+            };
+            crudModal.show();
+        }
+
+        function deleteClubEntity(id, sourceView) {
+            Swal.fire({ title: 'ลบชุมนุม?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'ลบชุมนุม' }).then((res) => {
+                if (res.isConfirmed) { const db = getDatabase(); db.clubs = db.clubs.filter(c => c.id != id); db.registrations = db.registrations.filter(r => r.clubId != id); saveDatabase(db, function() { renderWorkspace(sourceView); }); }
+            });
+        }
+
+        function deleteRegistrationEntity(regId, sourceView) {
+            Swal.fire({ title: 'ถอนสิทธิ์นักเรียน?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'ยืนยันลบ' }).then((res) => {
+                if (res.isConfirmed) { const db = getDatabase(); db.registrations = db.registrations.filter(r => r.id != regId); saveDatabase(db, function() { executeReportFilterTable(sourceView); }); }
+            });
+        }
+
+        function handleSaveSettings(e) {
+            e.preventDefault();
+            const db = getDatabase();
+            db.settings.startPeriod = document.getElementById('setStartPeriod').value;
+            db.settings.endPeriod = document.getElementById('setEndPeriod').value;
+            saveDatabase(db, function() { Swal.fire({ icon: 'success', title: 'อัปเดตกำหนดเวลาสำเร็จ', timer: 1500, showConfirmButton: false }); });
+        }
+
+        function handleSaveProfile(e) {
+            e.preventDefault();
+            const db = getDatabase();
+            const idx = db.users.findIndex(u => u.id == currentUser.id);
+            db.users[idx].username = document.getElementById('profUser').value.trim();
+            db.users[idx].password = document.getElementById('profPass').value;
+            db.users[idx].name = document.getElementById('profName').value.trim();
+            saveDatabase(db, function() {
+                currentUser = db.users[idx]; sessionStorage.setItem('currentRegUser', JSON.stringify(currentUser));
+                updateUINavigation(); Swal.fire({ icon: 'success', title: 'อัปเดตข้อมูลแล้ว', timer: 1500, showConfirmButton: false });
+            });
+        }
+
+        // โหลดข้อมูลอัตโนมัติจาก Google Sheets เมื่อเปิดหน้าเว็บ
+        window.addEventListener('DOMContentLoaded', () => {
+            triggerLoading('show', 'กำลังเชื่อมต่อ Google Sheets...');
+            google.script.run.withSuccessHandler(function(data) {
+                dbCache = data;
+                triggerLoading('hide');
+                updateUINavigation();
+                navigateTo('home');
+            }).withFailureHandler(function(error) {
+                triggerLoading('hide');
+                Swal.fire('ข้อผิดพลาดการเชื่อมต่อ', 'กรุณารีเฟรชหน้าต่างใหม่', 'error');
+            }).getDatabaseFromSheet();
+        });
+    </script>
+</body>
+</html>

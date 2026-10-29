@@ -1,0 +1,2554 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ลงทะเบียนชุมนุม MHC">
+  <meta name="theme-color" content="#4F46E5">
+  <title>ระบบลงทะเบียนชุมนุมออนไลน์ — โรงเรียนมหาชัยพิทยาคาร | MHC Smart School</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans, Noto Sans Thai, Sarabun -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6.6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <!-- HTML2Canvas (for saving registration slip) -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <!-- Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#EEF2FF',
+              100: '#E0E7FF',
+              200: '#C7D2FE',
+              300: '#A5B4FC',
+              400: '#818CF8',
+              500: '#6366F1',
+              600: '#4F46E5',
+              700: '#4338CA',
+              800: '#3730A3',
+              900: '#312E81',
+            },
+            school: {
+              50: '#FFF1F2',
+              100: '#FFE4E6',
+              200: '#FECDD3',
+              500: '#F43F5E',
+              700: '#BE123C',
+              800: '#9F1239',
+              900: '#800020',
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '"Noto Sans Thai"', 'sans-serif'],
+            thai: ['"Noto Sans Thai"', 'sans-serif'],
+            doc: ['"Sarabun"', 'sans-serif']
+          },
+          boxShadow: {
+            'aurora': '0 10px 30px -10px rgba(79, 70, 229, 0.25)',
+            'card': '0 4px 20px 0 rgba(0, 0, 0, 0.05)',
+            'card-hover': '0 14px 30px -4px rgba(79, 70, 229, 0.15)',
+            'soft': '0 2px 10px 0 rgba(0, 0, 0, 0.03)'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --primary: #4F46E5;
+      --primary-dark: #3730A3;
+      --school-burgundy: #800020;
+    }
+
+    * {
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', sans-serif;
+      background-color: #F8FAFC;
+      color: #1E293B;
+      min-height: 100vh;
+      padding-top: var(--sat);
+      padding-bottom: calc(var(--sab) + 72px);
+    }
+
+    @media (min-width: 1024px) {
+      body {
+        padding-bottom: 0;
+      }
+    }
+
+    /* Aurora Gradient Header */
+    .bg-aurora {
+      background: linear-gradient(135deg, #1E1B4B 0%, #312E81 35%, #4F46E5 70%, #7C3AED 100%);
+    }
+
+    .bg-aurora-card {
+      background: linear-gradient(135deg, rgba(79, 70, 229, 0.08) 0%, rgba(124, 58, 237, 0.04) 100%);
+    }
+
+    /* Glassmorphism */
+    .glass-nav {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    }
+
+    .dark .glass-nav {
+      background: rgba(15, 23, 42, 0.88);
+      border-bottom: 1px solid rgba(51, 65, 85, 0.8);
+    }
+
+    .glass-bottom-bar {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.04);
+      padding-bottom: max(var(--sab), 8px);
+    }
+
+    .dark .glass-bottom-bar {
+      background: rgba(15, 23, 42, 0.94);
+      border-top: 1px solid rgba(51, 65, 85, 0.9);
+    }
+
+    /* Shimmer loading */
+    .skeleton {
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: skeleton-shimmer 1.5s infinite;
+    }
+    @keyframes skeleton-shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Smooth Transitions */
+    .btn-press:active {
+      transform: scale(0.97);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop-custom {
+      background-color: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+    }
+
+    /* Digital Registration Ticket / Slip Styling */
+    .ticket-container {
+      background: #ffffff;
+      border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 16px 40px -10px rgba(79, 70, 229, 0.2);
+      border: 1px solid #E2E8F0;
+    }
+    .ticket-header {
+      background: linear-gradient(135deg, #800020 0%, #BE123C 50%, #4F46E5 100%);
+      color: white;
+      padding: 20px 24px;
+      text-align: center;
+    }
+    .ticket-rip {
+      position: relative;
+      height: 24px;
+      background: #F8FAFC;
+      border-top: 2px dashed #CBD5E1;
+      margin: 0 -2px;
+    }
+    .ticket-rip::before, .ticket-rip::after {
+      content: '';
+      position: absolute;
+      top: -12px;
+      width: 24px;
+      height: 24px;
+      background: #1E293B; /* match overlay */
+      border-radius: 50%;
+    }
+    .ticket-rip::before { left: -12px; }
+    .ticket-rip::after { right: -12px; }
+
+    /* Print styling */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #print-area, #print-area * {
+        visibility: visible;
+      }
+      #print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 10mm;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 antialiased selection:bg-brand-500 selection:text-white transition-colors duration-200">
+
+  <!-- ========================================================
+       TOP NAVIGATION BAR
+       ======================================================== -->
+  <header class="sticky top-0 z-40 glass-nav transition-all duration-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 sm:h-20">
+        
+        <!-- School Brand & Identity -->
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('home')">
+          <div class="relative flex-shrink-0">
+            <img id="nav-school-logo" src="https://lh3.googleusercontent.com/d/19aXvolxpVK5GndtRSMFP6sEdl7oa5PzN" alt="MHC Logo" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl object-contain shadow-sm bg-white p-0.5 border border-slate-200 dark:border-slate-700">
+            <span class="absolute -bottom-1 -right-1 flex h-3 w-3">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+            </span>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/40 px-2 py-0.5 rounded-full border border-brand-200 dark:border-brand-800/50">Smart School</span>
+              <span class="text-[11px] text-slate-400 font-medium hidden sm:inline">v3.3.32</span>
+            </div>
+            <h1 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">ระบบลงทะเบียนชุมนุมออนไลน์</h1>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[200px] sm:max-w-xs">โรงเรียนมหาชัยพิทยาคาร สพม.มหาสารคาม</p>
+          </div>
+        </div>
+
+        <!-- Desktop Navigation Items -->
+        <nav class="hidden lg:flex items-center space-x-1" id="desktop-menu-items">
+          <!-- Populated by JS -->
+        </nav>
+
+        <!-- Right Action Controls -->
+        <div class="flex items-center space-x-2">
+          <!-- Dark Mode Toggle -->
+          <button onclick="toggleDarkMode()" class="p-2 sm:p-2.5 rounded-xl text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors btn-press" title="สลับธีม สว่าง/มืด">
+            <i class="fas fa-moon text-base dark:hidden"></i>
+            <i class="fas fa-sun text-base hidden dark:inline text-amber-400"></i>
+          </button>
+
+          <!-- Auth Status / Login Button (Desktop) -->
+          <div id="desktop-auth-container" class="hidden sm:flex items-center">
+            <!-- Populated by JS -->
+          </div>
+
+          <!-- Mobile Drawer Toggle (For Teacher/Admin on small screens) -->
+          <button id="mobile-menu-btn" onclick="toggleMobileDrawer()" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 lg:hidden btn-press">
+            <i class="fas fa-bars-staggered text-lg"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================
+       MAIN APP CONTAINER
+       ======================================================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
+
+    <!-- ----------------------------------------------------
+         VIEW 1: PUBLIC HOME (นักเรียน และ ทุกคน)
+         ---------------------------------------------------- -->
+    <section id="view-home" class="view-panel space-y-6">
+
+      <!-- Hero Banner & Registration Period Card -->
+      <div class="relative overflow-hidden rounded-3xl bg-aurora text-white p-6 sm:p-8 lg:p-10 shadow-aurora">
+        <!-- Background decorative ambient circles -->
+        <div class="absolute -right-12 -top-12 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute -left-12 -bottom-12 w-64 h-64 bg-brand-500/20 rounded-full blur-2xl pointer-events-none"></div>
+
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div class="space-y-3 max-w-2xl">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs sm:text-sm font-medium border border-white/20">
+              <i class="fas fa-sparkles text-amber-300"></i>
+              <span>ยินดีต้อนรับนักเรียนและบุคลากรทุกท่าน</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-tight">
+              เลือกชุมนุมตามความสนใจ พัฒนาศักยภาพสู่ความเป็นเลิศ
+            </h2>
+            <p class="text-brand-100 text-sm sm:text-base leading-relaxed">
+              โรงเรียนมหาชัยพิทยาคาร มุ่งเน้นการจัดกิจกรรมพัฒนาผู้เรียนให้นักเรียนมีทักษะ ศักยภาพ และความสุขในการเรียนรู้
+            </p>
+          </div>
+
+          <!-- Live Registration Window Badge & Countdown -->
+          <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 sm:p-5 flex-shrink-0 md:w-80 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-brand-200 font-semibold uppercase tracking-wider">สถานะระบบลงทะเบียน</span>
+              <span id="hero-status-pill" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500 text-white shadow-sm">
+                <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span>
+                กำลังตรวจสอบ
+              </span>
+            </div>
+            <div class="text-xs text-brand-100 space-y-1.5 border-t border-white/10 pt-2.5">
+              <div class="flex items-center gap-2">
+                <i class="fas fa-calendar-check text-emerald-300 w-4 text-center"></i>
+                <span id="hero-start-time" class="truncate">รอโหลดเวลา...</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <i class="fas fa-calendar-xmark text-rose-300 w-4 text-center"></i>
+                <span id="hero-end-time" class="truncate">รอโหลดเวลา...</span>
+              </div>
+            </div>
+            <div id="hero-countdown-box" class="bg-black/20 rounded-xl px-3 py-2 text-center text-xs font-medium text-amber-200">
+              <i class="fas fa-stopwatch me-1"></i> <span id="hero-countdown-text">กำลังคำนวณช่วงเวลา...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Metrics Counters (4 KPI Cards) -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <!-- Total Clubs -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 border border-slate-200/70 dark:border-slate-700/60 shadow-soft flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl flex-shrink-0">
+            <i class="fas fa-cubes"></i>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">ชุมนุมทั้งหมด</p>
+            <h3 id="stat-total-clubs" class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">0</h3>
+          </div>
+        </div>
+
+        <!-- Total Students Registered -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 border border-slate-200/70 dark:border-slate-700/60 shadow-soft flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl flex-shrink-0">
+            <i class="fas fa-user-check"></i>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">นักเรียนลงทะเบียนแล้ว</p>
+            <h3 id="stat-total-registered" class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">0</h3>
+          </div>
+        </div>
+
+        <!-- Available Clubs -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 border border-slate-200/70 dark:border-slate-700/60 shadow-soft flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xl flex-shrink-0">
+            <i class="fas fa-door-open"></i>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">ชุมนุมที่ยังว่าง</p>
+            <h3 id="stat-available-clubs" class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">0</h3>
+          </div>
+        </div>
+
+        <!-- Full Clubs -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 border border-slate-200/70 dark:border-slate-700/60 shadow-soft flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-xl bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center text-xl flex-shrink-0">
+            <i class="fas fa-lock"></i>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">ชุมนุมที่เต็มแล้ว</p>
+            <h3 id="stat-full-clubs" class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">0</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search & Filters Toolbar -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 border border-slate-200/70 dark:border-slate-700/60 shadow-soft space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-4">
+        <!-- Search Input -->
+        <div class="relative flex-1">
+          <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+          <input type="text" id="club-search-input" oninput="handleSearchClubs()" placeholder="พิมพ์ค้นหาชื่อชุมนุม หรือ ครูผู้ดูแล..." class="w-full pl-11 pr-4 py-2.5 sm:py-3 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all">
+          <button id="search-clear-btn" onclick="clearClubSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+            <i class="fas fa-times-circle text-sm"></i>
+          </button>
+        </div>
+
+        <!-- Filter Chips (All / Available / Full) -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none flex-shrink-0">
+          <button onclick="setClubFilter('all')" id="filter-chip-all" class="club-filter-btn px-3.5 py-2 rounded-xl text-xs font-semibold bg-brand-600 text-white shadow-sm transition-all btn-press">
+            ทั้งหมด (<span id="chip-count-all">0</span>)
+          </button>
+          <button onclick="setClubFilter('available')" id="filter-chip-available" class="club-filter-btn px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all btn-press">
+            เฉพาะที่ยังว่าง (<span id="chip-count-avail">0</span>)
+          </button>
+          <button onclick="setClubFilter('full')" id="filter-chip-full" class="club-filter-btn px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all btn-press">
+            เต็มแล้ว (<span id="chip-count-full">0</span>)
+          </button>
+        </div>
+      </div>
+
+      <!-- Club Cards Grid Container -->
+      <div id="clubs-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+        <!-- Skeleton placeholders while loading -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 space-y-4">
+          <div class="h-44 rounded-xl skeleton"></div>
+          <div class="h-5 w-3/4 rounded skeleton"></div>
+          <div class="h-4 w-1/2 rounded skeleton"></div>
+          <div class="h-10 rounded-xl skeleton"></div>
+        </div>
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 space-y-4">
+          <div class="h-44 rounded-xl skeleton"></div>
+          <div class="h-5 w-3/4 rounded skeleton"></div>
+          <div class="h-4 w-1/2 rounded skeleton"></div>
+          <div class="h-10 rounded-xl skeleton"></div>
+        </div>
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 space-y-4">
+          <div class="h-44 rounded-xl skeleton"></div>
+          <div class="h-5 w-3/4 rounded skeleton"></div>
+          <div class="h-4 w-1/2 rounded skeleton"></div>
+          <div class="h-10 rounded-xl skeleton"></div>
+        </div>
+      </div>
+
+      <!-- Empty State (When no club matches search/filter) -->
+      <div id="clubs-empty-state" class="hidden text-center py-16 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 p-8 space-y-3">
+        <div class="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 mx-auto text-2xl">
+          <i class="fas fa-folder-open"></i>
+        </div>
+        <h4 class="text-base font-bold text-slate-700 dark:text-slate-200">ไม่พบรายการชุมนุมที่ค้นหา</h4>
+        <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">ลองเปลี่ยนคำค้นหา หรือเลือกตัวกรองเป็น "ทั้งหมด" เพื่อดูชุมนุมทั้งหมดในระบบ</p>
+        <button onclick="clearClubSearch()" class="mt-2 px-4 py-2 rounded-xl text-xs font-semibold bg-brand-600 text-white hover:bg-brand-700 transition-colors btn-press">ล้างคำค้นหา</button>
+      </div>
+
+    </section>
+
+    <!-- ----------------------------------------------------
+         VIEW 2: STUDENT CHECK STATUS (ตรวจสอบผลการลงทะเบียน)
+         ---------------------------------------------------- -->
+    <section id="view-check" class="view-panel hidden space-y-6">
+      <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-700 shadow-soft space-y-6">
+        <div class="text-center max-w-lg mx-auto space-y-2">
+          <div class="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-900/40 text-brand-600 dark:text-brand-400 flex items-center justify-center text-xl mx-auto">
+            <i class="fas fa-search"></i>
+          </div>
+          <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">ตรวจสอบผลการลงทะเบียนชุมนุม</h2>
+          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+            พิมพ์ชื่อ-นามสกุล หรือเลือกระดับชั้นเรียน เพื่อค้นหาและพิมพ์บัตรประจำตัวการลงทะเบียน
+          </p>
+        </div>
+
+        <!-- Search Form -->
+        <div class="max-w-xl mx-auto grid grid-cols-1 sm:grid-cols-12 gap-3">
+          <div class="sm:col-span-5">
+            <select id="check-filter-class" onchange="performStudentCheck()" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              <option value="all">-- ทุกระดับชั้นเรียน --</option>
+            </select>
+          </div>
+          <div class="sm:col-span-7 relative">
+            <input type="text" id="check-input-name" oninput="performStudentCheck()" placeholder="ระบุชื่อหรือนามสกุลนักเรียน..." class="w-full pl-4 pr-10 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            <i class="fas fa-user-graduate absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          </div>
+        </div>
+
+        <!-- Search Results Table / Cards -->
+        <div id="check-results-wrapper" class="space-y-3">
+          <!-- Populated by JS -->
+          <div class="text-center py-10 text-slate-400 text-sm">
+            <i class="fas fa-keyboard text-2xl mb-2 text-slate-300"></i>
+            <p>กรุณาระบุชื่อ หรือเลือกระดับชั้นเรียนเพื่อแสดงผลการลงทะเบียน</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ----------------------------------------------------
+         VIEW 3: TEACHER & ADMIN WORKSPACE (หน้าจัดการระบบ)
+         ---------------------------------------------------- -->
+    <section id="view-workspace" class="view-panel hidden space-y-6">
+      
+      <!-- Workspace Header -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-slate-700 shadow-soft flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="workspace-role-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300">
+              ผู้ดูแลระบบ
+            </span>
+            <span class="text-xs text-slate-400" id="workspace-user-display">-</span>
+          </div>
+          <h2 id="workspace-title" class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
+            แดชบอร์ดจัดการระบบ
+          </h2>
+        </div>
+        <div id="workspace-action-btn" class="flex items-center gap-2">
+          <!-- Populated by JS (e.g. + เพิ่มชุมนุม, Export) -->
+        </div>
+      </div>
+
+      <!-- Workspace Sub-tabs for Mobile & Quick Switch -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" id="workspace-subtabs">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Workspace Dynamic Content Container -->
+      <div id="workspace-content" class="space-y-4">
+        <!-- Rendered based on selected admin/teacher subview -->
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ========================================================
+       FOOTER (ตามระเบียบ MHC Smart School)
+       ======================================================== -->
+  <footer class="hidden lg:block border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 py-6 mt-12 text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <img src="https://lh3.googleusercontent.com/d/19aXvolxpVK5GndtRSMFP6sEdl7oa5PzN" alt="MHC" class="w-8 h-8 rounded-lg object-contain bg-white border border-slate-200 dark:border-slate-700">
+        <div>
+          <p class="font-bold text-slate-700 dark:text-slate-300">ระบบลงทะเบียนชุมนุมออนไลน์ — โรงเรียนมหาชัยพิทยาคาร</p>
+          <p class="text-[11px] text-slate-400">สำนักงานเขตพื้นที่การศึกษามัธยมศึกษามหาสารคาม (สพม.มหาสารคาม)</p>
+        </div>
+      </div>
+      <div class="text-center md:text-right text-[11px] space-y-0.5">
+        <p>ผู้อำนวยการโรงเรียน: <strong class="text-slate-700 dark:text-slate-300 font-semibold">นายอธิการ สุขศรี</strong></p>
+        <p>ผู้พัฒนาระบบ: <strong class="text-brand-600 dark:text-brand-400 font-semibold">ครูก้องนที อุ่นเจริญ</strong> | MHC Smart School v3.3.32</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================
+       MOBILE BOTTOM NAVIGATION BAR (แบบ App มือถือ สะดวกมือเดียว)
+       ======================================================== -->
+  <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 glass-bottom-bar">
+    <div class="grid grid-cols-4 h-16 items-center text-center">
+      <!-- Tab 1: Home -->
+      <button onclick="navigateTo('home')" id="mobile-tab-home" class="mobile-nav-btn flex flex-col items-center justify-center text-brand-600 dark:text-brand-400 transition-colors py-1">
+        <i class="fas fa-cubes text-lg mb-0.5"></i>
+        <span class="text-[10px] font-bold">ชุมนุม</span>
+      </button>
+
+      <!-- Tab 2: Check Status -->
+      <button onclick="navigateTo('check')" id="mobile-tab-check" class="mobile-nav-btn flex flex-col items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors py-1">
+        <i class="fas fa-id-card-clip text-lg mb-0.5"></i>
+        <span class="text-[10px] font-medium">ตรวจผล</span>
+      </button>
+
+      <!-- Tab 3: Workspace (Teacher/Admin) -->
+      <button onclick="handleMobileWorkspaceClick()" id="mobile-tab-workspace" class="mobile-nav-btn flex flex-col items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors py-1">
+        <i class="fas fa-sliders text-lg mb-0.5"></i>
+        <span class="text-[10px] font-medium">จัดการ</span>
+      </button>
+
+      <!-- Tab 4: Account / Login -->
+      <button onclick="handleMobileAccountClick()" id="mobile-tab-account" class="mobile-nav-btn flex flex-col items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors py-1">
+        <i class="fas fa-user-circle text-lg mb-0.5"></i>
+        <span class="text-[10px] font-medium" id="mobile-account-label">บัญชี</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ========================================================
+       MODAL: STUDENT REGISTRATION (หน้าต่างลงทะเบียนของนักเรียน)
+       ======================================================== -->
+  <div id="modal-student-reg" class="fixed inset-0 z-50 hidden overflow-y-auto modal-backdrop-custom flex items-center justify-center p-4">
+    <div class="relative bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Modal Header Banner -->
+      <div class="relative bg-aurora text-white p-6">
+        <button onclick="closeModal('modal-student-reg')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors">
+          <i class="fas fa-times text-sm"></i>
+        </button>
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/20 backdrop-blur-md mb-2">
+          <i class="fas fa-pen-fancy text-amber-300"></i> ลงทะเบียนกิจกรรมชุมนุม
+        </span>
+        <h3 id="reg-modal-club-name" class="text-xl sm:text-2xl font-bold tracking-tight leading-snug">ชื่อชุมนุม</h3>
+        <p class="text-xs text-brand-100 mt-1 flex items-center gap-2">
+          <span><i class="fas fa-chalkboard-user me-1"></i>ครูผู้ดูแล: <span id="reg-modal-teacher-name">-</span></span>
+          <span>•</span>
+          <span><i class="fas fa-users me-1"></i>ว่างอีก: <span id="reg-modal-avail-seats" class="font-bold text-amber-200">0</span> ที่</span>
+        </p>
+      </div>
+
+      <!-- Registration Form -->
+      <form id="form-student-registration" onsubmit="handleStudentRegistrationSubmit(event)" class="p-6 space-y-4">
+        <input type="hidden" id="reg-modal-club-id">
+
+        <!-- Class Selection -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            ระดับชั้นเรียน <span class="text-rose-500">*</span>
+          </label>
+          <select id="reg-input-class" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            <option value="" disabled selected>-- เลือกระดับชั้นเรียนของนักเรียน --</option>
+          </select>
+        </div>
+
+        <!-- Student Prefix & Full Name -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            ชื่อ - นามสกุล นักเรียน <span class="text-rose-500">*</span>
+          </label>
+          <div class="grid grid-cols-12 gap-2">
+            <div class="col-span-4 sm:col-span-4">
+              <select id="reg-input-prefix" required class="w-full px-3 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                <option value="" disabled selected>คำนำหน้า</option>
+                <option value="เด็กชาย">ด.ช.</option>
+                <option value="เด็กหญิง">ด.ญ.</option>
+                <option value="นาย">นาย</option>
+                <option value="นางสาว">น.ส.</option>
+              </select>
+            </div>
+            <div class="col-span-8 sm:col-span-8">
+              <input type="text" id="reg-input-name" required placeholder="ระบุชื่อ และ นามสกุลจริง" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1.5">
+            <i class="fas fa-info-circle me-1"></i> กรุณากรอกชื่อ-นามสกุลให้ถูกต้อง (แต่ละคนลงทะเบียนได้เพียง 1 ชุมนุม)
+          </p>
+        </div>
+
+        <!-- Confirmation Checkbox -->
+        <div class="bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800/40 rounded-xl p-3 flex items-start gap-2.5">
+          <input type="checkbox" id="reg-confirm-check" required class="mt-0.5 rounded text-brand-600 focus:ring-brand-500 w-4 h-4 cursor-pointer">
+          <label for="reg-confirm-check" class="text-xs text-brand-900 dark:text-brand-200 cursor-pointer">
+            ข้าพเจ้ายืนยันว่าข้อมูลถูกต้อง และประสงค์จะเข้าร่วมกิจกรรมชุมนุมนี้ตลอดภาคเรียน
+          </label>
+        </div>
+
+        <!-- Buttons -->
+        <div class="pt-2 flex items-center gap-3">
+          <button type="button" onclick="closeModal('modal-student-reg')" class="flex-1 py-3 rounded-xl text-sm font-semibold border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors btn-press">
+            ยกเลิก
+          </button>
+          <button type="submit" id="btn-submit-registration" class="flex-1 py-3 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-aurora transition-all btn-press flex items-center justify-center gap-2">
+            <i class="fas fa-check-circle"></i>
+            <span>ยืนยันลงทะเบียน</span>
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL: DIGITAL REGISTRATION TICKET / PASS (บัตรยืนยัน)
+       ======================================================== -->
+  <div id="modal-ticket" class="fixed inset-0 z-50 hidden overflow-y-auto modal-backdrop-custom flex items-center justify-center p-4">
+    <div class="relative bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Close button -->
+      <button onclick="closeModal('modal-ticket')" class="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center justify-center transition-colors">
+        <i class="fas fa-times text-sm"></i>
+      </button>
+
+      <!-- Ticket Canvas Area to Save as Image -->
+      <div id="ticket-printable-area" class="p-6 bg-white text-slate-800">
+        <div class="ticket-container border-2 border-slate-100 shadow-none">
+          <!-- Ticket Header -->
+          <div class="ticket-header">
+            <img src="https://lh3.googleusercontent.com/d/19aXvolxpVK5GndtRSMFP6sEdl7oa5PzN" alt="MHC" class="w-12 h-12 mx-auto rounded-full bg-white p-1 mb-2 shadow-sm">
+            <h4 class="font-extrabold text-base tracking-tight leading-tight">บัตรประจำตัวการลงทะเบียนชุมนุม</h4>
+            <p class="text-[11px] text-brand-100">โรงเรียนมหาชัยพิทยาคาร สพม.มหาสารคาม</p>
+          </div>
+
+          <!-- Ticket Body -->
+          <div class="p-5 space-y-3.5 bg-gradient-to-b from-white to-slate-50">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 text-xs">
+              <span class="text-slate-400">รหัสอ้างอิง:</span>
+              <span id="ticket-ref-code" class="font-mono font-bold text-brand-700">MHC-0000</span>
+            </div>
+
+            <!-- Student Name & Class -->
+            <div class="space-y-1">
+              <span class="text-[11px] font-medium text-slate-400">ชื่อนักเรียน:</span>
+              <h3 id="ticket-student-name" class="text-lg font-extrabold text-slate-900 leading-tight">ด.ช.วิชาญ สมานใจ</h3>
+              <p class="text-xs font-semibold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-md inline-block" id="ticket-student-class">
+                ชั้นมัธยมศึกษาปีที่ 1/1
+              </p>
+            </div>
+
+            <!-- Club Info -->
+            <div class="bg-indigo-50/70 rounded-xl p-3.5 border border-indigo-100 space-y-1">
+              <span class="text-[11px] font-semibold text-indigo-500 uppercase">กิจกรรมชุมนุมที่เลือก:</span>
+              <h4 id="ticket-club-name" class="font-extrabold text-indigo-950 text-base leading-tight">ชุมนุมหุ่นยนต์และปัญญาประดิษฐ์</h4>
+              <p class="text-xs text-indigo-700" id="ticket-teacher-name">
+                <i class="fas fa-chalkboard-user me-1"></i>ครูผู้ดูแล: ครูก้องนที อุ่นเจริญ
+              </p>
+            </div>
+
+            <!-- Timestamp -->
+            <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+              <span>วันที่ลงทะเบียน:</span>
+              <span id="ticket-timestamp" class="font-medium text-slate-600">29 ต.ค. 2569 เวลา 11:30 น.</span>
+            </div>
+
+            <!-- Status Stamp -->
+            <div class="pt-2 text-center">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                <i class="fas fa-check-circle"></i> บันทึกข้อมูลสำเร็จเรียบร้อย
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="p-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-700 flex items-center gap-3">
+        <button onclick="downloadTicketImage()" class="flex-1 py-2.5 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-sm transition-all btn-press flex items-center justify-center gap-1.5">
+          <i class="fas fa-download"></i>
+          <span>บันทึกรูปภาพบัตร</span>
+        </button>
+        <button onclick="printTicket()" class="px-4 py-2.5 rounded-xl text-xs font-semibold border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors btn-press">
+          <i class="fas fa-print me-1"></i> พิมพ์
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL: AUTH LOGIN (เข้าสู่ระบบครูและแอดมิน)
+       ======================================================== -->
+  <div id="modal-login" class="fixed inset-0 z-50 hidden overflow-y-auto modal-backdrop-custom flex items-center justify-center p-4">
+    <div class="relative bg-white dark:bg-slate-800 rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
+      
+      <div class="bg-aurora text-white p-6 text-center relative">
+        <button onclick="closeModal('modal-login')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors">
+          <i class="fas fa-times text-sm"></i>
+        </button>
+        <div class="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center mx-auto mb-2 text-xl">
+          <i class="fas fa-shield-alt text-amber-300"></i>
+        </div>
+        <h3 class="text-xl font-bold tracking-tight">เข้าสู่ระบบบุคลากร</h3>
+        <p class="text-xs text-brand-100 mt-0.5">สำหรับครูที่ปรึกษาชุมนุมและผู้ดูแลระบบ</p>
+      </div>
+
+      <form id="form-login" onsubmit="handleLoginSubmit(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            ชื่อผู้ใช้งาน (Username)
+          </label>
+          <input type="text" id="login-input-username" required placeholder="เช่น admin หรือ user" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            รหัสผ่าน (Password)
+          </label>
+          <input type="password" id="login-input-password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-aurora transition-all btn-press flex items-center justify-center gap-2">
+          <i class="fas fa-sign-in-alt"></i>
+          <span>ยืนยันเข้าสู่ระบบ</span>
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL: GENERIC CRUD (เพิ่ม/แก้ไข ชุมนุม, ผู้ใช้, ชั้นเรียน)
+       ======================================================== -->
+  <div id="modal-crud" class="fixed inset-0 z-50 hidden overflow-y-auto modal-backdrop-custom flex items-center justify-center p-4">
+    <div class="relative bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
+      
+      <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
+        <h3 id="crud-modal-title" class="text-lg font-bold tracking-tight">จัดการข้อมูล</h3>
+        <button onclick="closeModal('modal-crud')" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
+          <i class="fas fa-times text-sm"></i>
+        </button>
+      </div>
+
+      <div id="crud-modal-body" class="p-6">
+        <!-- Injected dynamically -->
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MOBILE DRAWER (เมนูด้านข้างสำหรับมือถือ)
+       ======================================================== -->
+  <div id="mobile-drawer-backdrop" onclick="toggleMobileDrawer(false)" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
+  <div id="mobile-drawer" class="fixed top-0 bottom-0 right-0 z-50 w-72 bg-white dark:bg-slate-800 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+    <!-- Drawer Header -->
+    <div class="p-5 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <img src="https://lh3.googleusercontent.com/d/19aXvolxpVK5GndtRSMFP6sEdl7oa5PzN" alt="MHC" class="w-8 h-8 rounded-lg object-contain bg-white border border-slate-200">
+        <div>
+          <h4 class="text-sm font-bold text-slate-800 dark:text-white">เมนูระบบ</h4>
+          <p class="text-[11px] text-slate-400">MHC Smart School</p>
+        </div>
+      </div>
+      <button onclick="toggleMobileDrawer(false)" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 hover:text-slate-800 flex items-center justify-center">
+        <i class="fas fa-times text-sm"></i>
+      </button>
+    </div>
+
+    <!-- Drawer Navigation Links -->
+    <div class="p-4 flex-1 overflow-y-auto space-y-1.5" id="mobile-drawer-items">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- Drawer Footer -->
+    <div class="p-4 border-t border-slate-200 dark:border-slate-700 text-xs text-slate-400 text-center space-y-1">
+      <p>โรงเรียนมหาชัยพิทยาคาร</p>
+      <p class="text-[10px]">พัฒนาโดย ครูก้องนที อุ่นเจริญ</p>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       GLOBAL LOADING OVERLAY
+       ======================================================== -->
+  <div id="loading-overlay" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex flex-col items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-2xl flex flex-col items-center gap-4 max-w-xs w-full text-center border border-slate-200 dark:border-slate-700">
+      <div class="relative w-12 h-12">
+        <div class="w-12 h-12 rounded-full border-4 border-brand-200 dark:border-brand-900/50"></div>
+        <div class="w-12 h-12 rounded-full border-4 border-brand-600 border-t-transparent animate-spin absolute top-0 left-0"></div>
+      </div>
+      <div>
+        <h4 class="text-sm font-bold text-slate-800 dark:text-white" id="loading-title">กำลังประมวลผล...</h4>
+        <p class="text-xs text-slate-400 mt-0.5" id="loading-desc">โปรดรอสักครู่</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden Container for Printing A4 Reports -->
+  <div id="print-area" class="hidden"></div>
+
+
+  <!-- ========================================================
+       APPLICATION LOGIC SCRIPT
+       ======================================================== -->
+  <script>
+    /* --------------------------------------------------------
+       STATE MANAGEMENT & MOCK DATA
+       -------------------------------------------------------- */
+    let dbCache = null;
+    let currentUser = null;
+    let activePage = 'home';
+    let currentClubFilter = 'all';
+    let searchQuery = '';
+
+    // Fallback Mock Data for instant offline/browser testing
+    const DEFAULT_MOCK_DB = {
+      settings: {
+        startPeriod: "2026-10-01T08:00",
+        endPeriod: "2026-11-30T16:30"
+      },
+      users: [
+        { id: 1, username: "admin", password: "123", name: "ครูก้องนที อุ่นเจริญ", role: "admin" },
+        { id: 2, username: "teacher1", password: "123", name: "ครูวชิราวุธ ขันติวงศ์", role: "teacher" },
+        { id: 3, username: "teacher2", password: "123", name: "ครูวัลย์วิภา บุญสมบัติ", role: "teacher" },
+        { id: 4, username: "teacher3", password: "123", name: "ครูประเสริฐ ชัยนาท", role: "teacher" },
+        { id: 5, username: "teacher4", password: "123", name: "ครูนภัสสร มณีโชติ", role: "teacher" }
+      ],
+      classes: [
+        { id: 101, name: "ม.1/1" },
+        { id: 102, name: "ม.1/2" },
+        { id: 201, name: "ม.2/1" },
+        { id: 202, name: "ม.2/2" },
+        { id: 301, name: "ม.3/1" },
+        { id: 302, name: "ม.3/2" },
+        { id: 401, name: "ม.4/1" },
+        { id: 501, name: "ม.5/1" },
+        { id: 601, name: "ม.6/1" }
+      ],
+      clubs: [
+        {
+          id: 1,
+          name: "ชุมนุมหุ่นยนต์และปัญญาประดิษฐ์ (AI & Robotics)",
+          cover: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=800&q=80",
+          teacherId: 1,
+          capacity: 30
+        },
+        {
+          id: 2,
+          name: "ชุมนุมดนตรีสากลและวงดุริยางค์",
+          cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80",
+          teacherId: 2,
+          capacity: 25
+        },
+        {
+          id: 3,
+          name: "ชุมนุมคณิตศาสตร์คิดเร็วและโอลิมปิกวิชาการ",
+          cover: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80",
+          teacherId: 3,
+          capacity: 35
+        },
+        {
+          id: 4,
+          name: "ชุมนุมกีฬาบาสเกตบอลและสันทนาการ",
+          cover: "https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80",
+          teacherId: 4,
+          capacity: 30
+        },
+        {
+          id: 5,
+          name: "ชุมนุมศิลปะสร้างสรรค์และดิจิทัลเพ้นท์ติ้ง",
+          cover: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=800&q=80",
+          teacherId: 5,
+          capacity: 20
+        },
+        {
+          id: 6,
+          name: "ชุมนุมสวนพฤกษศาสตร์และเกษตรอินทรีย์",
+          cover: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=800&q=80",
+          teacherId: 1,
+          capacity: 40
+        }
+      ],
+      registrations: [
+        { id: 1730100001, studentName: "เด็กชายกิตติศักดิ์ ศรีวิชัย", classId: 101, clubId: 1, timestamp: "2026-10-25T09:15:00.000Z" },
+        { id: 1730100002, studentName: "เด็กหญิงพรพิมล ชื่นใจ", classId: 102, clubId: 1, timestamp: "2026-10-25T09:20:00.000Z" },
+        { id: 1730100003, studentName: "นายณัฐวุฒิ ทองหล่อ", classId: 401, clubId: 2, timestamp: "2026-10-26T10:05:00.000Z" }
+      ]
+    };
+
+    /* --------------------------------------------------------
+       INITIALIZATION
+       -------------------------------------------------------- */
+    window.addEventListener('DOMContentLoaded', () => {
+      // Check stored user session
+      try {
+        const stored = sessionStorage.getItem('mhc_reg_user');
+        if (stored) currentUser = JSON.parse(stored);
+      } catch (_) {}
+
+      // Init Dark Mode from localStorage
+      if (localStorage.getItem('mhc_dark_mode') === 'true') {
+        document.documentElement.classList.add('dark');
+      }
+
+      // Load database
+      loadInitialDatabase();
+
+      // Countdown loop
+      setInterval(updateCountdownDisplay, 1000);
+    });
+
+    function loadInitialDatabase() {
+      showLoading('กำลังโหลดข้อมูล...', 'เชื่อมต่อฐานข้อมูล Google Sheets');
+
+      // Check if running in GAS environment
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler((data) => {
+            hideLoading();
+            if (data && typeof data === 'object') {
+              dbCache = data;
+            } else {
+              dbCache = DEFAULT_MOCK_DB;
+            }
+            renderApp();
+          })
+          .withFailureHandler((err) => {
+            hideLoading();
+            console.warn('GAS fetch failed, falling back to cached/mock:', err);
+            dbCache = DEFAULT_MOCK_DB;
+            renderApp();
+            Swal.fire({
+              icon: 'warning',
+              title: 'โหมดออฟไลน์ / จำลอง',
+              text: 'ไม่สามารถเชื่อมต่อ Google Sheets โดยตรงได้ กำลังแสดงข้อมูลจำลองเพื่อการทดสอบ',
+              confirmButtonColor: '#4F46E5'
+            });
+          })
+          .getDatabaseFromSheet();
+      } else {
+        // Running locally in browser without GAS
+        setTimeout(() => {
+          hideLoading();
+          const localSaved = localStorage.getItem('mhc_local_db');
+          if (localSaved) {
+            try { dbCache = JSON.parse(localSaved); } catch(e) { dbCache = DEFAULT_MOCK_DB; }
+          } else {
+            dbCache = DEFAULT_MOCK_DB;
+          }
+          renderApp();
+        }, 400);
+      }
+    }
+
+    function renderApp() {
+      renderNavigation();
+      renderPublicHome();
+      populateClassDropdowns();
+    }
+
+    /* --------------------------------------------------------
+       DATABASE SYNC (Save to Sheets)
+       -------------------------------------------------------- */
+    function saveDatabase(callback) {
+      showLoading('กำลังบันทึกข้อมูล...', 'อัปเดตสเปรดชีต Google Sheets');
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler((updatedDb) => {
+            hideLoading();
+            if (updatedDb) dbCache = updatedDb;
+            if (callback) callback();
+          })
+          .withFailureHandler((err) => {
+            hideLoading();
+            Swal.fire('เกิดข้อผิดพลาดในการบันทึก', err.message || 'กรุณาลองใหม่อีกครั้ง', 'error');
+          })
+          .saveDatabaseToSheet(dbCache);
+      } else {
+        // Save to localStorage in local mode
+        setTimeout(() => {
+          localStorage.setItem('mhc_local_db', JSON.stringify(dbCache));
+          hideLoading();
+          if (callback) callback();
+        }, 300);
+      }
+    }
+
+    /* --------------------------------------------------------
+       TIME WINDOW VALIDATION
+       -------------------------------------------------------- */
+    function verifyTimeWindow() {
+      if (!dbCache || !dbCache.settings) {
+        return { valid: false, status: 'loading', msg: 'กำลังโหลดข้อมูล', badgeClass: 'bg-slate-400' };
+      }
+      const now = new Date();
+      const start = dbCache.settings.startPeriod ? new Date(dbCache.settings.startPeriod) : null;
+      const end = dbCache.settings.endPeriod ? new Date(dbCache.settings.endPeriod) : null;
+
+      if (!start || !end) {
+        return { valid: false, status: 'unset', msg: 'ยังไม่ได้ตั้งค่าเวลา', badgeClass: 'bg-amber-500' };
+      }
+      if (now < start) {
+        return { valid: false, status: 'upcoming', msg: 'ยังไม่ถึงเวลาเปิดระบบ', badgeClass: 'bg-amber-500' };
+      }
+      if (now > end) {
+        return { valid: false, status: 'closed', msg: 'หมดเขตลงทะเบียนแล้ว', badgeClass: 'bg-rose-500' };
+      }
+      return { valid: true, status: 'open', msg: 'เปิดรับลงทะเบียนปกติ', badgeClass: 'bg-emerald-500' };
+    }
+
+    function formatThaiDateTime(isoStr) {
+      if (!isoStr) return '-';
+      const d = new Date(isoStr);
+      if (isNaN(d.getTime())) return '-';
+      const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+      const day = d.getDate();
+      const month = thaiMonths[d.getMonth()];
+      const year = d.getFullYear() + 543;
+      const hour = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+      return `${day} ${month} ${year} เวลา ${hour}:${min} น.`;
+    }
+
+    function updateCountdownDisplay() {
+      if (!dbCache || !dbCache.settings) return;
+      const timeCheck = verifyTimeWindow();
+      const countdownBox = document.getElementById('hero-countdown-text');
+      if (!countdownBox) return;
+
+      const now = new Date();
+      const start = dbCache.settings.startPeriod ? new Date(dbCache.settings.startPeriod) : null;
+      const end = dbCache.settings.endPeriod ? new Date(dbCache.settings.endPeriod) : null;
+
+      if (timeCheck.status === 'upcoming' && start) {
+        const diffMs = start - now;
+        countdownBox.innerHTML = `เปิดระบบในอีก: <span class="font-bold text-white">${formatDuration(diffMs)}</span>`;
+      } else if (timeCheck.status === 'open' && end) {
+        const diffMs = end - now;
+        countdownBox.innerHTML = `เหลือเวลาอีก: <span class="font-bold text-white">${formatDuration(diffMs)}</span>`;
+      } else if (timeCheck.status === 'closed') {
+        countdownBox.innerText = 'ระบบปิดรับข้อมูลแล้ว';
+      } else {
+        countdownBox.innerText = 'โปรดติดตามประกาศจากโรงเรียน';
+      }
+    }
+
+    function formatDuration(ms) {
+      if (ms <= 0) return '00:00:00';
+      const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((ms % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((ms % (1000 * 60)) / 1000);
+      if (days > 0) return `${days} วัน ${hours} ชม. ${mins} นาที`;
+      return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    /* --------------------------------------------------------
+       NAVIGATION & ROUTING
+       -------------------------------------------------------- */
+    function navigateTo(pageTarget) {
+      activePage = pageTarget;
+      document.querySelectorAll('.view-panel').forEach(panel => panel.classList.add('hidden'));
+
+      const target = document.getElementById(`view-${pageTarget}`);
+      if (target) target.classList.remove('hidden');
+
+      // Update active nav indicators
+      updateNavActiveStyles();
+
+      if (pageTarget === 'home') {
+        renderPublicHome();
+      } else if (pageTarget === 'check') {
+        performStudentCheck();
+      } else if (pageTarget === 'workspace') {
+        if (!currentUser) {
+          openModal('modal-login');
+          return;
+        }
+        renderWorkspace(currentUser.role === 'admin' ? 'adm_clubs' : 'tch_clubs');
+      }
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderNavigation() {
+      const desktopMenu = document.getElementById('desktop-menu-items');
+      const desktopAuth = document.getElementById('desktop-auth-container');
+      const drawerItems = document.getElementById('mobile-drawer-items');
+      const mobileAccountLabel = document.getElementById('mobile-account-label');
+
+      let navHtml = `
+        <button onclick="navigateTo('home')" class="nav-link px-3.5 py-2 rounded-xl text-sm font-semibold transition-all ${activePage === 'home' ? 'bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300' : 'text-slate-600 hover:text-slate-900 dark:text-slate-300'}">
+          <i class="fas fa-cubes me-1.5 text-xs"></i> เลือกชุมนุม
+        </button>
+        <button onclick="navigateTo('check')" class="nav-link px-3.5 py-2 rounded-xl text-sm font-semibold transition-all ${activePage === 'check' ? 'bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300' : 'text-slate-600 hover:text-slate-900 dark:text-slate-300'}">
+          <i class="fas fa-search me-1.5 text-xs"></i> ตรวจสอบผล
+        </button>
+      `;
+
+      let drawerHtml = `
+        <button onclick="navigateTo('home'); toggleMobileDrawer(false);" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+          <i class="fas fa-cubes text-brand-500 w-5"></i> หน้าแรกเลือกชุมนุม
+        </button>
+        <button onclick="navigateTo('check'); toggleMobileDrawer(false);" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+          <i class="fas fa-id-card-clip text-brand-500 w-5"></i> ตรวจสอบผลการลงทะเบียน
+        </button>
+      `;
+
+      if (currentUser) {
+        navHtml += `
+          <button onclick="navigateTo('workspace')" class="nav-link px-3.5 py-2 rounded-xl text-sm font-semibold transition-all ${activePage === 'workspace' ? 'bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300' : 'text-slate-600 hover:text-slate-900 dark:text-slate-300'}">
+            <i class="fas fa-sliders me-1.5 text-xs"></i> จัดการระบบ
+          </button>
+        `;
+
+        drawerHtml += `
+          <div class="pt-3 pb-1 border-t border-slate-200 dark:border-slate-700">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3">เมนูบุคลากร</span>
+          </div>
+          <button onclick="navigateTo('workspace'); toggleMobileDrawer(false);" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+            <i class="fas fa-sliders text-indigo-500 w-5"></i> แดชบอร์ดจัดการระบบ
+          </button>
+          <button onclick="handleLogout(); toggleMobileDrawer(false);" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">
+            <i class="fas fa-sign-out-alt w-5"></i> ออกจากระบบ
+          </button>
+        `;
+
+        desktopAuth.innerHTML = `
+          <div class="flex items-center gap-3 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+            <div class="w-8 h-8 rounded-xl bg-brand-600 text-white flex items-center justify-center text-xs font-bold shadow-sm">
+              <i class="fas fa-user-tie"></i>
+            </div>
+            <div class="text-left text-xs">
+              <p class="font-bold text-slate-800 dark:text-white truncate max-w-[130px]">${currentUser.name}</p>
+              <p class="text-[10px] text-brand-600 dark:text-brand-400 font-medium">${currentUser.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ครูผู้สอน'}</p>
+            </div>
+            <button onclick="handleLogout()" class="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="ออกจากระบบ">
+              <i class="fas fa-sign-out-alt text-sm"></i>
+            </button>
+          </div>
+        `;
+        mobileAccountLabel.innerText = currentUser.role === 'admin' ? 'แอดมิน' : 'ครู';
+      } else {
+        desktopAuth.innerHTML = `
+          <button onclick="openModal('modal-login')" class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-sm transition-all btn-press flex items-center gap-1.5">
+            <i class="fas fa-sign-in-alt"></i>
+            <span>เข้าสู่ระบบครู</span>
+          </button>
+        `;
+        drawerHtml += `
+          <div class="pt-3 border-t border-slate-200 dark:border-slate-700">
+            <button onclick="openModal('modal-login'); toggleMobileDrawer(false);" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/30">
+              <i class="fas fa-sign-in-alt w-5"></i> เข้าสู่ระบบบุคลากร
+            </button>
+          </div>
+        `;
+        mobileAccountLabel.innerText = 'เข้าสู่ระบบ';
+      }
+
+      desktopMenu.innerHTML = navHtml;
+      drawerItems.innerHTML = drawerHtml;
+      updateNavActiveStyles();
+    }
+
+    function updateNavActiveStyles() {
+      // Update bottom mobile tabs
+      ['home', 'check', 'workspace', 'account'].forEach(tab => {
+        const btn = document.getElementById(`mobile-tab-${tab}`);
+        if (!btn) return;
+        if (activePage === tab) {
+          btn.classList.add('text-brand-600', 'dark:text-brand-400');
+          btn.classList.remove('text-slate-400');
+        } else {
+          btn.classList.remove('text-brand-600', 'dark:text-brand-400');
+          btn.classList.add('text-slate-400');
+        }
+      });
+    }
+
+    function handleMobileWorkspaceClick() {
+      if (currentUser) {
+        navigateTo('workspace');
+      } else {
+        openModal('modal-login');
+      }
+    }
+
+    function handleMobileAccountClick() {
+      if (currentUser) {
+        Swal.fire({
+          title: currentUser.name,
+          text: `สิทธิ์การใช้งาน: ${currentUser.role === 'admin' ? 'ผู้ดูแลระบบสูงสุด' : 'ครูประจำชุมนุม'}`,
+          icon: 'info',
+          showCancelButton: true,
+          confirmButtonColor: '#DC2626',
+          confirmButtonText: 'ออกจากระบบ',
+          cancelButtonText: 'ปิดหน้าต่าง'
+        }).then((res) => {
+          if (res.isConfirmed) handleLogout();
+        });
+      } else {
+        openModal('modal-login');
+      }
+    }
+
+    function toggleMobileDrawer(forceState) {
+      const drawer = document.getElementById('mobile-drawer');
+      const backdrop = document.getElementById('mobile-drawer-backdrop');
+      const isOpen = !drawer.classList.contains('translate-x-full');
+      const next = typeof forceState === 'boolean' ? forceState : !isOpen;
+
+      if (next) {
+        backdrop.classList.remove('hidden');
+        drawer.classList.remove('translate-x-full');
+      } else {
+        drawer.classList.add('translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+    }
+
+    function toggleDarkMode() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('mhc_dark_mode', isDark);
+    }
+
+    /* --------------------------------------------------------
+       PUBLIC HOME: CLUBS LISTING & CARDS
+       -------------------------------------------------------- */
+    function renderPublicHome() {
+      if (!dbCache) return;
+
+      const timeCheck = verifyTimeWindow();
+
+      // Hero banner dates & status
+      document.getElementById('hero-start-time').innerText = `เปิด: ${formatThaiDateTime(dbCache.settings.startPeriod)}`;
+      document.getElementById('hero-end-time').innerText = `ปิด: ${formatThaiDateTime(dbCache.settings.endPeriod)}`;
+      const statusPill = document.getElementById('hero-status-pill');
+      statusPill.className = `inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold text-white shadow-sm ${timeCheck.badgeClass}`;
+      statusPill.innerHTML = `<span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> ${timeCheck.msg}`;
+
+      // Calculate stats
+      const regCountMap = {};
+      dbCache.registrations.forEach(r => {
+        regCountMap[r.clubId] = (regCountMap[r.clubId] || 0) + 1;
+      });
+
+      let totalCapacity = 0;
+      let fullClubsCount = 0;
+      let availClubsCount = 0;
+
+      dbCache.clubs.forEach(c => {
+        totalCapacity += c.capacity;
+        const count = regCountMap[c.id] || 0;
+        if (count >= c.capacity) fullClubsCount++;
+        else availClubsCount++;
+      });
+
+      document.getElementById('stat-total-clubs').innerText = dbCache.clubs.length;
+      document.getElementById('stat-total-registered').innerText = dbCache.registrations.length;
+      document.getElementById('stat-available-clubs').innerText = availClubsCount;
+      document.getElementById('stat-full-clubs').innerText = fullClubsCount;
+
+      document.getElementById('chip-count-all').innerText = dbCache.clubs.length;
+      document.getElementById('chip-count-avail').innerText = availClubsCount;
+      document.getElementById('chip-count-full').innerText = fullClubsCount;
+
+      // Filter & Search clubs
+      const grid = document.getElementById('clubs-grid');
+      const emptyState = document.getElementById('clubs-empty-state');
+      grid.innerHTML = '';
+
+      let filtered = dbCache.clubs.filter(club => {
+        const count = regCountMap[club.id] || 0;
+        const isFull = count >= club.capacity;
+
+        if (currentClubFilter === 'available' && isFull) return false;
+        if (currentClubFilter === 'full' && !isFull) return false;
+
+        if (searchQuery) {
+          const teacherObj = dbCache.users.find(u => u.id == club.teacherId);
+          const teacherName = teacherObj ? teacherObj.name : '';
+          const matchName = club.name.toLowerCase().includes(searchQuery);
+          const matchTeacher = teacherName.toLowerCase().includes(searchQuery);
+          if (!matchName && !matchTeacher) return false;
+        }
+
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        emptyState.classList.remove('hidden');
+        return;
+      } else {
+        emptyState.classList.add('hidden');
+      }
+
+      // Render cards
+      filtered.forEach(club => {
+        const count = regCountMap[club.id] || 0;
+        const isFull = count >= club.capacity;
+        const remaining = Math.max(0, club.capacity - count);
+        const percent = Math.min(100, Math.round((count / club.capacity) * 100));
+
+        const teacherObj = dbCache.users.find(u => u.id == club.teacherId);
+        const teacherName = teacherObj ? teacherObj.name : 'ไม่ระบุผู้สอน';
+
+        // Progress bar color
+        let barColor = 'bg-emerald-500';
+        let badgeColor = 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800';
+        if (percent >= 100) {
+          barColor = 'bg-rose-500';
+          badgeColor = 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 border-rose-200 dark:border-rose-800';
+        } else if (percent >= 75) {
+          barColor = 'bg-amber-500';
+          badgeColor = 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 border-amber-200 dark:border-amber-800';
+        }
+
+        // Action button
+        let buttonHtml = '';
+        if (!timeCheck.valid) {
+          buttonHtml = `
+            <button disabled class="w-full py-3 rounded-xl text-xs font-bold bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed flex items-center justify-center gap-1.5">
+              <i class="fas fa-clock"></i> <span>อยู่นอกเวลาลงทะเบียน</span>
+            </button>
+          `;
+        } else if (isFull) {
+          buttonHtml = `
+            <button disabled class="w-full py-3 rounded-xl text-xs font-bold bg-rose-100 dark:bg-rose-900/30 text-rose-500 dark:text-rose-400 border border-rose-200 dark:border-rose-800 cursor-not-allowed flex items-center justify-center gap-1.5">
+              <i class="fas fa-lock"></i> <span>เต็มแล้ว (${count}/${club.capacity})</span>
+            </button>
+          `;
+        } else {
+          buttonHtml = `
+            <button onclick="openStudentRegModal(${club.id})" class="w-full py-3 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-aurora transition-all btn-press flex items-center justify-center gap-1.5">
+              <i class="fas fa-edit"></i> <span>ลงทะเบียนชุมนุมนี้</span>
+            </button>
+          `;
+        }
+
+        const fallbackImg = 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80';
+
+        const card = document.createElement('div');
+        card.className = 'group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-700/70 shadow-soft hover:shadow-card-hover transition-all duration-300 flex flex-col';
+        card.innerHTML = `
+          <!-- Card Image & Overlay -->
+          <div class="relative h-44 sm:h-48 overflow-hidden bg-slate-100 dark:bg-slate-900">
+            <img src="${club.cover || fallbackImg}" onerror="this.src='${fallbackImg}'" alt="${club.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+            
+            <!-- Badge Status Pill -->
+            <div class="absolute top-3 right-3">
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border backdrop-blur-md ${badgeColor}">
+                <i class="fas ${isFull ? 'fa-lock' : 'fa-door-open'} text-[10px]"></i>
+                <span>${isFull ? 'เต็มแล้ว' : `ว่าง ${remaining} ที่`}</span>
+              </span>
+            </div>
+
+            <!-- Capacity pill on image -->
+            <div class="absolute bottom-3 left-3 text-white text-xs font-semibold flex items-center gap-1.5 drop-shadow">
+              <i class="fas fa-users"></i>
+              <span>${count} / ${club.capacity} คน (${percent}%)</span>
+            </div>
+          </div>
+
+          <!-- Card Content -->
+          <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+            <div class="space-y-2">
+              <h3 class="font-extrabold text-slate-900 dark:text-white text-base leading-snug line-clamp-2" title="${club.name}">
+                ${club.name}
+              </h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <i class="fas fa-chalkboard-user text-brand-500"></i>
+                <span class="truncate">${teacherName}</span>
+              </p>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="space-y-1.5 pt-1">
+              <div class="flex items-center justify-between text-[11px] text-slate-400">
+                <span>ความจุผู้เรียน</span>
+                <span class="font-bold ${isFull ? 'text-rose-500' : 'text-slate-600 dark:text-slate-300'}">${count}/${club.capacity} คน</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
+                <div class="h-full rounded-full ${barColor} transition-all duration-500" style="width: ${percent}%"></div>
+              </div>
+            </div>
+
+            <!-- Action Button -->
+            <div class="pt-1">
+              ${buttonHtml}
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function setClubFilter(filterType) {
+      currentClubFilter = filterType;
+      document.querySelectorAll('.club-filter-btn').forEach(btn => {
+        btn.classList.remove('bg-brand-600', 'text-white', 'shadow-sm');
+        btn.classList.add('bg-slate-100', 'dark:bg-slate-700/60', 'text-slate-600', 'dark:text-slate-300');
+      });
+      const activeBtn = document.getElementById(`filter-chip-${filterType}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-slate-100', 'dark:bg-slate-700/60', 'text-slate-600', 'dark:text-slate-300');
+        activeBtn.classList.add('bg-brand-600', 'text-white', 'shadow-sm');
+      }
+      renderPublicHome();
+    }
+
+    function handleSearchClubs() {
+      const val = document.getElementById('club-search-input').value.trim().toLowerCase();
+      searchQuery = val;
+      const clearBtn = document.getElementById('search-clear-btn');
+      if (val) clearBtn.classList.remove('hidden');
+      else clearBtn.classList.add('hidden');
+      renderPublicHome();
+    }
+
+    function clearClubSearch() {
+      const input = document.getElementById('club-search-input');
+      input.value = '';
+      searchQuery = '';
+      document.getElementById('search-clear-btn').classList.add('hidden');
+      renderPublicHome();
+    }
+
+    /* --------------------------------------------------------
+       STUDENT REGISTRATION FLOW
+       -------------------------------------------------------- */
+    function openStudentRegModal(clubId) {
+      const timeCheck = verifyTimeWindow();
+      if (!timeCheck.valid) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'ไม่สามารถลงทะเบียนได้',
+          text: timeCheck.msg,
+          confirmButtonColor: '#4F46E5'
+        });
+        return;
+      }
+
+      const club = dbCache.clubs.find(c => c.id == clubId);
+      if (!club) return;
+
+      const regCount = dbCache.registrations.filter(r => r.clubId == clubId).length;
+      if (regCount >= club.capacity) {
+        Swal.fire({
+          icon: 'error',
+          title: 'ชุมนุมเต็มแล้ว',
+          text: 'ขออภัย ขณะนี้มีผู้ลงทะเบียนครบจำนวนโควตาแล้ว กรุณาเลือกชุมนุมอื่น',
+          confirmButtonColor: '#4F46E5'
+        });
+        renderPublicHome();
+        return;
+      }
+
+      const teacherObj = dbCache.users.find(u => u.id == club.teacherId);
+
+      document.getElementById('reg-modal-club-id').value = club.id;
+      document.getElementById('reg-modal-club-name').innerText = club.name;
+      document.getElementById('reg-modal-teacher-name').innerText = teacherObj ? teacherObj.name : 'ไม่ระบุผู้สอน';
+      document.getElementById('reg-modal-avail-seats').innerText = club.capacity - regCount;
+
+      // Reset form fields
+      document.getElementById('form-student-registration').reset();
+
+      openModal('modal-student-reg');
+    }
+
+    function handleStudentRegistrationSubmit(e) {
+      e.preventDefault();
+
+      const timeCheck = verifyTimeWindow();
+      if (!timeCheck.valid) {
+        closeModal('modal-student-reg');
+        Swal.fire('หมดเขตลงทะเบียน', timeCheck.msg, 'error');
+        return;
+      }
+
+      const clubId = parseInt(document.getElementById('reg-modal-club-id').value);
+      const classId = parseInt(document.getElementById('reg-input-class').value);
+      const prefix = document.getElementById('reg-input-prefix').value;
+      const rawName = document.getElementById('reg-input-name').value.trim();
+
+      if (!classId || !prefix || !rawName) {
+        Swal.fire('กรุณากรอกข้อมูลให้ครบถ้วน', 'โปรดเลือกชั้นเรียน คำนำหน้า และระบุชื่อ-นามสกุล', 'warning');
+        return;
+      }
+
+      const fullStudentName = `${prefix}${rawName}`;
+
+      // Check if student already registered in ANY club
+      const existingReg = dbCache.registrations.find(r => r.studentName.trim() === fullStudentName.trim());
+      if (existingReg) {
+        const registeredClub = dbCache.clubs.find(c => c.id == existingReg.clubId);
+        const clubTitle = registeredClub ? registeredClub.name : 'กิจกรรมชุมนุม';
+        Swal.fire({
+          icon: 'error',
+          title: 'พบข้อมูลการลงทะเบียนแล้ว',
+          html: `นักเรียน <strong>"${fullStudentName}"</strong> ได้ลงทะเบียนใน:<br><span class="text-indigo-600 font-bold">${clubTitle}</span> เรียบร้อยแล้ว<br><small class="text-slate-500">(1 คน สามารถลงทะเบียนได้ 1 ชุมนุมเท่านั้น)</small>`,
+          confirmButtonColor: '#4F46E5'
+        });
+        return;
+      }
+
+      // Check club quota again before pushing
+      const club = dbCache.clubs.find(c => c.id == clubId);
+      const currentQuota = dbCache.registrations.filter(r => r.clubId == clubId).length;
+      if (currentQuota >= club.capacity) {
+        closeModal('modal-student-reg');
+        Swal.fire({
+          icon: 'warning',
+          title: 'ชุมนุมเต็มแล้ว',
+          text: 'มีผู้ลงทะเบียนเต็มจำนวนในขณะนี้ กรุณาเลือกชุมนุมอื่น',
+          confirmButtonColor: '#4F46E5'
+        });
+        renderPublicHome();
+        return;
+      }
+
+      const newRegistration = {
+        id: Date.now(),
+        studentName: fullStudentName,
+        classId: classId,
+        clubId: clubId,
+        timestamp: new Date().toISOString()
+      };
+
+      dbCache.registrations.push(newRegistration);
+
+      saveDatabase(() => {
+        closeModal('modal-student-reg');
+
+        // Confetti celebration!
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+
+        // Show Ticket Modal
+        showRegistrationTicket(newRegistration);
+        renderPublicHome();
+      });
+    }
+
+    /* --------------------------------------------------------
+       DIGITAL REGISTRATION TICKET
+       -------------------------------------------------------- */
+    function showRegistrationTicket(regObj) {
+      const club = dbCache.clubs.find(c => c.id == regObj.clubId);
+      const classObj = dbCache.classes.find(c => c.id == regObj.classId);
+      const teacherObj = club ? dbCache.users.find(u => u.id == club.teacherId) : null;
+
+      document.getElementById('ticket-ref-code').innerText = `MHC-${String(regObj.id).slice(-6)}`;
+      document.getElementById('ticket-student-name').innerText = regObj.studentName;
+      document.getElementById('ticket-student-class').innerText = `ชั้น ${classObj ? classObj.name : '-'}`;
+      document.getElementById('ticket-club-name').innerText = club ? club.name : '-';
+      document.getElementById('ticket-teacher-name').innerHTML = `<i class="fas fa-chalkboard-user me-1"></i>ครูผู้ดูแล: ${teacherObj ? teacherObj.name : 'ไม่ระบุ'}`;
+      document.getElementById('ticket-timestamp').innerText = formatThaiDateTime(regObj.timestamp);
+
+      openModal('modal-ticket');
+    }
+
+    function downloadTicketImage() {
+      const area = document.getElementById('ticket-printable-area');
+      showLoading('กำลังสร้างรูปภาพ...', 'โปรดรอสักครู่');
+      html2canvas(area, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        useCORS: true
+      }).then(canvas => {
+        hideLoading();
+        const link = document.createElement('a');
+        link.download = `บัตรลงทะเบียนชุมนุม_${document.getElementById('ticket-student-name').innerText}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      }).catch(err => {
+        hideLoading();
+        Swal.fire('ไม่สามารถสร้างรูปภาพได้', 'กรุณาลองแคปหน้าจอแทน', 'warning');
+      });
+    }
+
+    function printTicket() {
+      window.print();
+    }
+
+    /* --------------------------------------------------------
+       STUDENT CHECK STATUS TAB
+       -------------------------------------------------------- */
+    function performStudentCheck() {
+      if (!dbCache) return;
+      const classFilter = document.getElementById('check-filter-class').value;
+      const nameQuery = document.getElementById('check-input-name').value.trim().toLowerCase();
+      const wrapper = document.getElementById('check-results-wrapper');
+
+      if (classFilter === 'all' && !nameQuery) {
+        wrapper.innerHTML = `
+          <div class="text-center py-12 text-slate-400 text-xs sm:text-sm">
+            <i class="fas fa-search text-3xl mb-2 text-slate-300"></i>
+            <p>กรุณาระบุชื่อ หรือเลือกระดับชั้นเรียน เพื่อค้นหาผลการลงทะเบียน</p>
+          </div>
+        `;
+        return;
+      }
+
+      let matches = dbCache.registrations.filter(r => {
+        if (classFilter !== 'all' && r.classId != classFilter) return false;
+        if (nameQuery && !r.studentName.toLowerCase().includes(nameQuery)) return false;
+        return true;
+      });
+
+      if (matches.length === 0) {
+        wrapper.innerHTML = `
+          <div class="text-center py-10 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 space-y-2">
+            <i class="fas fa-user-xmark text-2xl text-slate-400"></i>
+            <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300">ไม่พบรายชื่อในระบบ</h4>
+            <p class="text-xs text-slate-400">ตรวจสอบการสะกดชื่อ หรือเลือกระดับชั้นเรียนให้ถูกต้อง</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = `
+        <div class="flex items-center justify-between text-xs text-slate-500 pb-2">
+          <span>พบรายชื่อทั้งหมด: <strong class="text-brand-600 font-bold">${matches.length}</strong> รายการ</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      `;
+
+      matches.forEach(reg => {
+        const club = dbCache.clubs.find(c => c.id == reg.clubId);
+        const classObj = dbCache.classes.find(c => c.id == reg.classId);
+        const teacher = club ? dbCache.users.find(u => u.id == club.teacherId) : null;
+
+        html += `
+          <div class="bg-white dark:bg-slate-900/80 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm flex items-start justify-between gap-3">
+            <div class="space-y-1 flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
+                  ${classObj ? classObj.name : '-'}
+                </span>
+                <span class="text-xs text-slate-400">${formatThaiDateTime(reg.timestamp)}</span>
+              </div>
+              <h4 class="font-bold text-slate-900 dark:text-white text-sm truncate">${reg.studentName}</h4>
+              <p class="text-xs font-semibold text-brand-600 dark:text-brand-400 truncate">
+                <i class="fas fa-cubes me-1"></i>${club ? club.name : 'ไม่ระบุชุมนุม'}
+              </p>
+              <p class="text-[11px] text-slate-400 truncate">
+                <i class="fas fa-chalkboard-user me-1"></i>ครู: ${teacher ? teacher.name : '-'}
+              </p>
+            </div>
+            <button onclick='showRegistrationTicket(${JSON.stringify(reg)})' class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-brand-50 hover:text-brand-600 transition-colors btn-press flex-shrink-0" title="ดูบัตรลงทะเบียน">
+              <i class="fas fa-id-card text-base"></i>
+            </button>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+      wrapper.innerHTML = html;
+    }
+
+    /* --------------------------------------------------------
+       TEACHER & ADMIN WORKSPACE
+       -------------------------------------------------------- */
+    function renderWorkspace(subViewKey) {
+      if (!currentUser) {
+        openModal('modal-login');
+        return;
+      }
+
+      document.getElementById('workspace-role-badge').innerText = currentUser.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ครูประจำชุมนุม';
+      document.getElementById('workspace-user-display').innerText = currentUser.name;
+
+      const subtabs = document.getElementById('workspace-subtabs');
+      const actionBtn = document.getElementById('workspace-action-btn');
+      const content = document.getElementById('workspace-content');
+      actionBtn.innerHTML = '';
+
+      let tabs = [];
+      if (currentUser.role === 'admin') {
+        tabs = [
+          { key: 'adm_clubs', label: 'จัดการชุมนุม (ทั้งหมด)', icon: 'fa-cubes' },
+          { key: 'adm_classes', label: 'จัดการชั้นเรียน', icon: 'fa-layer-group' },
+          { key: 'adm_users', label: 'จัดการผู้ใช้งาน', icon: 'fa-users-cog' },
+          { key: 'adm_reports', label: 'สรุปผล & ออกรายงาน', icon: 'fa-file-lines' },
+          { key: 'adm_settings', label: 'ตั้งค่าเวลาลงทะเบียน', icon: 'fa-clock' }
+        ];
+      } else {
+        tabs = [
+          { key: 'tch_clubs', label: 'ชุมนุมของฉัน', icon: 'fa-folder-open' },
+          { key: 'tch_reports', label: 'รายชื่อผู้ลงทะเบียน', icon: 'fa-clipboard-user' },
+          { key: 'tch_profile', label: 'แก้ไขโปรไฟล์', icon: 'fa-user-pen' }
+        ];
+      }
+
+      // Render Subtabs
+      subtabs.innerHTML = tabs.map(t => `
+        <button onclick="renderWorkspace('${t.key}')" class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all btn-press ${subViewKey === t.key ? 'bg-brand-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'}">
+          <i class="fas ${t.icon} me-1.5"></i> ${t.label}
+        </button>
+      `).join('');
+
+      // Subview: Manage Clubs (Admin or Teacher)
+      if (subViewKey === 'adm_clubs' || subViewKey === 'tch_clubs') {
+        const isTeacher = (subViewKey === 'tch_clubs');
+        document.getElementById('workspace-title').innerText = isTeacher ? 'จัดการชุมนุมของฉัน' : 'จัดการกิจกรรมชุมนุมทั้งหมด';
+        actionBtn.innerHTML = `
+          <button onclick="openClubModal(null, ${isTeacher})" class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white hover:bg-brand-700 transition-all btn-press flex items-center gap-1.5">
+            <i class="fas fa-plus-circle"></i> <span>เพิ่มชุมนุม</span>
+          </button>
+        `;
+
+        const targetedClubs = isTeacher ? dbCache.clubs.filter(c => c.teacherId == currentUser.id) : dbCache.clubs;
+
+        if (targetedClubs.length === 0) {
+          content.innerHTML = `
+            <div class="text-center py-16 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 space-y-2">
+              <i class="fas fa-cubes text-3xl text-slate-300"></i>
+              <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300">ยังไม่มีรายการชุมนุม</h4>
+              <p class="text-xs text-slate-400">กดปุ่ม "+ เพิ่มชุมนุม" เพื่อเปิดรับสมัครกิจกรรมใหม่</p>
+            </div>
+          `;
+          return;
+        }
+
+        const regCountMap = {};
+        dbCache.registrations.forEach(r => { regCountMap[r.clubId] = (regCountMap[r.clubId] || 0) + 1; });
+
+        // Responsive Cards (Mobile friendly & Desktop grid)
+        content.innerHTML = `
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            ${targetedClubs.map(c => {
+              const regCount = regCountMap[c.id] || 0;
+              const teacherObj = dbCache.users.find(u => u.id == c.teacherId);
+              return `
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-soft space-y-3 flex flex-col justify-between">
+                  <div class="flex items-start gap-3">
+                    <img src="${c.cover || 'https://via.placeholder.com/150'}" class="w-16 h-16 rounded-xl object-cover border border-slate-200 dark:border-slate-700 flex-shrink-0">
+                    <div class="min-w-0 flex-1">
+                      <h4 class="font-bold text-slate-900 dark:text-white text-sm truncate">${c.name}</h4>
+                      <p class="text-xs text-slate-500 truncate mt-0.5"><i class="fas fa-chalkboard-user me-1"></i>${teacherObj ? teacherObj.name : '-'}</p>
+                      <div class="mt-2 flex items-center gap-2">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${regCount >= c.capacity ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">
+                          ${regCount} / ${c.capacity} คน
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="pt-2 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-end gap-2">
+                    <button onclick="openClubModal(${c.id}, ${isTeacher})" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors">
+                      <i class="fas fa-edit me-1"></i> แก้ไข
+                    </button>
+                    <button onclick="deleteClubEntity(${c.id}, '${subViewKey}')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors">
+                      <i class="fas fa-trash me-1"></i> ลบ
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      // Subview: Manage Classes (Admin)
+      else if (subViewKey === 'adm_classes') {
+        document.getElementById('workspace-title').innerText = 'จัดการระดับชั้นเรียน';
+        actionBtn.innerHTML = `
+          <button onclick="openClassModal(null)" class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white hover:bg-brand-700 transition-all btn-press flex items-center gap-1.5">
+            <i class="fas fa-plus-circle"></i> <span>เพิ่มชั้นเรียน</span>
+          </button>
+        `;
+
+        content.innerHTML = `
+          <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-soft">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 text-xs uppercase font-semibold border-b border-slate-200 dark:border-slate-700">
+                  <tr>
+                    <th class="py-3.5 px-4 w-16 text-center">ลำดับ</th>
+                    <th class="py-3.5 px-4">ชื่อระดับชั้นเรียน</th>
+                    <th class="py-3.5 px-4 text-center">จำนวนนักเรียนที่ลงทะเบียน</th>
+                    <th class="py-3.5 px-4 text-right">จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                  ${dbCache.classes.map((cls, idx) => {
+                    const stuCount = dbCache.registrations.filter(r => r.classId == cls.id).length;
+                    return `
+                      <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/30">
+                        <td class="py-3 px-4 text-center font-medium text-slate-400">${idx + 1}</td>
+                        <td class="py-3 px-4 font-bold text-slate-800 dark:text-slate-200">${cls.name}</td>
+                        <td class="py-3 px-4 text-center"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">${stuCount} คน</span></td>
+                        <td class="py-3 px-4 text-right space-x-1">
+                          <button onclick="openClassModal(${cls.id})" class="p-2 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-100 transition-colors"><i class="fas fa-edit"></i></button>
+                          <button onclick="deleteClassEntity(${cls.id})" class="p-2 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"><i class="fas fa-trash"></i></button>
+                        </td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+
+      // Subview: Manage Users (Admin)
+      else if (subViewKey === 'adm_users') {
+        document.getElementById('workspace-title').innerText = 'จัดการบัญชีผู้ใช้งานระบบ';
+        actionBtn.innerHTML = `
+          <button onclick="openUserModal(null)" class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white hover:bg-brand-700 transition-all btn-press flex items-center gap-1.5">
+            <i class="fas fa-plus-circle"></i> <span>เพิ่มผู้ใช้งาน</span>
+          </button>
+        `;
+
+        content.innerHTML = `
+          <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-soft">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 text-xs uppercase font-semibold border-b border-slate-200 dark:border-slate-700">
+                  <tr>
+                    <th class="py-3.5 px-4 w-16 text-center">ลำดับ</th>
+                    <th class="py-3.5 px-4">ชื่อผู้ใช้ (Username)</th>
+                    <th class="py-3.5 px-4">ชื่อ - นามสกุลจริง</th>
+                    <th class="py-3.5 px-4 text-center">สิทธิ์การใช้งาน</th>
+                    <th class="py-3.5 px-4 text-right">จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                  ${dbCache.users.map((u, idx) => `
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/30">
+                      <td class="py-3 px-4 text-center text-slate-400">${idx + 1}</td>
+                      <td class="py-3 px-4 font-mono font-bold text-slate-800 dark:text-slate-200">${u.username}</td>
+                      <td class="py-3 px-4 font-medium text-slate-700 dark:text-slate-300">${u.name}</td>
+                      <td class="py-3 px-4 text-center">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${u.role === 'admin' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'}">
+                          ${u.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ครูผู้สอน'}
+                        </span>
+                      </td>
+                      <td class="py-3 px-4 text-right space-x-1">
+                        <button onclick="openUserModal(${u.id})" class="p-2 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-100 transition-colors"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteUserEntity(${u.id})" class="p-2 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"><i class="fas fa-trash"></i></button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+
+      // Subview: Reports & Summary (Admin & Teacher)
+      else if (subViewKey === 'adm_reports' || subViewKey === 'tch_reports') {
+        const isTeacherScope = (subViewKey === 'tch_reports');
+        document.getElementById('workspace-title').innerText = 'สรุปผลและรายงานผู้ลงทะเบียน';
+
+        const filteredClubs = isTeacherScope ? dbCache.clubs.filter(c => c.teacherId == currentUser.id) : dbCache.clubs;
+
+        content.innerHTML = `
+          <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-soft space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div class="flex-1 max-w-md">
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">กรองข้อมูลตามชุมนุม</label>
+                <select id="report-filter-club" onchange="renderReportTable('${subViewKey}')" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                  <option value="all">-- แสดงนักเรียนจากทุกชุมนุม --</option>
+                  ${filteredClubs.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+                </select>
+              </div>
+              <div class="flex items-center gap-2 pt-2 sm:pt-4">
+                <button onclick="exportReportToPDF('${subViewKey}')" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition-all btn-press flex items-center gap-1.5 shadow-sm">
+                  <i class="fas fa-file-pdf"></i> <span>พิมพ์รายงาน A4</span>
+                </button>
+                <button onclick="exportReportToCSV('${subViewKey}')" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all btn-press flex items-center gap-1.5 shadow-sm">
+                  <i class="fas fa-file-excel"></i> <span>ส่งออก CSV</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Report Table Container -->
+            <div id="report-table-wrapper" class="overflow-x-auto pt-2">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        `;
+        renderReportTable(subViewKey);
+      }
+
+      // Subview: Registration Schedule Settings (Admin)
+      else if (subViewKey === 'adm_settings') {
+        document.getElementById('workspace-title').innerText = 'ตั้งค่ากำหนดเวลาเปิด-ปิด ระบบลงทะเบียน';
+        content.innerHTML = `
+          <div class="max-w-xl bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-700 shadow-soft">
+            <form onsubmit="handleSaveSettings(event)" class="space-y-5">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+                  <i class="fas fa-calendar-check text-emerald-500 me-1"></i> วันที่และเวลาเริ่มต้น (เปิดระบบ)
+                </label>
+                <input type="datetime-local" id="input-set-start" value="${dbCache.settings.startPeriod || ''}" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+                  <i class="fas fa-calendar-xmark text-rose-500 me-1"></i> วันที่และเวลาสิ้นสุด (ปิดรับสมัคร)
+                </label>
+                <input type="datetime-local" id="input-set-end" value="${dbCache.settings.endPeriod || ''}" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              </div>
+
+              <div class="pt-3">
+                <button type="submit" class="w-full py-3.5 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-aurora transition-all btn-press flex items-center justify-center gap-2">
+                  <i class="fas fa-save"></i> <span>บันทึกกำหนดเวลา</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        `;
+      }
+
+      // Subview: Profile Management (Teacher)
+      else if (subViewKey === 'tch_profile') {
+        document.getElementById('workspace-title').innerText = 'แก้ไขข้อมูลส่วนตัวบุคลากร';
+        content.innerHTML = `
+          <div class="max-w-md bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-700 shadow-soft">
+            <form onsubmit="handleSaveProfile(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1.5">ชื่อผู้ใช้งาน (Username)</label>
+                <input type="text" id="prof-input-user" value="${currentUser.username}" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1.5">รหัสผ่านใหม่ (Password)</label>
+                <input type="password" id="prof-input-pass" value="${currentUser.password}" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1.5">ชื่อ - นามสกุลจริง</label>
+                <input type="text" id="prof-input-name" value="${currentUser.name}" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              </div>
+              <div class="pt-3">
+                <button type="submit" class="w-full py-3.5 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-aurora transition-all btn-press flex items-center justify-center gap-2">
+                  <i class="fas fa-check-double"></i> <span>บันทึกข้อมูลส่วนตัว</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        `;
+      }
+    }
+
+    function renderReportTable(subViewKey) {
+      const select = document.getElementById('report-filter-club');
+      const selectedClubId = select ? select.value : 'all';
+      const wrapper = document.getElementById('report-table-wrapper');
+      if (!wrapper) return;
+
+      let targetRegs = dbCache.registrations;
+
+      if (subViewKey === 'tch_reports') {
+        const myClubs = dbCache.clubs.filter(c => c.teacherId == currentUser.id).map(c => c.id);
+        targetRegs = targetRegs.filter(r => myClubs.includes(r.clubId));
+      }
+
+      if (selectedClubId !== 'all') {
+        targetRegs = targetRegs.filter(r => r.clubId == parseInt(selectedClubId));
+      }
+
+      // Sort by Class then student name
+      targetRegs.sort((a, b) => {
+        if (a.classId !== b.classId) return a.classId - b.classId;
+        return a.studentName.localeCompare(b.studentName, 'th');
+      });
+
+      if (targetRegs.length === 0) {
+        wrapper.innerHTML = `
+          <div class="text-center py-10 text-slate-400 text-sm">
+            <i class="fas fa-clipboard text-2xl mb-1 text-slate-300"></i>
+            <p>ไม่พบรายชื่อนักเรียนที่ลงทะเบียนในเงื่อนไขที่เลือก</p>
+          </div>
+        `;
+        return;
+      }
+
+      wrapper.innerHTML = `
+        <table class="w-full text-left text-sm border-collapse">
+          <thead class="bg-slate-50 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 text-xs uppercase font-semibold border-b border-slate-200 dark:border-slate-700">
+            <tr>
+              <th class="py-3 px-4 w-14 text-center">ลำดับ</th>
+              <th class="py-3 px-4">ชื่อ - นามสกุล นักเรียน</th>
+              <th class="py-3 px-4 text-center">ระดับชั้น</th>
+              <th class="py-3 px-4">กิจกรรมชุมนุม</th>
+              <th class="py-3 px-4 text-center">เวลาลงทะเบียน</th>
+              <th class="py-3 px-4 text-right">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+            ${targetRegs.map((r, i) => {
+              const cls = dbCache.classes.find(c => c.id == r.classId);
+              const clb = dbCache.clubs.find(c => c.id == r.clubId);
+              return `
+                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/30">
+                  <td class="py-2.5 px-4 text-center font-medium text-slate-400">${i + 1}</td>
+                  <td class="py-2.5 px-4 font-bold text-slate-800 dark:text-slate-200">${r.studentName}</td>
+                  <td class="py-2.5 px-4 text-center"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 dark:bg-slate-700">${cls ? cls.name : '-'}</span></td>
+                  <td class="py-2.5 px-4 text-slate-600 dark:text-slate-300 font-medium">${clb ? clb.name : '-'}</td>
+                  <td class="py-2.5 px-4 text-center text-xs text-slate-400">${formatThaiDateTime(r.timestamp)}</td>
+                  <td class="py-2.5 px-4 text-right">
+                    <button onclick="deleteRegistrationEntity(${r.id}, '${subViewKey}')" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors">
+                      <i class="fas fa-user-minus me-1"></i> ถอนสิทธิ์
+                    </button>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    /* --------------------------------------------------------
+       A4 OFFICIAL PRINT & CSV EXPORT
+       -------------------------------------------------------- */
+    function exportReportToPDF(subViewKey) {
+      const select = document.getElementById('report-filter-club');
+      const selectedClubId = select ? select.value : 'all';
+      const selectedClubName = select && select.selectedIndex >= 0 ? select.options[select.selectedIndex].text : 'ทุกชุมนุม';
+
+      let targetRegs = dbCache.registrations;
+      if (subViewKey === 'tch_reports') {
+        const myClubs = dbCache.clubs.filter(c => c.teacherId == currentUser.id).map(c => c.id);
+        targetRegs = targetRegs.filter(r => myClubs.includes(r.clubId));
+      }
+      if (selectedClubId !== 'all') {
+        targetRegs = targetRegs.filter(r => r.clubId == parseInt(selectedClubId));
+      }
+
+      if (targetRegs.length === 0) {
+        Swal.fire('ไม่มีข้อมูล', 'ไม่พบรายชื่อนักเรียนสำหรับออกรายงาน', 'warning');
+        return;
+      }
+
+      targetRegs.sort((a, b) => {
+        if (a.classId !== b.classId) return a.classId - b.classId;
+        return a.studentName.localeCompare(b.studentName, 'th');
+      });
+
+      const printContainer = document.getElementById('print-area');
+      printContainer.innerHTML = `
+        <div style="font-family: 'Sarabun', sans-serif; color: #000; line-height: 1.5; padding: 15mm 20mm;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <img src="https://lh3.googleusercontent.com/d/19aXvolxpVK5GndtRSMFP6sEdl7oa5PzN" style="width: 70px; height: 70px; object-fit: contain; margin-bottom: 8px;">
+            <h3 style="font-size: 18pt; font-weight: bold; margin: 0;">โรงเรียนมหาชัยพิทยาคาร</h3>
+            <p style="font-size: 14pt; margin: 4px 0 0 0;">แบบรายงานผลการลงทะเบียนกิจกรรมชุมนุม ประจำปีการศึกษา ๒๕๖๙</p>
+            <p style="font-size: 12pt; margin: 2px 0 0 0; color: #444;">${selectedClubName}</p>
+          </div>
+
+          <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12pt;">
+            <thead>
+              <tr style="background-color: #f2f2f2;">
+                <th style="border: 1px solid #333; padding: 6px; width: 8%; text-align: center;">ลำดับ</th>
+                <th style="border: 1px solid #333; padding: 6px; text-align: left;">ชื่อ - นามสกุล นักเรียน</th>
+                <th style="border: 1px solid #333; padding: 6px; width: 15%; text-align: center;">ระดับชั้น</th>
+                <th style="border: 1px solid #333; padding: 6px; width: 35%; text-align: left;">ชื่อกิจกรรมชุมนุม</th>
+                <th style="border: 1px solid #333; padding: 6px; width: 12%; text-align: center;">หมายเหตุ</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${targetRegs.map((r, i) => {
+                const cls = dbCache.classes.find(c => c.id == r.classId);
+                const clb = dbCache.clubs.find(c => c.id == r.clubId);
+                return `
+                  <tr>
+                    <td style="border: 1px solid #333; padding: 6px; text-align: center;">${i + 1}</td>
+                    <td style="border: 1px solid #333; padding: 6px;">${r.studentName}</td>
+                    <td style="border: 1px solid #333; padding: 6px; text-align: center;">${cls ? cls.name : '-'}</td>
+                    <td style="border: 1px solid #333; padding: 6px;">${clb ? clb.name : '-'}</td>
+                    <td style="border: 1px solid #333; padding: 6px; text-align: center;">-</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+
+          <div style="margin-top: 40px; display: flex; justify-content: space-between; text-align: center; font-size: 12pt;">
+            <div style="width: 45%;">
+              <p>ลงชื่อ......................................................ผู้รายงาน</p>
+              <p>( ${currentUser ? currentUser.name : '......................................................'} )</p>
+              <p>ตำแหน่ง ครู โรงเรียนมหาชัยพิทยาคาร</p>
+            </div>
+            <div style="width: 45%;">
+              <p>ลงชื่อ......................................................ผู้อนุมัติ</p>
+              <p>( นายอธิการ สุขศรี )</p>
+              <p>ผู้อำนวยการโรงเรียนมหาชัยพิทยาคาร</p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      printContainer.classList.remove('hidden');
+      window.print();
+      setTimeout(() => {
+        printContainer.classList.add('hidden');
+      }, 1000);
+    }
+
+    function exportReportToCSV(subViewKey) {
+      let targetRegs = dbCache.registrations;
+      if (subViewKey === 'tch_reports') {
+        const myClubs = dbCache.clubs.filter(c => c.teacherId == currentUser.id).map(c => c.id);
+        targetRegs = targetRegs.filter(r => myClubs.includes(r.clubId));
+      }
+
+      if (targetRegs.length === 0) {
+        Swal.fire('ไม่มีข้อมูล', 'ไม่พบรายชื่อนักเรียนสำหรับส่งออก', 'warning');
+        return;
+      }
+
+      let csv = '\uFEFFลำดับ,ชื่อ-นามสกุล,ระดับชั้น,กิจกรรมชุมนุม,ครูประจำชุมนุม,วันเวลาลงทะเบียน\n';
+      targetRegs.forEach((r, idx) => {
+        const cls = dbCache.classes.find(c => c.id == r.classId);
+        const clb = dbCache.clubs.find(c => c.id == r.clubId);
+        const tch = clb ? dbCache.users.find(u => u.id == clb.teacherId) : null;
+        csv += `"${idx + 1}","${r.studentName}","${cls ? cls.name : ''}","${clb ? clb.name : ''}","${tch ? tch.name : ''}","${r.timestamp}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `รายชื่อลงทะเบียนชุมนุม_${new Date().toISOString().slice(0,10)}.csv`;
+      link.click();
+    }
+
+    /* --------------------------------------------------------
+       CRUD MODALS & ENTITY MANAGEMENT
+       -------------------------------------------------------- */
+    function openClubModal(clubId, isTeacherView) {
+      const isEdit = clubId !== null;
+      const clubData = isEdit ? dbCache.clubs.find(c => c.id == clubId) : {
+        name: '',
+        cover: '',
+        teacherId: (isTeacherView ? currentUser.id : ''),
+        capacity: 30
+      };
+
+      document.getElementById('crud-modal-title').innerText = isEdit ? 'แก้ไขข้อมูลชุมนุม' : 'เพิ่มกิจกรรมชุมนุมใหม่';
+
+      const teachers = dbCache.users.filter(u => u.role === 'teacher' || u.role === 'admin');
+
+      document.getElementById('crud-modal-body').innerHTML = `
+        <form onsubmit="handleSaveClub(event, ${isEdit ? clubId : 'null'}, ${isTeacherView})" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">ชื่อกิจกรรมชุมนุม <span class="text-rose-500">*</span></label>
+            <input type="text" id="mcl-name" required value="${clubData.name}" placeholder="เช่น ชุมนุมวิทยาศาสตร์และอวกาศ" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">ลิงก์รูปภาพหน้าปก (URL)</label>
+            <input type="url" id="mcl-cover" value="${clubData.cover}" placeholder="https://example.com/cover.jpg" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            <p class="text-[11px] text-slate-400 mt-1">สามารถใส่ลิงก์รูปภาพจากเว็บ หรือเว้นว่างเพื่อใช้รูปมาตรฐาน</p>
+          </div>
+
+          ${!isTeacherView ? `
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">ครูผู้ดูแลชุมนุม <span class="text-rose-500">*</span></label>
+              <select id="mcl-teacher" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                <option value="" disabled ${!clubData.teacherId ? 'selected' : ''}>-- เลือกครูผู้รับผิดชอบ --</option>
+                ${teachers.map(t => `<option value="${t.id}" ${t.id == clubData.teacherId ? 'selected' : ''}>${t.name}</option>`).join('')}
+              </select>
+            </div>
+          ` : `<input type="hidden" id="mcl-teacher" value="${currentUser.id}">`}
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">จำนวนรับสูงสุด (คน) <span class="text-rose-500">*</span></label>
+            <input type="number" id="mcl-cap" min="1" max="200" required value="${clubData.capacity}" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" class="w-full py-3 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-aurora transition-all btn-press">
+              บันทึกข้อมูลชุมนุม
+            </button>
+          </div>
+        </form>
+      `;
+
+      openModal('modal-crud');
+    }
+
+    function handleSaveClub(e, clubId, isTeacherView) {
+      e.preventDefault();
+      const name = document.getElementById('mcl-name').value.trim();
+      const cover = document.getElementById('mcl-cover').value.trim();
+      const teacherId = parseInt(document.getElementById('mcl-teacher').value);
+      const capacity = parseInt(document.getElementById('mcl-cap').value);
+
+      if (clubId) {
+        const idx = dbCache.clubs.findIndex(c => c.id == clubId);
+        if (idx !== -1) {
+          dbCache.clubs[idx] = { ...dbCache.clubs[idx], name, cover, teacherId, capacity };
+        }
+      } else {
+        dbCache.clubs.push({
+          id: Date.now(),
+          name,
+          cover,
+          teacherId,
+          capacity
+        });
+      }
+
+      saveDatabase(() => {
+        closeModal('modal-crud');
+        Swal.fire({ icon: 'success', title: 'บันทึกข้อมูลเรียบร้อย', timer: 1500, showConfirmButton: false });
+        renderWorkspace(isTeacherView ? 'tch_clubs' : 'adm_clubs');
+      });
+    }
+
+    function deleteClubEntity(id, sourceView) {
+      Swal.fire({
+        title: 'ยืนยันลบกิจกรรมชุมนุม?',
+        text: 'การลบชุมนุมจะลบข้อมูลการลงทะเบียนของนักเรียนในชุมนุมนี้ทั้งหมดด้วย!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DC2626',
+        confirmButtonText: 'ยืนยันลบ',
+        cancelButtonText: 'ยกเลิก'
+      }).then((res) => {
+        if (res.isConfirmed) {
+          dbCache.clubs = dbCache.clubs.filter(c => c.id != id);
+          dbCache.registrations = dbCache.registrations.filter(r => r.clubId != id);
+          saveDatabase(() => {
+            renderWorkspace(sourceView);
+          });
+        }
+      });
+    }
+
+    function deleteRegistrationEntity(regId, sourceView) {
+      Swal.fire({
+        title: 'ยืนยันถอนสิทธิ์นักเรียน?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DC2626',
+        confirmButtonText: 'ยืนยันถอนสิทธิ์',
+        cancelButtonText: 'ยกเลิก'
+      }).then((res) => {
+        if (res.isConfirmed) {
+          dbCache.registrations = dbCache.registrations.filter(r => r.id != regId);
+          saveDatabase(() => {
+            renderReportTable(sourceView);
+            Swal.fire({ icon: 'success', title: 'ถอนสิทธิ์เรียบร้อย', timer: 1200, showConfirmButton: false });
+          });
+        }
+      });
+    }
+
+    function openClassModal(classId) {
+      const isEdit = classId !== null;
+      const cData = isEdit ? dbCache.classes.find(c => c.id == classId) : { name: '' };
+      document.getElementById('crud-modal-title').innerText = isEdit ? 'แก้ไขระดับชั้นเรียน' : 'เพิ่มระดับชั้นเรียนใหม่';
+
+      document.getElementById('crud-modal-body').innerHTML = `
+        <form onsubmit="handleSaveClass(event, ${isEdit ? classId : 'null'})" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">ชื่อระดับชั้นเรียน <span class="text-rose-500">*</span></label>
+            <input type="text" id="mcls-name" required value="${cData.name}" placeholder="เช่น ม.1/3" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          </div>
+          <div class="pt-2">
+            <button type="submit" class="w-full py-3 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-aurora transition-all btn-press">
+              บันทึกระดับชั้น
+            </button>
+          </div>
+        </form>
+      `;
+      openModal('modal-crud');
+    }
+
+    function handleSaveClass(e, classId) {
+      e.preventDefault();
+      const name = document.getElementById('mcls-name').value.trim();
+      if (classId) {
+        const idx = dbCache.classes.findIndex(c => c.id == classId);
+        if (idx !== -1) dbCache.classes[idx].name = name;
+      } else {
+        dbCache.classes.push({ id: Date.now(), name });
+      }
+      saveDatabase(() => {
+        closeModal('modal-crud');
+        populateClassDropdowns();
+        renderWorkspace('adm_classes');
+      });
+    }
+
+    function deleteClassEntity(id) {
+      Swal.fire({
+        title: 'ยืนยันลบระดับชั้นเรียน?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DC2626',
+        confirmButtonText: 'ลบชั้นเรียน'
+      }).then((res) => {
+        if (res.isConfirmed) {
+          dbCache.classes = dbCache.classes.filter(c => c.id != id);
+          saveDatabase(() => {
+            populateClassDropdowns();
+            renderWorkspace('adm_classes');
+          });
+        }
+      });
+    }
+
+    function openUserModal(userId) {
+      const isEdit = userId !== null;
+      const uData = isEdit ? dbCache.users.find(u => u.id == userId) : { username: '', password: '', name: '', role: 'teacher' };
+      document.getElementById('crud-modal-title').innerText = isEdit ? 'แก้ไขผู้ใช้งาน' : 'เพิ่มผู้ใช้งานระบบใหม่';
+
+      document.getElementById('crud-modal-body').innerHTML = `
+        <form onsubmit="handleSaveUser(event, ${isEdit ? userId : 'null'})" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">ชื่อผู้ใช้งาน (Username) <span class="text-rose-500">*</span></label>
+            <input type="text" id="mu-user" required value="${uData.username}" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">รหัสผ่าน (Password) <span class="text-rose-500">*</span></label>
+            <input type="password" id="mu-pass" required value="${uData.password}" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">ชื่อ - นามสกุลจริง <span class="text-rose-500">*</span></label>
+            <input type="text" id="mu-name" required value="${uData.name}" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">สิทธิ์การใช้งาน</label>
+            <select id="mu-role" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              <option value="teacher" ${uData.role === 'teacher' ? 'selected' : ''}>ครูผู้สอน / ครูประจำชุมนุม (Teacher)</option>
+              <option value="admin" ${uData.role === 'admin' ? 'selected' : ''}>ผู้ดูแลระบบสูงสุด (Admin)</option>
+            </select>
+          </div>
+          <div class="pt-2">
+            <button type="submit" class="w-full py-3 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-aurora transition-all btn-press">
+              บันทึกข้อมูลผู้ใช้
+            </button>
+          </div>
+        </form>
+      `;
+      openModal('modal-crud');
+    }
+
+    function handleSaveUser(e, userId) {
+      e.preventDefault();
+      const username = document.getElementById('mu-user').value.trim();
+      const password = document.getElementById('mu-pass').value;
+      const name = document.getElementById('mu-name').value.trim();
+      const role = document.getElementById('mu-role').value;
+
+      if (userId) {
+        const idx = dbCache.users.findIndex(u => u.id == userId);
+        if (idx !== -1) dbCache.users[idx] = { id: userId, username, password, name, role };
+      } else {
+        dbCache.users.push({ id: Date.now(), username, password, name, role });
+      }
+
+      saveDatabase(() => {
+        closeModal('modal-crud');
+        renderWorkspace('adm_users');
+      });
+    }
+
+    function deleteUserEntity(id) {
+      Swal.fire({
+        title: 'ยืนยันลบผู้ใช้งาน?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DC2626',
+        confirmButtonText: 'ลบผู้ใช้'
+      }).then((res) => {
+        if (res.isConfirmed) {
+          dbCache.users = dbCache.users.filter(u => u.id != id);
+          saveDatabase(() => {
+            renderWorkspace('adm_users');
+          });
+        }
+      });
+    }
+
+    function handleSaveSettings(e) {
+      e.preventDefault();
+      dbCache.settings.startPeriod = document.getElementById('input-set-start').value;
+      dbCache.settings.endPeriod = document.getElementById('input-set-end').value;
+
+      saveDatabase(() => {
+        Swal.fire({ icon: 'success', title: 'อัปเดตกำหนดเวลาสำเร็จ', timer: 1500, showConfirmButton: false });
+        renderPublicHome();
+      });
+    }
+
+    function handleSaveProfile(e) {
+      e.preventDefault();
+      const idx = dbCache.users.findIndex(u => u.id == currentUser.id);
+      if (idx !== -1) {
+        dbCache.users[idx].username = document.getElementById('prof-input-user').value.trim();
+        dbCache.users[idx].password = document.getElementById('prof-input-pass').value;
+        dbCache.users[idx].name = document.getElementById('prof-input-name').value.trim();
+
+        saveDatabase(() => {
+          currentUser = dbCache.users[idx];
+          sessionStorage.setItem('mhc_reg_user', JSON.stringify(currentUser));
+          renderNavigation();
+          Swal.fire({ icon: 'success', title: 'อัปเดตข้อมูลส่วนตัวแล้ว', timer: 1500, showConfirmButton: false });
+        });
+      }
+    }
+
+    /* --------------------------------------------------------
+       AUTH: LOGIN / LOGOUT
+       -------------------------------------------------------- */
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const userVal = document.getElementById('login-input-username').value.trim();
+      const passVal = document.getElementById('login-input-password').value;
+
+      const matched = dbCache.users.find(u => u.username === userVal && u.password === passVal);
+      if (matched) {
+        currentUser = matched;
+        sessionStorage.setItem('mhc_reg_user', JSON.stringify(currentUser));
+        closeModal('modal-login');
+        document.getElementById('form-login').reset();
+        renderNavigation();
+        navigateTo('workspace');
+
+        Swal.fire({
+          icon: 'success',
+          title: `ยินดีต้อนรับ ${matched.name}`,
+          text: `เข้าสู่ระบบในฐานะ: ${matched.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ครูผู้สอน'}`,
+          timer: 1800,
+          showConfirmButton: false
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'เข้าสู่ระบบไม่สำเร็จ',
+          text: 'ชื่อผู้ใช้งาน หรือรหัสผ่านไม่ถูกต้อง โปรดตรวจสอบอีกครั้ง',
+          confirmButtonColor: '#4F46E5'
+        });
+      }
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem('mhc_reg_user');
+      currentUser = null;
+      renderNavigation();
+      navigateTo('home');
+      Swal.fire({ icon: 'info', title: 'ออกจากระบบเรียบร้อยแล้ว', timer: 1200, showConfirmButton: false });
+    }
+
+    /* --------------------------------------------------------
+       HELPERS & UI UTILITIES
+       -------------------------------------------------------- */
+    function populateClassDropdowns() {
+      if (!dbCache || !dbCache.classes) return;
+
+      const regSelect = document.getElementById('reg-input-class');
+      const checkSelect = document.getElementById('check-filter-class');
+
+      if (regSelect) {
+        regSelect.innerHTML = '<option value="" disabled selected>-- เลือกระดับชั้นเรียนของนักเรียน --</option>';
+        dbCache.classes.forEach(c => {
+          regSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+        });
+      }
+
+      if (checkSelect) {
+        checkSelect.innerHTML = '<option value="all">-- ทุกระดับชั้นเรียน --</option>';
+        dbCache.classes.forEach(c => {
+          checkSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+        });
+      }
+    }
+
+    function openModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function showLoading(title = 'กำลังประมวลผล...', desc = 'โปรดรอสักครู่') {
+      const overlay = document.getElementById('loading-overlay');
+      const t = document.getElementById('loading-title');
+      const d = document.getElementById('loading-desc');
+      if (t) t.innerText = title;
+      if (d) d.innerText = desc;
+      if (overlay) overlay.classList.remove('hidden');
+    }
+
+    function hideLoading() {
+      const overlay = document.getElementById('loading-overlay');
+      if (overlay) overlay.classList.add('hidden');
+    }
+  </script>
+</body>
+</html>

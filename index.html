@@ -455,38 +455,81 @@
          VIEW 2: STUDENT CHECK STATUS (ตรวจสอบผลการลงทะเบียน)
          ---------------------------------------------------- -->
     <section id="view-check" class="view-panel hidden space-y-6">
-      <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-700 shadow-soft space-y-6">
-        <div class="text-center max-w-lg mx-auto space-y-2">
-          <div class="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-900/40 text-brand-600 dark:text-brand-400 flex items-center justify-center text-xl mx-auto">
-            <i class="fas fa-search"></i>
+      <div class="bg-white dark:bg-slate-800 rounded-3xl p-5 sm:p-8 border border-slate-200/80 dark:border-slate-700 shadow-soft space-y-6">
+        
+        <!-- Header & Action Tools -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-700">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-900/40 text-brand-600 dark:text-brand-400 flex items-center justify-center text-xl flex-shrink-0">
+              <i class="fas fa-clipboard-check"></i>
+            </div>
+            <div>
+              <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white leading-tight">ตรวจสอบผลการลงทะเบียนชุมนุม</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400">ค้นหารายชื่อ กรองตามระดับชั้นหรือชุมนุม และดูบัตรประจำตัวการลงทะเบียน</p>
+            </div>
           </div>
-          <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">ตรวจสอบผลการลงทะเบียนชุมนุม</h2>
-          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            พิมพ์ชื่อ-นามสกุล หรือเลือกระดับชั้นเรียน เพื่อค้นหาและพิมพ์บัตรประจำตัวการลงทะเบียน
-          </p>
+          <div class="flex items-center gap-2">
+            <button onclick="printCheckResultsTable()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition-colors btn-press flex items-center gap-1.5">
+              <i class="fas fa-print"></i> <span>พิมพ์ตาราง</span>
+            </button>
+            <button onclick="exportCheckResultsCSV()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 transition-colors btn-press flex items-center gap-1.5">
+              <i class="fas fa-file-excel"></i> <span>ส่งออก CSV</span>
+            </button>
+          </div>
         </div>
 
-        <!-- Search Form -->
-        <div class="max-w-xl mx-auto grid grid-cols-1 sm:grid-cols-12 gap-3">
-          <div class="sm:col-span-5">
-            <select id="check-filter-class" onchange="performStudentCheck()" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
-              <option value="all">-- ทุกระดับชั้นเรียน --</option>
+        <!-- 3-Filter Toolbar with Search and Reset -->
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700">
+          <!-- Filter 1: Student Name Search -->
+          <div class="sm:col-span-5 relative">
+            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">ค้นหาชื่อ - นามสกุล</label>
+            <div class="relative">
+              <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+              <input type="text" id="check-input-name" oninput="performStudentCheck()" placeholder="พิมพ์ชื่อหรือนามสกุลนักเรียน..." class="w-full pl-9 pr-8 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              <button id="check-clear-name-btn" onclick="clearCheckName()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                <i class="fas fa-times-circle text-xs"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Filter 2: Class Dropdown -->
+          <div class="sm:col-span-3">
+            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">ระดับชั้นเรียน</label>
+            <select id="check-filter-class" onchange="performStudentCheck()" class="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              <option value="all">-- ทุกระดับชั้น --</option>
             </select>
           </div>
-          <div class="sm:col-span-7 relative">
-            <input type="text" id="check-input-name" oninput="performStudentCheck()" placeholder="ระบุชื่อหรือนามสกุลนักเรียน..." class="w-full pl-4 pr-10 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
-            <i class="fas fa-user-graduate absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+
+          <!-- Filter 3: Club Dropdown -->
+          <div class="sm:col-span-3">
+            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">กิจกรรมชุมนุม</label>
+            <select id="check-filter-club" onchange="performStudentCheck()" class="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              <option value="all">-- ทุกกิจกรรมชุมนุม --</option>
+            </select>
+          </div>
+
+          <!-- Reset Filter Button -->
+          <div class="sm:col-span-1 flex items-end">
+            <button onclick="resetStudentCheckFilters()" class="w-full py-2.5 rounded-xl text-xs font-semibold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition-colors btn-press flex items-center justify-center gap-1" title="ล้างตัวกรอง">
+              <i class="fas fa-rotate-left"></i>
+            </button>
           </div>
         </div>
 
-        <!-- Search Results Table / Cards -->
-        <div id="check-results-wrapper" class="space-y-3">
-          <!-- Populated by JS -->
-          <div class="text-center py-10 text-slate-400 text-sm">
-            <i class="fas fa-keyboard text-2xl mb-2 text-slate-300"></i>
-            <p>กรุณาระบุชื่อ หรือเลือกระดับชั้นเรียนเพื่อแสดงผลการลงทะเบียน</p>
+        <!-- Filter Count Summary & Status -->
+        <div class="flex items-center justify-between text-xs text-slate-500 px-1">
+          <div class="flex items-center gap-2">
+            <span>แสดงผลการลงทะเบียน: <strong id="check-results-count" class="text-brand-600 dark:text-brand-400 font-bold">0</strong> คน</span>
+            <span class="text-slate-300 dark:text-slate-600">•</span>
+            <span>(จากนักเรียนที่ลงทะเบียนทั้งหมด <span id="check-total-registered-count" class="font-semibold text-slate-700 dark:text-slate-300">0</span> คน)</span>
           </div>
         </div>
+
+        <!-- Search Results Table Container -->
+        <div id="check-results-wrapper" class="overflow-hidden">
+          <!-- Populated by JS -->
+        </div>
+
       </div>
     </section>
 
@@ -539,8 +582,7 @@
           <p class="text-[11px] text-slate-400">สำนักงานเขตพื้นที่การศึกษามัธยมศึกษามหาสารคาม (สพม.มหาสารคาม)</p>
         </div>
       </div>
-      <div class="text-center md:text-right text-[11px] space-y-0.5">
-        <p>ผู้อำนวยการโรงเรียน: <strong class="text-slate-700 dark:text-slate-300 font-semibold">นายอธิการ สุขศรี</strong></p>
+      <div class="text-center md:text-right text-[11px]">
         <p>ผู้พัฒนาระบบ: <strong class="text-brand-600 dark:text-brand-400 font-semibold">ครูก้องนที อุ่นเจริญ</strong> | MHC Smart School v3.3.32</p>
       </div>
     </div>
@@ -1004,6 +1046,7 @@
       renderNavigation();
       renderPublicHome();
       populateClassDropdowns();
+      performStudentCheck();
     }
 
     /* --------------------------------------------------------
@@ -1119,6 +1162,7 @@
       if (pageTarget === 'home') {
         renderPublicHome();
       } else if (pageTarget === 'check') {
+        populateClassDropdowns();
         performStudentCheck();
       } else if (pageTarget === 'workspace') {
         if (!currentUser) {
@@ -1638,79 +1682,234 @@
     }
 
     /* --------------------------------------------------------
-       STUDENT CHECK STATUS TAB
+       STUDENT CHECK STATUS TAB (ตารางตรวจสอบผล พร้อม Filter)
        -------------------------------------------------------- */
     function performStudentCheck() {
       if (!dbCache) return;
-      const classFilter = document.getElementById('check-filter-class').value;
-      const nameQuery = document.getElementById('check-input-name').value.trim().toLowerCase();
+      const classFilter = document.getElementById('check-filter-class') ? document.getElementById('check-filter-class').value : 'all';
+      const clubFilter = document.getElementById('check-filter-club') ? document.getElementById('check-filter-club').value : 'all';
+      const nameInput = document.getElementById('check-input-name');
+      const nameQuery = nameInput ? nameInput.value.trim().toLowerCase() : '';
       const wrapper = document.getElementById('check-results-wrapper');
+      const clearBtn = document.getElementById('check-clear-name-btn');
 
-      if (classFilter === 'all' && !nameQuery) {
+      if (clearBtn) {
+        if (nameQuery) clearBtn.classList.remove('hidden');
+        else clearBtn.classList.add('hidden');
+      }
+
+      const totalRegs = dbCache.registrations || [];
+      const totalCountElem = document.getElementById('check-total-registered-count');
+      if (totalCountElem) totalCountElem.innerText = totalRegs.length;
+
+      let matches = totalRegs.filter(r => {
+        if (classFilter !== 'all' && r.classId != classFilter) return false;
+        if (clubFilter !== 'all' && r.clubId != clubFilter) return false;
+        if (nameQuery && !r.studentName.toLowerCase().includes(nameQuery)) return false;
+        return true;
+      });
+
+      const countElem = document.getElementById('check-results-count');
+      if (countElem) countElem.innerText = matches.length;
+
+      if (matches.length === 0) {
         wrapper.innerHTML = `
-          <div class="text-center py-12 text-slate-400 text-xs sm:text-sm">
-            <i class="fas fa-search text-3xl mb-2 text-slate-300"></i>
-            <p>กรุณาระบุชื่อ หรือเลือกระดับชั้นเรียน เพื่อค้นหาผลการลงทะเบียน</p>
+          <div class="text-center py-12 bg-white dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 space-y-3">
+            <div class="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center text-2xl mx-auto">
+              <i class="fas fa-search"></i>
+            </div>
+            <h4 class="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300">ไม่พบข้อมูลตามเงื่อนไขที่เลือก</h4>
+            <p class="text-xs text-slate-400 max-w-sm mx-auto">ลองเปลี่ยนคำค้นหา หรือกดปุ่มรีเซ็ตตัวกรองเพื่อแสดงรายชื่อทั้งหมด</p>
+            <button onclick="resetStudentCheckFilters()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-brand-600 text-white hover:bg-brand-700 transition-colors btn-press">
+              <i class="fas fa-rotate-left me-1"></i> ล้างตัวกรองทั้งหมด
+            </button>
           </div>
         `;
         return;
       }
 
-      let matches = dbCache.registrations.filter(r => {
+      // Sort by Class first, then student name
+      matches.sort((a, b) => {
+        if (a.classId !== b.classId) return a.classId - b.classId;
+        return a.studentName.localeCompare(b.studentName, 'th');
+      });
+
+      let rowsHtml = '';
+      matches.forEach((reg, idx) => {
+        const club = dbCache.clubs.find(c => c.id == reg.clubId);
+        const classObj = dbCache.classes.find(c => c.id == reg.classId);
+        const teacher = club ? dbCache.users.find(u => u.id == club.teacherId) : null;
+
+        rowsHtml += `
+          <tr class="hover:bg-brand-50/40 dark:hover:bg-slate-700/30 transition-colors">
+            <td class="py-3 px-4 text-center font-medium text-slate-400">${idx + 1}</td>
+            <td class="py-3 px-4">
+              <span class="font-bold text-slate-900 dark:text-white">${reg.studentName}</span>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200">
+                ${classObj ? classObj.name : '-'}
+              </span>
+            </td>
+            <td class="py-3 px-4 font-semibold text-brand-600 dark:text-brand-400">
+              <i class="fas fa-cubes me-1.5 text-xs text-brand-500"></i>${club ? club.name : '-'}
+            </td>
+            <td class="py-3 px-4 text-xs text-slate-500 dark:text-slate-400 truncate max-w-[160px]">
+              <i class="fas fa-chalkboard-user me-1 text-slate-400"></i>${teacher ? teacher.name : '-'}
+            </td>
+            <td class="py-3 px-4 text-center text-xs text-slate-400 whitespace-nowrap">
+              ${formatThaiDateTime(reg.timestamp)}
+            </td>
+            <td class="py-3 px-4 text-center whitespace-nowrap">
+              <button onclick='showRegistrationTicket(${JSON.stringify(reg)})' class="px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-50 text-brand-700 hover:bg-brand-600 hover:text-white dark:bg-brand-900/40 dark:text-brand-300 dark:hover:bg-brand-600 transition-all btn-press inline-flex items-center gap-1.5 shadow-sm">
+                <i class="fas fa-id-card"></i> <span>ดูบัตร</span>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      wrapper.innerHTML = `
+        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-soft">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm border-collapse">
+              <thead class="bg-slate-50 dark:bg-slate-900/70 text-slate-600 dark:text-slate-300 text-xs uppercase font-bold border-b border-slate-200 dark:border-slate-700">
+                <tr>
+                  <th class="py-3.5 px-4 w-14 text-center">ลำดับ</th>
+                  <th class="py-3.5 px-4 min-w-[180px]">ชื่อ - นามสกุล นักเรียน</th>
+                  <th class="py-3.5 px-4 text-center min-w-[90px]">ระดับชั้น</th>
+                  <th class="py-3.5 px-4 min-w-[200px]">กิจกรรมชุมนุม</th>
+                  <th class="py-3.5 px-4 min-w-[160px]">ครูผู้ดูแล</th>
+                  <th class="py-3.5 px-4 text-center min-w-[160px]">เวลาลงทะเบียน</th>
+                  <th class="py-3.5 px-4 text-center min-w-[100px]">บัตรประจำตัว</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                ${rowsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function clearCheckName() {
+      const input = document.getElementById('check-input-name');
+      if (input) input.value = '';
+      performStudentCheck();
+    }
+
+    function resetStudentCheckFilters() {
+      const nameInput = document.getElementById('check-input-name');
+      const classSelect = document.getElementById('check-filter-class');
+      const clubSelect = document.getElementById('check-filter-club');
+      if (nameInput) nameInput.value = '';
+      if (classSelect) classSelect.value = 'all';
+      if (clubSelect) clubSelect.value = 'all';
+      performStudentCheck();
+    }
+
+    function printCheckResultsTable() {
+      const classFilter = document.getElementById('check-filter-class').value;
+      const clubFilter = document.getElementById('check-filter-club').value;
+      const nameQuery = document.getElementById('check-input-name').value.trim().toLowerCase();
+
+      let matches = (dbCache.registrations || []).filter(r => {
         if (classFilter !== 'all' && r.classId != classFilter) return false;
+        if (clubFilter !== 'all' && r.clubId != clubFilter) return false;
         if (nameQuery && !r.studentName.toLowerCase().includes(nameQuery)) return false;
         return true;
       });
 
       if (matches.length === 0) {
-        wrapper.innerHTML = `
-          <div class="text-center py-10 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 space-y-2">
-            <i class="fas fa-user-xmark text-2xl text-slate-400"></i>
-            <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300">ไม่พบรายชื่อในระบบ</h4>
-            <p class="text-xs text-slate-400">ตรวจสอบการสะกดชื่อ หรือเลือกระดับชั้นเรียนให้ถูกต้อง</p>
-          </div>
-        `;
+        Swal.fire('ไม่มีข้อมูล', 'ไม่พบรายชื่อนักเรียนสำหรับสั่งพิมพ์', 'warning');
         return;
       }
 
-      let html = `
-        <div class="flex items-center justify-between text-xs text-slate-500 pb-2">
-          <span>พบรายชื่อทั้งหมด: <strong class="text-brand-600 font-bold">${matches.length}</strong> รายการ</span>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-      `;
-
-      matches.forEach(reg => {
-        const club = dbCache.clubs.find(c => c.id == reg.clubId);
-        const classObj = dbCache.classes.find(c => c.id == reg.classId);
-        const teacher = club ? dbCache.users.find(u => u.id == club.teacherId) : null;
-
-        html += `
-          <div class="bg-white dark:bg-slate-900/80 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm flex items-start justify-between gap-3">
-            <div class="space-y-1 flex-1 min-w-0">
-              <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
-                  ${classObj ? classObj.name : '-'}
-                </span>
-                <span class="text-xs text-slate-400">${formatThaiDateTime(reg.timestamp)}</span>
-              </div>
-              <h4 class="font-bold text-slate-900 dark:text-white text-sm truncate">${reg.studentName}</h4>
-              <p class="text-xs font-semibold text-brand-600 dark:text-brand-400 truncate">
-                <i class="fas fa-cubes me-1"></i>${club ? club.name : 'ไม่ระบุชุมนุม'}
-              </p>
-              <p class="text-[11px] text-slate-400 truncate">
-                <i class="fas fa-chalkboard-user me-1"></i>ครู: ${teacher ? teacher.name : '-'}
-              </p>
-            </div>
-            <button onclick='showRegistrationTicket(${JSON.stringify(reg)})' class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-brand-50 hover:text-brand-600 transition-colors btn-press flex-shrink-0" title="ดูบัตรลงทะเบียน">
-              <i class="fas fa-id-card text-base"></i>
-            </button>
-          </div>
-        `;
+      matches.sort((a, b) => {
+        if (a.classId !== b.classId) return a.classId - b.classId;
+        return a.studentName.localeCompare(b.studentName, 'th');
       });
 
-      html += `</div>`;
-      wrapper.innerHTML = html;
+      const printContainer = document.getElementById('print-area');
+      printContainer.innerHTML = `
+        <div style="font-family: 'Sarabun', sans-serif; color: #000; line-height: 1.5; padding: 15mm 20mm;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <img src="https://lh3.googleusercontent.com/d/19aXvolxpVK5GndtRSMFP6sEdl7oa5PzN" style="width: 65px; height: 65px; object-fit: contain; margin-bottom: 6px;">
+            <h3 style="font-size: 16pt; font-weight: bold; margin: 0;">โรงเรียนมหาชัยพิทยาคาร</h3>
+            <p style="font-size: 13pt; margin: 4px 0 0 0;">ตารางตรวจสอบผลการลงทะเบียนกิจกรรมชุมนุม ประจำปีการศึกษา ๒๕๖๙</p>
+            <p style="font-size: 11pt; margin: 2px 0 0 0; color: #444;">จำนวนนักเรียนที่แสดงผล: ${matches.length} คน</p>
+          </div>
+
+          <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 11pt;">
+            <thead>
+              <tr style="background-color: #f2f2f2;">
+                <th style="border: 1px solid #333; padding: 6px; width: 8%; text-align: center;">ลำดับ</th>
+                <th style="border: 1px solid #333; padding: 6px; text-align: left;">ชื่อ - นามสกุล นักเรียน</th>
+                <th style="border: 1px solid #333; padding: 6px; width: 12%; text-align: center;">ระดับชั้น</th>
+                <th style="border: 1px solid #333; padding: 6px; width: 35%; text-align: left;">กิจกรรมชุมนุม</th>
+                <th style="border: 1px solid #333; padding: 6px; width: 20%; text-align: left;">ครูผู้ดูแล</th>
+                <th style="border: 1px solid #333; padding: 6px; width: 15%; text-align: center;">เวลาลงทะเบียน</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${matches.map((r, i) => {
+                const cls = dbCache.classes.find(c => c.id == r.classId);
+                const clb = dbCache.clubs.find(c => c.id == r.clubId);
+                const tch = clb ? dbCache.users.find(u => u.id == clb.teacherId) : null;
+                return `
+                  <tr>
+                    <td style="border: 1px solid #333; padding: 6px; text-align: center;">${i + 1}</td>
+                    <td style="border: 1px solid #333; padding: 6px;">${r.studentName}</td>
+                    <td style="border: 1px solid #333; padding: 6px; text-align: center;">${cls ? cls.name : '-'}</td>
+                    <td style="border: 1px solid #333; padding: 6px;">${clb ? clb.name : '-'}</td>
+                    <td style="border: 1px solid #333; padding: 6px;">${tch ? tch.name : '-'}</td>
+                    <td style="border: 1px solid #333; padding: 6px; text-align: center;">${formatThaiDateTime(r.timestamp)}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      printContainer.classList.remove('hidden');
+      window.print();
+      setTimeout(() => {
+        printContainer.classList.add('hidden');
+      }, 1000);
+    }
+
+    function exportCheckResultsCSV() {
+      const classFilter = document.getElementById('check-filter-class').value;
+      const clubFilter = document.getElementById('check-filter-club').value;
+      const nameQuery = document.getElementById('check-input-name').value.trim().toLowerCase();
+
+      let matches = (dbCache.registrations || []).filter(r => {
+        if (classFilter !== 'all' && r.classId != classFilter) return false;
+        if (clubFilter !== 'all' && r.clubId != clubFilter) return false;
+        if (nameQuery && !r.studentName.toLowerCase().includes(nameQuery)) return false;
+        return true;
+      });
+
+      if (matches.length === 0) {
+        Swal.fire('ไม่มีข้อมูล', 'ไม่พบรายชื่อนักเรียนสำหรับส่งออก', 'warning');
+        return;
+      }
+
+      let csv = '\uFEFFลำดับ,ชื่อ-นามสกุล,ระดับชั้น,กิจกรรมชุมนุม,ครูผู้ดูแล,เวลาลงทะเบียน\n';
+      matches.forEach((r, idx) => {
+        const cls = dbCache.classes.find(c => c.id == r.classId);
+        const clb = dbCache.clubs.find(c => c.id == r.clubId);
+        const tch = clb ? dbCache.users.find(u => u.id == clb.teacherId) : null;
+        csv += `"${idx + 1}","${r.studentName}","${cls ? cls.name : ''}","${clb ? clb.name : ''}","${tch ? tch.name : ''}","${r.timestamp}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `ตารางตรวจสอบผลการลงทะเบียน_${new Date().toISOString().slice(0, 10)}.csv`;
+      link.click();
     }
 
     /* --------------------------------------------------------
@@ -2140,8 +2339,8 @@
             </div>
             <div style="width: 45%;">
               <p>ลงชื่อ......................................................ผู้อนุมัติ</p>
-              <p>( นายอธิการ สุขศรี )</p>
-              <p>ผู้อำนวยการโรงเรียนมหาชัยพิทยาคาร</p>
+              <p>( ...................................................... )</p>
+              <p>หัวหน้ากลุ่มบริหารงานวิชาการ</p>
             </div>
           </div>
         </div>
@@ -2506,22 +2705,33 @@
        HELPERS & UI UTILITIES
        -------------------------------------------------------- */
     function populateClassDropdowns() {
-      if (!dbCache || !dbCache.classes) return;
+      if (!dbCache) return;
 
       const regSelect = document.getElementById('reg-input-class');
-      const checkSelect = document.getElementById('check-filter-class');
+      const checkClassSelect = document.getElementById('check-filter-class');
+      const checkClubSelect = document.getElementById('check-filter-club');
 
-      if (regSelect) {
+      if (regSelect && dbCache.classes) {
         regSelect.innerHTML = '<option value="" disabled selected>-- เลือกระดับชั้นเรียนของนักเรียน --</option>';
         dbCache.classes.forEach(c => {
           regSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
         });
       }
 
-      if (checkSelect) {
-        checkSelect.innerHTML = '<option value="all">-- ทุกระดับชั้นเรียน --</option>';
+      if (checkClassSelect && dbCache.classes) {
+        const total = (dbCache.registrations || []).length;
+        checkClassSelect.innerHTML = `<option value="all">-- ทุกระดับชั้นเรียน (${total} คน) --</option>`;
         dbCache.classes.forEach(c => {
-          checkSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+          const count = (dbCache.registrations || []).filter(r => r.classId == c.id).length;
+          checkClassSelect.innerHTML += `<option value="${c.id}">${c.name} (${count} คน)</option>`;
+        });
+      }
+
+      if (checkClubSelect && dbCache.clubs) {
+        checkClubSelect.innerHTML = `<option value="all">-- ทุกกิจกรรมชุมนุม (${dbCache.clubs.length} ชุมนุม) --</option>`;
+        dbCache.clubs.forEach(c => {
+          const count = (dbCache.registrations || []).filter(r => r.clubId == c.id).length;
+          checkClubSelect.innerHTML += `<option value="${c.id}">${c.name} (${count}/${c.capacity} คน)</option>`;
         });
       }
     }

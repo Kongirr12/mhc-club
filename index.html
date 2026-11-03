@@ -266,7 +266,12 @@
         </nav>
 
         <!-- Right Action Controls -->
-        <div class="flex items-center space-x-2">
+        <div class="flex items-center space-x-1.5 sm:space-x-2">
+          <!-- Clear Cache / Refresh Button -->
+          <button onclick="clearLocalStorageCache()" class="p-2 sm:p-2.5 rounded-xl text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors btn-press" title="ล้างแคชในเครื่อง (Clear Cache)">
+            <i class="fas fa-arrows-rotate text-sm sm:text-base"></i>
+          </button>
+
           <!-- Dark Mode Toggle -->
           <button onclick="toggleDarkMode()" class="p-2 sm:p-2.5 rounded-xl text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors btn-press" title="สลับธีม สว่าง/มืด">
             <i class="fas fa-moon text-base dark:hidden"></i>
@@ -1244,10 +1249,7 @@
           .then((data) => {
             hideLoading();
             if (data && typeof data === 'object') {
-              dbCache = data;
-              if (!Array.isArray(dbCache.students)) {
-                dbCache.students = JSON.parse(JSON.stringify(DEFAULT_MOCK_DB.students || []));
-              }
+              dbCache = normalizeDatabaseData(data);
               try {
                 localStorage.setItem('mhc_local_db', JSON.stringify(dbCache));
               } catch (_) {}
@@ -1257,24 +1259,56 @@
             }
             renderApp();
           })
-          .catch((err) => {
-            console.warn('Direct fetch to GAS failed, falling back to local storage:', err);
-            fallbackToLocalStorage();
+          .catch(async (err) => {
+            console.warn('POST to GAS failed, trying GET fallback (?api=getDatabase)...', err);
+            try {
+              const res = await fetch(`${gasUrl}?api=getDatabase`, { redirect: 'follow' });
+              const json = await res.json();
+              const fetchedData = json.data !== undefined ? json.data : json;
+              if (fetchedData && typeof fetchedData === 'object' && Array.isArray(fetchedData.clubs)) {
+                hideLoading();
+                dbCache = normalizeDatabaseData(fetchedData);
+                try {
+                  localStorage.setItem('mhc_local_db', JSON.stringify(dbCache));
+                } catch (_) {}
+                console.log('✓ เชื่อมต่อฐานข้อมูลสำเร็จผ่าน GET fallback');
+                renderApp();
+                return;
+              }
+            } catch (e2) {
+              console.warn('GET fallback also failed:', e2);
+            }
+            fallbackToLocalStorage(err);
           });
       } else {
         fallbackToLocalStorage();
       }
     }
 
-    function fallbackToLocalStorage() {
+    function normalizeDatabaseData(data) {
+      if (!data || typeof data !== 'object') return JSON.parse(JSON.stringify(DEFAULT_MOCK_DB));
+      if (!Array.isArray(data.students)) {
+        data.students = JSON.parse(JSON.stringify(DEFAULT_MOCK_DB.students || []));
+      }
+      // Self-healing: if clubs columns were inverted in an older spreadsheet
+      if (Array.isArray(data.clubs)) {
+        data.clubs.forEach(c => {
+          if (c.name && c.name.startsWith('http') && c.cover && !c.cover.startsWith('http')) {
+            const temp = c.name;
+            c.name = c.cover;
+            c.cover = temp;
+          }
+        });
+      }
+      return data;
+    }
+
+    function fallbackToLocalStorage(err) {
       hideLoading();
       const localSaved = localStorage.getItem('mhc_local_db');
       if (localSaved) {
         try {
-          dbCache = JSON.parse(localSaved);
-          if (!Array.isArray(dbCache.students)) {
-            dbCache.students = JSON.parse(JSON.stringify(DEFAULT_MOCK_DB.students || []));
-          }
+          dbCache = normalizeDatabaseData(JSON.parse(localSaved));
         } catch(e) {
           dbCache = JSON.parse(JSON.stringify(DEFAULT_MOCK_DB));
         }
@@ -1282,6 +1316,50 @@
         dbCache = JSON.parse(JSON.stringify(DEFAULT_MOCK_DB));
       }
       renderApp();
+
+      if (err) {
+        console.warn('Running with local fallback data due to:', err);
+      }
+    }
+
+    function clearLocalStorageCache(silent = false) {
+      const doClear = () => {
+        localStorage.removeItem('mhc_local_db');
+        sessionStorage.clear();
+        if ('caches' in window) {
+          caches.keys().then(names => Promise.all(names.map(name => caches.delete(name))));
+        }
+        if (silent) return;
+        Swal.fire({
+          icon: 'success',
+          title: 'ล้างแคชในเครื่องสำเร็จ! 🧹',
+          text: 'ล้างข้อมูลแคชในเบราว์เซอร์ Chrome เรียบร้อย กำลังรีโหลดหน้าเว็บ...',
+          timer: 1200,
+          showConfirmButton: false
+        }).then(() => {
+          window.location.reload(true);
+        });
+      };
+
+      if (silent) {
+        doClear();
+        return;
+      }
+
+      Swal.fire({
+        title: '🧹 ยืนยันล้างแคชในเครื่อง?',
+        text: 'ระบบจะล้างข้อมูลที่เบราว์เซอร์ Chrome จำไว้ในเครื่องนี้ (localStorage) และโหลดข้อมูลชุดใหม่ล่าสุดจาก Google Sheets',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#EF4444',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: 'ล้างแคชทันที',
+        cancelButtonText: 'ยกเลิก'
+      }).then((res) => {
+        if (res.isConfirmed) {
+          doClear();
+        }
+      });
     }
 
     function getClubTeachersText(club) {
@@ -2911,6 +2989,18 @@
                   </p>
                   <button type="button" onclick="setupRemoteDatabase()" class="w-full py-3 rounded-xl text-xs sm:text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-all btn-press flex items-center justify-center gap-2">
                     <i class="fas fa-hammer"></i> <span>🛠️ ติดตั้ง / สร้างโครงสร้าง Database บน Sheet อัตโนมัติ</span>
+                  </button>
+                </div>
+
+                <div class="p-4 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/40 rounded-2xl space-y-2.5">
+                  <h5 class="text-xs font-bold text-rose-900 dark:text-rose-200 flex items-center gap-1.5">
+                    <i class="fas fa-broom text-rose-600"></i> ล้างแคชในเครื่อง (Clear LocalStorage Cache)
+                  </h5>
+                  <p class="text-xs text-rose-800/80 dark:text-rose-300/80 leading-relaxed">
+                    หาก Chrome จำข้อมูลเก่า (เช่น ชุมนุมเก่าที่เคยสร้างไว้ในเครื่อง) หรือกดรีเฟรชแล้วข้อมูลไม่อัปเดต ให้กดปุ่มนี้เพื่อล้างข้อมูลแคชในเบราว์เซอร์ทิ้ง แล้วโหลดข้อมูลใหม่จาก Google Sheets
+                  </p>
+                  <button type="button" onclick="clearLocalStorageCache()" class="w-full py-3 rounded-xl text-xs sm:text-sm font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-sm transition-all btn-press flex items-center justify-center gap-2">
+                    <i class="fas fa-trash-arrow-up"></i> <span>🧹 ล้างแคชในเครื่อง Chrome และรีโหลดข้อมูลใหม่</span>
                   </button>
                 </div>
               </div>

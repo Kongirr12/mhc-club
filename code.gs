@@ -20,10 +20,16 @@ const APP_CONFIG = {
  * Web App Entry Point: ให้บริการหน้าเว็บ HTML
  */
 function doGet(e) {
-  // รองรับ JSON API เผื่อเรียกทดสอบภายนอก (?api=getDatabase)
-  if (e && e.parameter && e.parameter.api === 'getDatabase') {
-    const data = getDatabaseFromSheet();
-    return jsonOut_({ ok: true, data: data });
+  // รองรับ JSON API เผื่อเรียกทดสอบภายนอก (?api=getDatabase หรือ ?api=setupDatabase)
+  if (e && e.parameter) {
+    if (e.parameter.api === 'getDatabase') {
+      const data = getDatabaseFromSheet();
+      return jsonOut_({ ok: true, data: data });
+    }
+    if (e.parameter.api === 'setupDatabase' || e.parameter.api === 'createDatabase') {
+      const res = setupDatabase();
+      return jsonOut_({ ok: true, data: res });
+    }
   }
 
   const htmlOutput = HtmlService.createTemplateFromFile('index')
@@ -227,16 +233,25 @@ function readClassesSheet(ss) {
 
 function readClubsSheet(ss) {
   const sheet = ss.getSheetByName('Clubs');
+  if (!sheet) return [];
   const values = sheet.getDataRange().getValues();
   const clubs = [];
 
   for (let i = 1; i < values.length; i++) {
     const row = values[i];
     if (!row[0] && !row[1]) continue;
+    let name = String(row[1] || '');
+    let cover = String(row[2] || '');
+    // Self-healing: if columns B & C were swapped in older sheets
+    if (name.startsWith('http') && !cover.startsWith('http')) {
+      const t = name;
+      name = cover;
+      cover = t;
+    }
     clubs.push({
       id: Number(row[0]) || (i),
-      name: String(row[1] || ''),
-      cover: String(row[2] || ''),
+      name: name,
+      cover: cover,
       teachers: String(row[3] || ''), // รายชื่อครูผู้ดูแลชุมนุม (สามารถใส่ได้หลายคน)
       capacity: Number(row[4]) || 30
     });

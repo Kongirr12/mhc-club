@@ -316,6 +316,14 @@
             <p class="text-brand-100 text-sm sm:text-base leading-relaxed">
               โรงเรียนมหาชัยพิทยาคาร มุ่งเน้นการจัดกิจกรรมพัฒนาผู้เรียนให้นักเรียนมีทักษะ ศักยภาพ และความสุขในการเรียนรู้
             </p>
+            <div class="flex flex-wrap items-center gap-2.5 pt-2">
+              <a href="#clubs-section" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-brand-700 hover:bg-brand-50 text-xs sm:text-sm font-bold shadow-md transition-all btn-press">
+                <i class="fas fa-cubes text-brand-600"></i> <span>เลือกลงทะเบียนชุมนุม</span>
+              </a>
+              <button onclick="navigateTo('check')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs sm:text-sm font-bold backdrop-blur-md transition-all btn-press border border-white/25">
+                <i class="fas fa-clipboard-check text-amber-300"></i> <span>ตรวจสอบผลการลงทะเบียน</span>
+              </button>
+            </div>
           </div>
 
           <!-- Live Registration Window Badge & Countdown -->
@@ -392,7 +400,7 @@
       </div>
 
       <!-- Search & Filters Toolbar -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 border border-slate-200/70 dark:border-slate-700/60 shadow-soft space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-4">
+      <div id="clubs-section" class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 border border-slate-200/70 dark:border-slate-700/60 shadow-soft space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-4 scroll-mt-24">
         <!-- Search Input -->
         <div class="relative flex-1">
           <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
@@ -454,7 +462,20 @@
     <!-- ----------------------------------------------------
          VIEW 2: STUDENT CHECK STATUS (ตรวจสอบผลการลงทะเบียน)
          ---------------------------------------------------- -->
-    <section id="view-check" class="view-panel hidden space-y-6">
+    <section id="view-check" class="view-panel hidden space-y-4">
+      <!-- Navigation & Back Bar -->
+      <div class="flex items-center justify-between pb-1">
+        <button onclick="navigateBack()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-slate-700 transition-all btn-press">
+          <i class="fas fa-arrow-left text-brand-600 dark:text-brand-400"></i>
+          <span>ย้อนกลับหน้าแรก</span>
+        </button>
+        <div class="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1.5 font-medium">
+          <span>หน้าแรก</span>
+          <i class="fas fa-chevron-right text-[10px]"></i>
+          <span class="text-brand-600 dark:text-brand-400 font-bold">ตรวจสอบผล</span>
+        </div>
+      </div>
+
       <div class="bg-white dark:bg-slate-800 rounded-3xl p-5 sm:p-8 border border-slate-200/80 dark:border-slate-700 shadow-soft space-y-6">
         
         <!-- Header & Action Tools -->
@@ -534,10 +555,21 @@
     </section>
 
     <!-- ----------------------------------------------------
-         VIEW 3: TEACHER & ADMIN WORKSPACE (หน้าจัดการระบบ)
+         VIEW 3: ADMIN WORKSPACE (หน้าจัดการระบบ)
          ---------------------------------------------------- -->
-    <section id="view-workspace" class="view-panel hidden space-y-6">
-      
+    <section id="view-workspace" class="view-panel hidden space-y-4">
+      <!-- Navigation & Back Bar -->
+      <div class="flex items-center justify-between pb-1">
+        <button onclick="navigateBack()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-slate-700 transition-all btn-press">
+          <i class="fas fa-arrow-left text-brand-600 dark:text-brand-400"></i>
+          <span>กลับหน้านักเรียน (เลือกชุมนุม)</span>
+        </button>
+        <div class="text-xs text-indigo-600 dark:text-indigo-400 font-bold flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-900/40 px-3 py-1.5 rounded-xl border border-indigo-200/60 dark:border-indigo-800 shadow-sm">
+          <i class="fas fa-shield-alt"></i>
+          <span>ระบบจัดการแอดมิน</span>
+        </div>
+      </div>
+
       <!-- Workspace Header -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-slate-700 shadow-soft flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -622,7 +654,7 @@
   <!-- ========================================================
        MODAL: STUDENT REGISTRATION (หน้าต่างลงทะเบียนของนักเรียน)
        ======================================================== -->
-  <div id="modal-student-reg" class="fixed inset-0 z-50 hidden overflow-y-auto modal-backdrop-custom flex items-center justify-center p-4">
+  <div id="modal-student-reg" onclick="if(event.target === this) closeModal('modal-student-reg')" class="fixed inset-0 z-50 hidden overflow-y-auto modal-backdrop-custom flex items-center justify-center p-4">
     <div class="relative bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
       
       <!-- Modal Header Banner -->
@@ -705,7 +737,7 @@
   <!-- ========================================================
        MODAL: DIGITAL REGISTRATION TICKET / PASS (บัตรยืนยัน)
        ======================================================== -->
-  <div id="modal-ticket" class="fixed inset-0 z-50 hidden overflow-y-auto modal-backdrop-custom flex items-center justify-center p-4">
+  <div id="modal-ticket" onclick="if(event.target === this) closeModal('modal-ticket')" class="fixed inset-0 z-50 hidden overflow-y-auto modal-backdrop-custom flex items-center justify-center p-4">
     <div class="relative bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
       
       <!-- Close button -->
@@ -781,7 +813,7 @@
   <!-- ========================================================
        MODAL: AUTH LOGIN (เข้าสู่ระบบผู้ดูแลระบบ)
        ======================================================== -->
-  <div id="modal-login" class="fixed inset-0 z-50 hidden overflow-y-auto modal-backdrop-custom flex items-center justify-center p-4">
+  <div id="modal-login" onclick="if(event.target === this) closeModal('modal-login')" class="fixed inset-0 z-50 hidden overflow-y-auto modal-backdrop-custom flex items-center justify-center p-4">
     <div class="relative bg-white dark:bg-slate-800 rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
       
       <div class="bg-aurora text-white p-6 text-center relative">
@@ -821,7 +853,7 @@
   <!-- ========================================================
        MODAL: GENERIC CRUD (เพิ่ม/แก้ไข ชุมนุม, ผู้ใช้, ชั้นเรียน)
        ======================================================== -->
-  <div id="modal-crud" class="fixed inset-0 z-50 hidden overflow-y-auto modal-backdrop-custom flex items-center justify-center p-4">
+  <div id="modal-crud" onclick="if(event.target === this) closeModal('modal-crud')" class="fixed inset-0 z-50 hidden overflow-y-auto modal-backdrop-custom flex items-center justify-center p-4">
     <div class="relative bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
       
       <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
@@ -1065,9 +1097,8 @@
 
     function renderApp() {
       renderNavigation();
-      renderPublicHome();
       populateClassDropdowns();
-      performStudentCheck();
+      routeFromCurrentHash(false);
     }
 
     /* --------------------------------------------------------
@@ -1168,34 +1199,150 @@
     }
 
     /* --------------------------------------------------------
-       NAVIGATION & ROUTING
+       NAVIGATION & ROUTING (History & Back Support)
        -------------------------------------------------------- */
-    function navigateTo(pageTarget) {
+    let isInternalRouting = false;
+    let openModalStack = [];
+
+    const WORKSPACE_SUBVIEWS = {
+      'clubs': 'adm_clubs',
+      'classes': 'adm_classes',
+      'reports': 'adm_reports',
+      'settings': 'adm_settings',
+      'users': 'adm_users',
+      'adm_clubs': 'adm_clubs',
+      'adm_classes': 'adm_classes',
+      'adm_reports': 'adm_reports',
+      'adm_settings': 'adm_settings',
+      'adm_users': 'adm_users'
+    };
+
+    function parseHash(hashStr = window.location.hash) {
+      const clean = (hashStr || '').replace(/^#\/?/, '').trim();
+      if (!clean) return { page: 'home', subview: null };
+      const parts = clean.split('/');
+      const page = parts[0] || 'home';
+      let subview = parts[1] || null;
+      if (page === 'workspace') {
+        subview = WORKSPACE_SUBVIEWS[subview] || 'adm_clubs';
+      }
+      return { page, subview };
+    }
+
+    function buildHash(pageTarget, subview) {
+      if (pageTarget === 'home') return '#/home';
+      if (pageTarget === 'check') return '#/check';
+      if (pageTarget === 'workspace') {
+        const cleanSub = (subview || 'adm_clubs').replace('adm_', '');
+        return `#/workspace/${cleanSub}`;
+      }
+      return `#/${pageTarget}`;
+    }
+
+    function navigateTo(pageTarget, subview = null, updateHistory = true) {
+      // If navigating to workspace and not logged in, prompt login modal
+      if (pageTarget === 'workspace' && !currentUser) {
+        openModal('modal-login');
+        return;
+      }
+
       activePage = pageTarget;
-      document.querySelectorAll('.view-panel').forEach(panel => panel.classList.add('hidden'));
+      const targetHash = buildHash(pageTarget, subview);
+
+      if (updateHistory && window.location.hash !== targetHash) {
+        isInternalRouting = true;
+        window.location.hash = targetHash;
+        setTimeout(() => { isInternalRouting = false; }, 60);
+      }
+
+      // Hide all view panels cleanly and reveal the target one
+      document.querySelectorAll('.view-panel').forEach(panel => {
+        panel.classList.add('hidden');
+        panel.classList.remove('animate-in', 'fade-in', 'duration-200');
+      });
 
       const target = document.getElementById(`view-${pageTarget}`);
-      if (target) target.classList.remove('hidden');
+      if (target) {
+        target.classList.remove('hidden');
+        target.classList.add('animate-in', 'fade-in', 'duration-200');
+      }
+
+      // Update page title and render view content
+      if (pageTarget === 'home') {
+        document.title = 'โรงเรียนมหาชัยพิทยาคาร | เลือกลงทะเบียนกิจกรรมชุมนุม';
+        renderPublicHome();
+      } else if (pageTarget === 'check') {
+        document.title = 'โรงเรียนมหาชัยพิทยาคาร | ตรวจสอบผลการลงทะเบียนชุมนุม';
+        populateClassDropdowns();
+        performStudentCheck();
+      } else if (pageTarget === 'workspace') {
+        document.title = 'โรงเรียนมหาชัยพิทยาคาร | แดชบอร์ดผู้ดูแลระบบ';
+        renderWorkspace(subview || 'adm_clubs');
+      }
 
       // Update active nav indicators
       updateNavActiveStyles();
 
-      if (pageTarget === 'home') {
-        renderPublicHome();
-      } else if (pageTarget === 'check') {
-        populateClassDropdowns();
-        performStudentCheck();
-      } else if (pageTarget === 'workspace') {
-        if (!currentUser) {
-          openModal('modal-login');
-          return;
-        }
-        renderWorkspace('adm_clubs');
-      }
-
       // Scroll to top
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
+    // Go back in history or fallback to home
+    function navigateBack() {
+      // 1. If any modal is open, close the topmost modal
+      if (openModalStack.length > 0) {
+        const topModal = openModalStack[openModalStack.length - 1];
+        closeModal(topModal);
+        return;
+      }
+
+      // 2. If we have browser history, use window.history.back()
+      if (window.history.length > 1 && window.location.hash && window.location.hash !== '#/home' && window.location.hash !== '#home') {
+        window.history.back();
+      } else {
+        navigateTo('home');
+      }
+    }
+
+    function routeFromCurrentHash(updateHistory = false) {
+      const { page, subview } = parseHash(window.location.hash);
+      if (page === 'workspace' && !currentUser) {
+        navigateTo('home', null, updateHistory);
+        return;
+      }
+      navigateTo(page, subview, updateHistory);
+    }
+
+    function closeTopModalOrDrawer() {
+      if (openModalStack.length > 0) {
+        const topModal = openModalStack.pop();
+        if (topModal === 'mobile-drawer') {
+          const drawer = document.getElementById('mobile-drawer');
+          const backdrop = document.getElementById('mobile-drawer-backdrop');
+          if (drawer) drawer.classList.add('translate-x-full');
+          if (backdrop) backdrop.classList.add('hidden');
+        } else {
+          const modal = document.getElementById(topModal);
+          if (modal) modal.classList.add('hidden');
+        }
+        return true;
+      }
+      return false;
+    }
+
+    // Global listener for Hash Changes (Browser Back/Forward buttons)
+    window.addEventListener('hashchange', () => {
+      if (isInternalRouting) return;
+      closeTopModalOrDrawer();
+      routeFromCurrentHash(false);
+    });
+
+    // Global listener for PopState (Mobile Back swipe, physical back buttons)
+    window.addEventListener('popstate', (e) => {
+      if (isInternalRouting) return;
+      if (closeTopModalOrDrawer()) return;
+      routeFromCurrentHash(false);
+    });
 
     function renderNavigation() {
       const desktopMenu = document.getElementById('desktop-menu-items');
@@ -1278,6 +1425,22 @@
     }
 
     function updateNavActiveStyles() {
+      // Update desktop menu links
+      const desktopNavBtns = document.querySelectorAll('#desktop-menu-items .nav-link');
+      desktopNavBtns.forEach(btn => {
+        const text = btn.innerText;
+        let isCurrent = false;
+        if (activePage === 'home' && text.includes('เลือกชุมนุม')) isCurrent = true;
+        if (activePage === 'check' && text.includes('ตรวจสอบผล')) isCurrent = true;
+        if (activePage === 'workspace' && text.includes('จัดการระบบ')) isCurrent = true;
+
+        if (isCurrent) {
+          btn.className = 'nav-link px-3.5 py-2 rounded-xl text-sm font-semibold transition-all bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300';
+        } else {
+          btn.className = 'nav-link px-3.5 py-2 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 dark:text-slate-300';
+        }
+      });
+
       // Update bottom mobile tabs
       ['home', 'check', 'workspace', 'account'].forEach(tab => {
         const btn = document.getElementById(`mobile-tab-${tab}`);
@@ -1321,15 +1484,35 @@
     function toggleMobileDrawer(forceState) {
       const drawer = document.getElementById('mobile-drawer');
       const backdrop = document.getElementById('mobile-drawer-backdrop');
+      if (!drawer || !backdrop) return;
       const isOpen = !drawer.classList.contains('translate-x-full');
       const next = typeof forceState === 'boolean' ? forceState : !isOpen;
 
       if (next) {
         backdrop.classList.remove('hidden');
         drawer.classList.remove('translate-x-full');
+        if (!openModalStack.includes('mobile-drawer')) {
+          openModalStack.push('mobile-drawer');
+          try {
+            history.pushState({ modal: 'mobile-drawer', isModal: true }, '', window.location.hash);
+          } catch (_) {}
+        }
       } else {
         drawer.classList.add('translate-x-full');
         backdrop.classList.add('hidden');
+        const idx = openModalStack.indexOf('mobile-drawer');
+        if (idx !== -1) {
+          openModalStack.splice(idx, 1);
+          if (history.state && history.state.isModal) {
+            try {
+              isInternalRouting = true;
+              history.back();
+              setTimeout(() => { isInternalRouting = false; }, 60);
+            } catch (_) {
+              isInternalRouting = false;
+            }
+          }
+        }
       }
     }
 
@@ -1955,7 +2138,7 @@
 
       // Render Subtabs
       subtabs.innerHTML = tabs.map(t => `
-        <button onclick="renderWorkspace('${t.key}')" class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all btn-press ${subViewKey === t.key ? 'bg-brand-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'}">
+        <button onclick="navigateTo('workspace', '${t.key}')" class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all btn-press ${subViewKey === t.key ? 'bg-brand-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'}">
           <i class="fas ${t.icon} me-1.5"></i> ${t.label}
         </button>
       `).join('');
@@ -2837,12 +3020,35 @@
 
     function openModal(modalId) {
       const modal = document.getElementById(modalId);
-      if (modal) modal.classList.remove('hidden');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+
+      if (!openModalStack.includes(modalId)) {
+        openModalStack.push(modalId);
+        try {
+          history.pushState({ modal: modalId, isModal: true }, '', window.location.hash);
+        } catch (_) {}
+      }
     }
 
     function closeModal(modalId) {
       const modal = document.getElementById(modalId);
-      if (modal) modal.classList.add('hidden');
+      if (!modal) return;
+      modal.classList.add('hidden');
+
+      const idx = openModalStack.indexOf(modalId);
+      if (idx !== -1) {
+        openModalStack.splice(idx, 1);
+        if (history.state && history.state.isModal) {
+          try {
+            isInternalRouting = true;
+            history.back();
+            setTimeout(() => { isInternalRouting = false; }, 60);
+          } catch (_) {
+            isInternalRouting = false;
+          }
+        }
+      }
     }
 
     function showLoading(title = 'กำลังประมวลผล...', desc = 'โปรดรอสักครู่') {

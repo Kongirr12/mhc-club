@@ -56,7 +56,8 @@ function getDatabaseFromSheet() {
     users: readUsersSheet(ss),
     classes: readClassesSheet(ss),
     clubs: readClubsSheet(ss),
-    registrations: readRegistrationsSheet(ss)
+    registrations: readRegistrationsSheet(ss),
+    students: readStudentsSheet(ss)
   };
 
   try {
@@ -109,6 +110,11 @@ function saveDatabaseToSheet(db) {
     // 5. บันทึก Registrations
     if (Array.isArray(db.registrations)) {
       writeRegistrationsSheet(ss, db.registrations);
+    }
+
+    // 6. บันทึก Students
+    if (Array.isArray(db.students)) {
+      writeStudentsSheet(ss, db.students);
     }
 
     // เคลียร์แคชเพื่อให้ทุกคนได้ข้อมูลล่าสุดทันที
@@ -216,6 +222,25 @@ function readRegistrationsSheet(ss) {
   return registrations;
 }
 
+function readStudentsSheet(ss) {
+  const sheet = ss.getSheetByName('Students');
+  if (!sheet) return [];
+  const values = sheet.getDataRange().getValues();
+  const students = [];
+
+  for (let i = 1; i < values.length; i++) {
+    const row = values[i];
+    if (!row[0] && !row[1] && !row[2]) continue;
+    students.push({
+      id: Number(row[0]) || (i),
+      studentCode: String(row[1] || ''),
+      name: String(row[2] || ''),
+      classId: Number(row[3]) || 0
+    });
+  }
+  return students;
+}
+
 /* ============================================================
  *  HELPER: WRITE SHEET DATA (BATCH OPERATIONS)
  * ============================================================ */
@@ -272,12 +297,23 @@ function writeRegistrationsSheet(ss, registrations) {
   sheet.getRange(1, 1, rows.length, 5).setValues(rows);
 }
 
+function writeStudentsSheet(ss, students) {
+  let sheet = ss.getSheetByName('Students');
+  if (!sheet) sheet = ss.insertSheet('Students');
+  sheet.clearContents();
+  const rows = [['ID', 'StudentCode', 'StudentName', 'ClassID']];
+  students.forEach((s, idx) => {
+    rows.push([s.id || (idx + 1), s.studentCode || '', s.name || '', s.classId || 0]);
+  });
+  sheet.getRange(1, 1, rows.length, 4).setValues(rows);
+}
+
 /* ============================================================
  *  HELPER: INITIALIZE DEFAULT SHEETS & DATA IF FRESH
  * ============================================================ */
 
 function ensureSheetsInitialized(ss) {
-  const required = ['Settings', 'Users', 'Classes', 'Clubs', 'Registrations'];
+  const required = ['Settings', 'Users', 'Classes', 'Clubs', 'Registrations', 'Students'];
   let createdAny = false;
 
   required.forEach(name => {
@@ -333,6 +369,22 @@ function ensureSheetsInitialized(ss) {
     const regSheet = ss.getSheetByName('Registrations');
     if (regSheet.getLastRow() === 0) {
       regSheet.appendRow(['ID', 'StudentName', 'ClassID', 'ClubID', 'Timestamp']);
+    }
+
+    const stuSheet = ss.getSheetByName('Students');
+    if (stuSheet.getLastRow() <= 1) {
+      writeStudentsSheet(ss, [
+        { id: 1, studentCode: '10001', name: 'เด็กชายกิตติศักดิ์ ศรีวิชัย', classId: 101 },
+        { id: 2, studentCode: '10002', name: 'เด็กหญิงพรพิมล ชื่นใจ', classId: 101 },
+        { id: 3, studentCode: '10003', name: 'เด็กชายธนกฤต สุขเกษม', classId: 101 },
+        { id: 4, studentCode: '10004', name: 'เด็กหญิงกัญญาณัฐ วงศ์วิจิตร', classId: 101 },
+        { id: 5, studentCode: '10005', name: 'เด็กชายณัฐวุฒิ ทองหล่อ', classId: 102 },
+        { id: 6, studentCode: '10006', name: 'เด็กหญิงอารียา สมบัติเจริญ', classId: 102 },
+        { id: 7, studentCode: '20001', name: 'เด็กชายพงศกร พัฒนกิจ', classId: 201 },
+        { id: 8, studentCode: '20002', name: 'เด็กหญิงกมลวรรณ บุญมี', classId: 201 },
+        { id: 9, studentCode: '30001', name: 'เด็กชายนพรัตน์ แสนสุข', classId: 301 },
+        { id: 10, studentCode: '40001', name: 'นายณัฐดนัย รัตนโชติ', classId: 401 }
+      ]);
     }
   }
 }

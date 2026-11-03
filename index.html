@@ -682,19 +682,43 @@
           <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
             ระดับชั้นเรียน <span class="text-rose-500">*</span>
           </label>
-          <select id="reg-input-class" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          <select id="reg-input-class" onchange="handleRegistrationClassChange()" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
             <option value="" disabled selected>-- เลือกระดับชั้นเรียนของนักเรียน --</option>
           </select>
         </div>
 
-        <!-- Student Prefix & Full Name -->
-        <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-            ชื่อ - นามสกุล นักเรียน <span class="text-rose-500">*</span>
-          </label>
+        <!-- Mode A: Roster Select (Default when class has student list) -->
+        <div id="reg-roster-box">
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+              <i class="fas fa-user-check text-brand-600 me-1"></i> เลือกลายชื่อนักเรียนในห้อง <span class="text-rose-500">*</span>
+            </label>
+            <button type="button" onclick="switchToManualNameInput()" class="text-xs text-brand-600 hover:text-brand-700 dark:text-brand-400 font-medium hover:underline flex items-center gap-1">
+              <i class="fas fa-keyboard"></i> พิมพ์ชื่อเอง
+            </button>
+          </div>
+          <select id="reg-select-student" onchange="handleStudentSelectChange()" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            <option value="" disabled selected>-- เลือกระดับชั้นเรียนก่อนเพื่อแสดงรายชื่อ --</option>
+          </select>
+          <p class="text-[11px] text-slate-400 mt-1.5 flex items-center justify-between">
+            <span><i class="fas fa-info-circle me-1"></i> เลือกลายชื่อของตนเองจากระบบ</span>
+            <span id="reg-roster-count-hint" class="text-brand-600 dark:text-brand-400 font-semibold"></span>
+          </p>
+        </div>
+
+        <!-- Mode B: Manual Name Input (shown if no roster or user chooses to type manually) -->
+        <div id="reg-manual-box" class="hidden">
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+              <i class="fas fa-keyboard text-brand-600 me-1"></i> ชื่อ - นามสกุล นักเรียน <span class="text-rose-500">*</span>
+            </label>
+            <button type="button" id="btn-back-to-roster" onclick="switchToRosterSelect()" class="text-xs text-brand-600 hover:text-brand-700 dark:text-brand-400 font-medium hover:underline flex items-center gap-1">
+              <i class="fas fa-list-ul"></i> เลือกจากรายชื่อ
+            </button>
+          </div>
           <div class="grid grid-cols-12 gap-2">
             <div class="col-span-4 sm:col-span-4">
-              <select id="reg-input-prefix" required class="w-full px-3 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              <select id="reg-input-prefix" class="w-full px-3 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
                 <option value="" disabled selected>คำนำหน้า</option>
                 <option value="เด็กชาย">ด.ช.</option>
                 <option value="เด็กหญิง">ด.ญ.</option>
@@ -703,7 +727,7 @@
               </select>
             </div>
             <div class="col-span-8 sm:col-span-8">
-              <input type="text" id="reg-input-name" required placeholder="ระบุชื่อ และ นามสกุลจริง" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              <input type="text" id="reg-input-name" placeholder="ระบุชื่อ และ นามสกุลจริง" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
             </div>
           </div>
           <p class="text-[11px] text-slate-400 mt-1.5">
@@ -1002,6 +1026,18 @@
         { id: 1730100001, studentName: "เด็กชายกิตติศักดิ์ ศรีวิชัย", classId: 101, clubId: 1, timestamp: "2026-10-25T09:15:00.000Z" },
         { id: 1730100002, studentName: "เด็กหญิงพรพิมล ชื่นใจ", classId: 102, clubId: 1, timestamp: "2026-10-25T09:20:00.000Z" },
         { id: 1730100003, studentName: "นายณัฐวุฒิ ทองหล่อ", classId: 401, clubId: 2, timestamp: "2026-10-26T10:05:00.000Z" }
+      ],
+      students: [
+        { id: 1, studentCode: '10001', name: 'เด็กชายกิตติศักดิ์ ศรีวิชัย', classId: 101 },
+        { id: 2, studentCode: '10002', name: 'เด็กหญิงพรพิมล ชื่นใจ', classId: 101 },
+        { id: 3, studentCode: '10003', name: 'เด็กชายธนกฤต สุขเกษม', classId: 101 },
+        { id: 4, studentCode: '10004', name: 'เด็กหญิงกัญญาณัฐ วงศ์วิจิตร', classId: 101 },
+        { id: 5, studentCode: '10005', name: 'เด็กชายณัฐวุฒิ ทองหล่อ', classId: 102 },
+        { id: 6, studentCode: '10006', name: 'เด็กหญิงอารียา สมบัติเจริญ', classId: 102 },
+        { id: 7, studentCode: '20001', name: 'เด็กชายพงศกร พัฒนกิจ', classId: 201 },
+        { id: 8, studentCode: '20002', name: 'เด็กหญิงกมลวรรณ บุญมี', classId: 201 },
+        { id: 9, studentCode: '30001', name: 'เด็กชายนพรัตน์ แสนสุข', classId: 301 },
+        { id: 10, studentCode: '40001', name: 'นายณัฐดนัย รัตนโชติ', classId: 401 }
       ]
     };
 
@@ -1037,15 +1073,18 @@
             hideLoading();
             if (data && typeof data === 'object') {
               dbCache = data;
+              if (!Array.isArray(dbCache.students)) {
+                dbCache.students = JSON.parse(JSON.stringify(DEFAULT_MOCK_DB.students || []));
+              }
             } else {
-              dbCache = DEFAULT_MOCK_DB;
+              dbCache = JSON.parse(JSON.stringify(DEFAULT_MOCK_DB));
             }
             renderApp();
           })
           .withFailureHandler((err) => {
             hideLoading();
             console.warn('GAS fetch failed, falling back to cached/mock:', err);
-            dbCache = DEFAULT_MOCK_DB;
+            dbCache = JSON.parse(JSON.stringify(DEFAULT_MOCK_DB));
             renderApp();
             Swal.fire({
               icon: 'warning',
@@ -1061,9 +1100,16 @@
           hideLoading();
           const localSaved = localStorage.getItem('mhc_local_db');
           if (localSaved) {
-            try { dbCache = JSON.parse(localSaved); } catch(e) { dbCache = DEFAULT_MOCK_DB; }
+            try {
+              dbCache = JSON.parse(localSaved);
+              if (!Array.isArray(dbCache.students)) {
+                dbCache.students = JSON.parse(JSON.stringify(DEFAULT_MOCK_DB.students || []));
+              }
+            } catch(e) {
+              dbCache = JSON.parse(JSON.stringify(DEFAULT_MOCK_DB));
+            }
           } else {
-            dbCache = DEFAULT_MOCK_DB;
+            dbCache = JSON.parse(JSON.stringify(DEFAULT_MOCK_DB));
           }
           renderApp();
         }, 400);
@@ -1207,11 +1253,13 @@
     const WORKSPACE_SUBVIEWS = {
       'clubs': 'adm_clubs',
       'classes': 'adm_classes',
+      'students': 'adm_students',
       'reports': 'adm_reports',
       'settings': 'adm_settings',
       'users': 'adm_users',
       'adm_clubs': 'adm_clubs',
       'adm_classes': 'adm_classes',
+      'adm_students': 'adm_students',
       'adm_reports': 'adm_reports',
       'adm_settings': 'adm_settings',
       'adm_users': 'adm_users'
@@ -1763,6 +1811,95 @@
     /* --------------------------------------------------------
        STUDENT REGISTRATION FLOW
        -------------------------------------------------------- */
+    let currentRegNameMode = 'roster'; // 'roster' | 'manual'
+
+    function switchToManualNameInput() {
+      currentRegNameMode = 'manual';
+      const rosterBox = document.getElementById('reg-roster-box');
+      const manualBox = document.getElementById('reg-manual-box');
+      if (rosterBox) rosterBox.classList.add('hidden');
+      if (manualBox) manualBox.classList.remove('hidden');
+      const manualName = document.getElementById('reg-input-name');
+      if (manualName) manualName.focus();
+    }
+
+    function switchToRosterSelect() {
+      currentRegNameMode = 'roster';
+      const rosterBox = document.getElementById('reg-roster-box');
+      const manualBox = document.getElementById('reg-manual-box');
+      if (rosterBox) rosterBox.classList.remove('hidden');
+      if (manualBox) manualBox.classList.add('hidden');
+    }
+
+    function handleStudentSelectChange() {
+      const studentSelect = document.getElementById('reg-select-student');
+      if (studentSelect && studentSelect.value === '__MANUAL__') {
+        switchToManualNameInput();
+      }
+    }
+
+    function handleRegistrationClassChange() {
+      const classSelect = document.getElementById('reg-input-class');
+      const studentSelect = document.getElementById('reg-select-student');
+      const hintEl = document.getElementById('reg-roster-count-hint');
+      const backToRosterBtn = document.getElementById('btn-back-to-roster');
+      if (!classSelect || !studentSelect) return;
+
+      const classId = parseInt(classSelect.value);
+      if (!classId) {
+        studentSelect.innerHTML = '<option value="" disabled selected>-- เลือกระดับชั้นเรียนก่อนเพื่อแสดงรายชื่อ --</option>';
+        if (hintEl) hintEl.innerText = '';
+        return;
+      }
+
+      const allInClass = (dbCache.students || []).filter(s => s.classId == classId);
+      if (allInClass.length === 0) {
+        // No roster for this class, switch directly to manual input mode
+        switchToManualNameInput();
+        if (backToRosterBtn) backToRosterBtn.classList.add('hidden');
+        if (hintEl) hintEl.innerText = '';
+        return;
+      }
+
+      // Students available!
+      if (backToRosterBtn) backToRosterBtn.classList.remove('hidden');
+      switchToRosterSelect();
+
+      // Sort students: by studentCode if present, else by name
+      allInClass.sort((a, b) => {
+        if (a.studentCode && b.studentCode) {
+          return a.studentCode.localeCompare(b.studentCode, undefined, { numeric: true });
+        }
+        return a.name.localeCompare(b.name, 'th');
+      });
+
+      let registeredCount = 0;
+      let optionsHtml = '<option value="" disabled selected>-- ค้นหา/เลือกชื่อของตนเอง (' + allInClass.length + ' คน) --</option>';
+
+      allInClass.forEach(s => {
+        const existingReg = (dbCache.registrations || []).find(r => r.studentName.trim() === s.name.trim());
+        if (existingReg) {
+          registeredCount++;
+          const regClub = (dbCache.clubs || []).find(c => c.id == existingReg.clubId);
+          const clubName = regClub ? regClub.name : 'ลงทะเบียนแล้ว';
+          optionsHtml += `<option value="${s.id}" data-name="${escapeHTML(s.name)}" disabled class="text-slate-400 bg-slate-100 dark:bg-slate-800">
+            ${s.studentCode ? escapeHTML(s.studentCode) + ' - ' : ''}${escapeHTML(s.name)} (ลงทะเบียนแล้ว: ${escapeHTML(clubName)})
+          </option>`;
+        } else {
+          optionsHtml += `<option value="${s.id}" data-name="${escapeHTML(s.name)}">
+            ${s.studentCode ? escapeHTML(s.studentCode) + ' - ' : ''}${escapeHTML(s.name)}
+          </option>`;
+        }
+      });
+
+      optionsHtml += '<option value="__MANUAL__">➕ ไม่พบชื่อในรายชื่อ (ต้องการพิมพ์เอง)</option>';
+      studentSelect.innerHTML = optionsHtml;
+
+      if (hintEl) {
+        hintEl.innerText = `มีรายชื่อ ${allInClass.length} คน (${registeredCount} คนลงทะเบียนแล้ว)`;
+      }
+    }
+
     function openStudentRegModal(clubId) {
       const timeCheck = verifyTimeWindow();
       if (!timeCheck.valid) {
@@ -1797,6 +1934,8 @@
 
       // Reset form fields
       document.getElementById('form-student-registration').reset();
+      switchToRosterSelect();
+      handleRegistrationClassChange();
 
       openModal('modal-student-reg');
     }
@@ -1813,15 +1952,48 @@
 
       const clubId = parseInt(document.getElementById('reg-modal-club-id').value);
       const classId = parseInt(document.getElementById('reg-input-class').value);
-      const prefix = document.getElementById('reg-input-prefix').value;
-      const rawName = document.getElementById('reg-input-name').value.trim();
 
-      if (!classId || !prefix || !rawName) {
-        Swal.fire('กรุณากรอกข้อมูลให้ครบถ้วน', 'โปรดเลือกชั้นเรียน คำนำหน้า และระบุชื่อ-นามสกุล', 'warning');
+      if (!classId) {
+        Swal.fire('กรุณาเลือกระดับชั้นเรียน', 'โปรดเลือกระดับชั้นเรียนของนักเรียนก่อนทำรายการ', 'warning');
         return;
       }
 
-      const fullStudentName = `${prefix}${rawName}`;
+      let fullStudentName = '';
+
+      if (currentRegNameMode === 'roster') {
+        const studentSelect = document.getElementById('reg-select-student');
+        const selectedVal = studentSelect ? studentSelect.value : '';
+
+        if (!selectedVal || selectedVal === '__MANUAL__') {
+          if (selectedVal === '__MANUAL__') {
+            switchToManualNameInput();
+          }
+          Swal.fire('กรุณาเลือกชื่อนักเรียน', 'โปรดเลือกชื่อของตนเองจากรายการ หรือคลิก "พิมพ์ชื่อเอง"', 'warning');
+          return;
+        }
+
+        const stuObj = (dbCache.students || []).find(s => s.id == selectedVal);
+        if (stuObj && stuObj.name) {
+          fullStudentName = stuObj.name.trim();
+        } else {
+          const opt = studentSelect.options[studentSelect.selectedIndex];
+          fullStudentName = opt ? (opt.getAttribute('data-name') || opt.text).trim() : '';
+        }
+      } else {
+        const prefix = document.getElementById('reg-input-prefix').value;
+        const rawName = document.getElementById('reg-input-name').value.trim();
+
+        if (!prefix || !rawName) {
+          Swal.fire('กรุณากรอกข้อมูลให้ครบถ้วน', 'โปรดเลือกคำนำหน้า และระบุชื่อ-นามสกุลจริง', 'warning');
+          return;
+        }
+        fullStudentName = `${prefix}${rawName}`;
+      }
+
+      if (!fullStudentName) {
+        Swal.fire('ข้อมูลไม่ถูกต้อง', 'ไม่พบชื่อนักเรียนที่ต้องการลงทะเบียน', 'warning');
+        return;
+      }
 
       // Check if student already registered in ANY club
       const existingReg = dbCache.registrations.find(r => r.studentName.trim() === fullStudentName.trim());
@@ -1831,7 +2003,7 @@
         Swal.fire({
           icon: 'error',
           title: 'พบข้อมูลการลงทะเบียนแล้ว',
-          html: `นักเรียน <strong>"${fullStudentName}"</strong> ได้ลงทะเบียนใน:<br><span class="text-indigo-600 font-bold">${clubTitle}</span> เรียบร้อยแล้ว<br><small class="text-slate-500">(1 คน สามารถลงทะเบียนได้ 1 ชุมนุมเท่านั้น)</small>`,
+          html: `นักเรียน <strong>"${escapeHTML(fullStudentName)}"</strong> ได้ลงทะเบียนใน:<br><span class="text-indigo-600 font-bold">${escapeHTML(clubTitle)}</span> เรียบร้อยแล้ว<br><small class="text-slate-500">(1 คน สามารถลงทะเบียนได้ 1 ชุมนุมเท่านั้น)</small>`,
           confirmButtonColor: '#4F46E5'
         });
         return;
@@ -1839,6 +2011,7 @@
 
       // Check club quota again before pushing
       const club = dbCache.clubs.find(c => c.id == clubId);
+      if (!club) return;
       const currentQuota = dbCache.registrations.filter(r => r.clubId == clubId).length;
       if (currentQuota >= club.capacity) {
         closeModal('modal-student-reg');
@@ -2169,6 +2342,7 @@
       const tabs = [
         { key: 'adm_clubs', label: 'จัดการกิจกรรมชุมนุม', icon: 'fa-cubes' },
         { key: 'adm_classes', label: 'จัดการระดับชั้นเรียน', icon: 'fa-layer-group' },
+        { key: 'adm_students', label: 'จัดการรายชื่อนักเรียน', icon: 'fa-user-graduate' },
         { key: 'adm_reports', label: 'สรุปผล & ออกรายงาน', icon: 'fa-file-lines' },
         { key: 'adm_settings', label: 'ตั้งค่าเวลาลงทะเบียน', icon: 'fa-clock' },
         { key: 'adm_users', label: 'บัญชีผู้ดูแลระบบ (Admin)', icon: 'fa-user-shield' }
@@ -2285,7 +2459,70 @@
         `;
       }
 
-      // 3. Subview: Reports & Summary
+      // 3. Subview: Manage Students (Admin)
+      else if (subViewKey === 'adm_students') {
+        document.getElementById('workspace-title').innerText = 'จัดการรายชื่อนักเรียนในระบบ';
+        actionBtn.innerHTML = `
+          <div class="flex items-center gap-2">
+            <button onclick="openStudentModal(null)" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white hover:bg-brand-700 transition-all btn-press flex items-center gap-1.5 shadow-sm">
+              <i class="fas fa-user-plus"></i> <span>เพิ่มนักเรียน</span>
+            </button>
+            <button onclick="openImportStudentsModal()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-all btn-press flex items-center gap-1.5 shadow-sm">
+              <i class="fas fa-file-import"></i> <span>นำเข้าจาก Excel</span>
+            </button>
+          </div>
+        `;
+
+        const totalStudents = (dbCache.students || []).length;
+        const totalRegistered = (dbCache.registrations || []).length;
+
+        content.innerHTML = `
+          <div class="space-y-4">
+            <!-- Filter & Search Bar -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-soft">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
+                    <i class="fas fa-layer-group text-brand-500 me-1"></i> เลือกระดับชั้นเรียน
+                  </label>
+                  <select id="adm-stu-filter-class" onchange="renderStudentAdminTable()" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    <option value="all">-- ทุกระดับชั้นเรียน (${totalStudents} คน) --</option>
+                    ${(dbCache.classes || []).map(c => {
+                      const count = (dbCache.students || []).filter(s => s.classId == c.id).length;
+                      return `<option value="${c.id}">${escapeHTML(c.name)} (${count} คน)</option>`;
+                    }).join('')}
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
+                    <i class="fas fa-clipboard-check text-emerald-500 me-1"></i> สถานะการลงทะเบียน
+                  </label>
+                  <select id="adm-stu-filter-status" onchange="renderStudentAdminTable()" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    <option value="all">-- ทุกสถานะ --</option>
+                    <option value="registered">✓ ลงทะเบียนแล้ว (${totalRegistered} คน)</option>
+                    <option value="unregistered">⏳ ยังไม่ลงทะเบียน</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
+                    <i class="fas fa-search text-slate-400 me-1"></i> ค้นหาชื่อ หรือ เลขประจำตัว
+                  </label>
+                  <input type="text" id="adm-stu-search" oninput="renderStudentAdminTable()" placeholder="พิมพ์ชื่อ-สกุล หรือ รหัส..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                </div>
+              </div>
+            </div>
+
+            <!-- Table Container -->
+            <div id="adm-students-table-wrapper" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-soft">
+              <!-- Rendered by renderStudentAdminTable() -->
+            </div>
+          </div>
+        `;
+
+        renderStudentAdminTable();
+      }
+
+      // 4. Subview: Reports & Summary
       else if (subViewKey === 'adm_reports') {
         document.getElementById('workspace-title').innerText = 'สรุปผลและรายงานผู้ลงทะเบียน';
 
@@ -2976,6 +3213,359 @@
       saveDatabase(() => {
         Swal.fire({ icon: 'success', title: 'อัปเดตกำหนดเวลาสำเร็จ', timer: 1500, showConfirmButton: false });
         renderPublicHome();
+      });
+    }
+
+    /* --------------------------------------------------------
+       ADMIN: MANAGE STUDENTS (จัดการรายชื่อนักเรียน & นำเข้า Excel)
+       -------------------------------------------------------- */
+    function renderStudentAdminTable() {
+      const classSelect = document.getElementById('adm-stu-filter-class');
+      const statusSelect = document.getElementById('adm-stu-filter-status');
+      const searchInput = document.getElementById('adm-stu-search');
+      const wrapper = document.getElementById('adm-students-table-wrapper');
+      if (!wrapper) return;
+
+      const selectedClass = classSelect ? classSelect.value : 'all';
+      const selectedStatus = statusSelect ? statusSelect.value : 'all';
+      const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+      let list = [...(dbCache.students || [])];
+
+      // Filter by Class
+      if (selectedClass !== 'all') {
+        const clsId = parseInt(selectedClass);
+        list = list.filter(s => s.classId == clsId);
+      }
+
+      // Filter by Status
+      if (selectedStatus === 'registered') {
+        list = list.filter(s => (dbCache.registrations || []).some(r => r.studentName.trim() === s.name.trim()));
+      } else if (selectedStatus === 'unregistered') {
+        list = list.filter(s => !(dbCache.registrations || []).some(r => r.studentName.trim() === s.name.trim()));
+      }
+
+      // Filter by Search Query
+      if (query) {
+        list = list.filter(s => {
+          const nameMatch = (s.name || '').toLowerCase().includes(query);
+          const codeMatch = (s.studentCode || '').toLowerCase().includes(query);
+          return nameMatch || codeMatch;
+        });
+      }
+
+      // Sort by Class then studentCode / name
+      list.sort((a, b) => {
+        if (a.classId !== b.classId) return a.classId - b.classId;
+        if (a.studentCode && b.studentCode) {
+          return a.studentCode.localeCompare(b.studentCode, undefined, { numeric: true });
+        }
+        return (a.name || '').localeCompare(b.name || '', 'th');
+      });
+
+      if (list.length === 0) {
+        wrapper.innerHTML = `
+          <div class="text-center py-16 p-8 space-y-2">
+            <i class="fas fa-user-graduate text-3xl text-slate-300"></i>
+            <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300">ไม่พบข้อมูลรายชื่อนักเรียน</h4>
+            <p class="text-xs text-slate-400">สามารถกดปุ่ม "+ เพิ่มนักเรียน" หรือ "นำเข้าจาก Excel" เพื่อเพิ่มรายชื่อลงในระบบ</p>
+          </div>
+        `;
+        return;
+      }
+
+      wrapper.innerHTML = `
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 text-xs uppercase font-semibold border-b border-slate-200 dark:border-slate-700">
+              <tr>
+                <th class="py-3.5 px-4 w-14 text-center">ลำดับ</th>
+                <th class="py-3.5 px-4 w-28">เลขประจำตัว</th>
+                <th class="py-3.5 px-4">ชื่อ - นามสกุล นักเรียน</th>
+                <th class="py-3.5 px-4 text-center">ระดับชั้น</th>
+                <th class="py-3.5 px-4">สถานะการลงทะเบียน</th>
+                <th class="py-3.5 px-4 text-right">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+              ${list.map((s, idx) => {
+                const cls = (dbCache.classes || []).find(c => c.id == s.classId);
+                const reg = (dbCache.registrations || []).find(r => r.studentName.trim() === s.name.trim());
+                const regClub = reg ? (dbCache.clubs || []).find(c => c.id == reg.clubId) : null;
+
+                return `
+                  <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/30">
+                    <td class="py-3 px-4 text-center text-slate-400 text-xs">${idx + 1}</td>
+                    <td class="py-3 px-4 font-mono text-xs font-semibold text-slate-600 dark:text-slate-300">${escapeHTML(s.studentCode || '-')}</td>
+                    <td class="py-3 px-4 font-bold text-slate-800 dark:text-slate-200">${escapeHTML(s.name)}</td>
+                    <td class="py-3 px-4 text-center">
+                      <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                        ${cls ? escapeHTML(cls.name) : '-'}
+                      </span>
+                    </td>
+                    <td class="py-3 px-4">
+                      ${reg ? `
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                          <i class="fas fa-check-circle text-[10px]"></i>
+                          <span>${regClub ? escapeHTML(regClub.name) : 'ลงทะเบียนแล้ว'}</span>
+                        </span>
+                      ` : `
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                          <i class="fas fa-clock text-[10px]"></i> ยังไม่ได้ลงทะเบียน
+                        </span>
+                      `}
+                    </td>
+                    <td class="py-3 px-4 text-right space-x-1">
+                      <button onclick="openStudentModal(${s.id})" class="p-2 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" title="แก้ไข">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button onclick="deleteStudentEntity(${s.id})" class="p-2 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors" title="ลบ">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function openStudentModal(studentId) {
+      const isEdit = studentId !== null;
+      const sData = isEdit
+        ? (dbCache.students || []).find(s => s.id == studentId)
+        : { studentCode: '', name: '', classId: (dbCache.classes && dbCache.classes[0]) ? dbCache.classes[0].id : 0 };
+
+      document.getElementById('crud-modal-title').innerText = isEdit ? 'แก้ไขข้อมูลนักเรียน' : 'เพิ่มนักเรียนใหม่';
+
+      document.getElementById('crud-modal-body').innerHTML = `
+        <form onsubmit="handleSaveStudent(event, ${isEdit ? studentId : 'null'})" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+              เลขประจำตัวนักเรียน (Student ID)
+            </label>
+            <input type="text" id="mstu-code" value="${escapeHTML(sData.studentCode || '')}" placeholder="เช่น 10001 (เว้นว่างได้)" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+              ชื่อ - นามสกุล นักเรียน <span class="text-rose-500">*</span>
+            </label>
+            <input type="text" id="mstu-name" required value="${escapeHTML(sData.name || '')}" placeholder="เช่น เด็กชายกิตติศักดิ์ ศรีวิชัย" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            <p class="text-[11px] text-slate-400 mt-1">กรุณาระบุคำนำหน้า (เช่น เด็กชาย, เด็กหญิง, นาย, นางสาว) พร้อมชื่อและนามสกุล</p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+              ระดับชั้นเรียน <span class="text-rose-500">*</span>
+            </label>
+            <select id="mstu-class" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              ${(dbCache.classes || []).map(c => `
+                <option value="${c.id}" ${c.id == sData.classId ? 'selected' : ''}>${escapeHTML(c.name)}</option>
+              `).join('')}
+            </select>
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" class="w-full py-3 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-aurora transition-all btn-press flex items-center justify-center gap-2">
+              <i class="fas fa-save"></i> <span>บันทึกข้อมูลนักเรียน</span>
+            </button>
+          </div>
+        </form>
+      `;
+
+      openModal('modal-crud');
+    }
+
+    function handleSaveStudent(e, studentId) {
+      e.preventDefault();
+      const studentCode = document.getElementById('mstu-code').value.trim();
+      const name = document.getElementById('mstu-name').value.trim();
+      const classId = parseInt(document.getElementById('mstu-class').value);
+
+      if (!name || !classId) {
+        Swal.fire('กรุณากรอกข้อมูลให้ครบถ้วน', 'โปรดระบุชื่อ-นามสกุล และเลือกระดับชั้นเรียน', 'warning');
+        return;
+      }
+
+      if (!dbCache.students) dbCache.students = [];
+
+      if (studentId) {
+        const idx = dbCache.students.findIndex(s => s.id == studentId);
+        if (idx !== -1) {
+          dbCache.students[idx] = {
+            ...dbCache.students[idx],
+            studentCode,
+            name,
+            classId
+          };
+        }
+      } else {
+        dbCache.students.push({
+          id: Date.now(),
+          studentCode,
+          name,
+          classId
+        });
+      }
+
+      saveDatabase(() => {
+        closeModal('modal-crud');
+        renderStudentAdminTable();
+        Swal.fire({ icon: 'success', title: 'บันทึกข้อมูลนักเรียนเรียบร้อย', timer: 1200, showConfirmButton: false });
+      });
+    }
+
+    function deleteStudentEntity(id) {
+      Swal.fire({
+        title: 'ยืนยันลบรายชื่อนักเรียน?',
+        text: 'รายชื่อนักเรียนนี้จะถูกนำออกจากระบบ (หากเคยลงทะเบียนแล้ว ข้อมูลการลงทะเบียนจะไม่ถูกลบ)',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DC2626',
+        confirmButtonText: 'ยืนยันลบ',
+        cancelButtonText: 'ยกเลิก'
+      }).then((res) => {
+        if (res.isConfirmed) {
+          dbCache.students = (dbCache.students || []).filter(s => s.id != id);
+          saveDatabase(() => {
+            renderStudentAdminTable();
+            Swal.fire({ icon: 'success', title: 'ลบรายชื่อเรียบร้อย', timer: 1200, showConfirmButton: false });
+          });
+        }
+      });
+    }
+
+    function openImportStudentsModal() {
+      document.getElementById('crud-modal-title').innerText = 'นำเข้ารายชื่อนักเรียน (ชุดใหญ่ / คัดลอกจาก Excel)';
+
+      document.getElementById('crud-modal-body').innerHTML = `
+        <form onsubmit="handleImportStudentsSubmit(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+              นำเข้าสู่ระดับชั้นเรียน <span class="text-rose-500">*</span>
+            </label>
+            <select id="mimp-class" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              ${(dbCache.classes || []).map(c => `
+                <option value="${c.id}">${escapeHTML(c.name)}</option>
+              `).join('')}
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+              วางรายชื่อนักเรียน (คัดลอกจาก Excel หรือ Word) <span class="text-rose-500">*</span>
+            </label>
+            <textarea id="mimp-text" rows="8" required oninput="updateImportPreview()" placeholder="ตัวอย่างรูปแบบที่รองรับ (1 บรรทัดต่อ 1 คน):\n10001 เด็กชายกิตติศักดิ์ ศรีวิชัย\n10002 เด็กหญิงพรพิมล ชื่นใจ\nหรือวางเฉพาะชื่อ:\nนายธนกฤต สุขเกษม\nนางสาวกัญญาณัฐ วงศ์วิจิตร" class="w-full p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
+            <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1">
+              <span><i class="fas fa-info-circle me-1"></i> รองรับทั้งมีเลขประจำตัว และไม่มีเลขประจำตัว</span>
+              <span id="mimp-preview-count" class="font-bold text-brand-600 dark:text-brand-400">ยังไม่มีข้อมูล</span>
+            </div>
+          </div>
+
+          <div class="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 rounded-xl flex items-start gap-2.5">
+            <input type="checkbox" id="mimp-replace-existing" class="mt-0.5 rounded text-amber-600 focus:ring-amber-500 w-4 h-4 cursor-pointer">
+            <label for="mimp-replace-existing" class="text-xs text-amber-900 dark:text-amber-200 cursor-pointer">
+              <strong>ล้างรายชื่อเดิม</strong> ในระดับชั้นนี้ออกทั้งหมดก่อนนำเข้าใหม่ (หากไม่ติ๊ก จะเป็นการเพิ่มต่อท้าย)
+            </label>
+          </div>
+
+          <div class="pt-2 flex items-center gap-3">
+            <button type="button" onclick="closeModal('modal-crud')" class="flex-1 py-3 rounded-xl text-sm font-semibold border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 transition-colors btn-press">
+              ยกเลิก
+            </button>
+            <button type="submit" class="flex-1 py-3 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-aurora transition-all btn-press flex items-center justify-center gap-2">
+              <i class="fas fa-file-import"></i> <span>เริ่มการนำเข้า</span>
+            </button>
+          </div>
+        </form>
+      `;
+
+      openModal('modal-crud');
+    }
+
+    function updateImportPreview() {
+      const textarea = document.getElementById('mimp-text');
+      const countEl = document.getElementById('mimp-preview-count');
+      if (!textarea || !countEl) return;
+
+      const lines = textarea.value.split('\n').map(l => l.trim()).filter(Boolean);
+      countEl.innerText = lines.length > 0 ? `ตรวจพบ ${lines.length} รายชื่อ` : 'ยังไม่มีข้อมูล';
+    }
+
+    function handleImportStudentsSubmit(e) {
+      e.preventDefault();
+      const targetClassId = parseInt(document.getElementById('mimp-class').value);
+      const text = document.getElementById('mimp-text').value;
+      const replaceExisting = document.getElementById('mimp-replace-existing').checked;
+
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      if (lines.length === 0) {
+        Swal.fire('ไม่พบข้อมูลรายชื่อ', 'กรุณาวางรายชื่อนักเรียนอย่างน้อย 1 รายชื่อ', 'warning');
+        return;
+      }
+
+      if (!dbCache.students) dbCache.students = [];
+
+      // Parse lines
+      const parsedStudents = [];
+      const now = Date.now();
+
+      lines.forEach((line, idx) => {
+        // Remove leading numbering like "1. ", "1) ", "1  " if present
+        let cleanLine = line.replace(/^\d+[\.\)\s\-]\s*/, '').trim();
+        if (!cleanLine) cleanLine = line;
+
+        // Try extracting student code if starts with digits
+        let code = '';
+        let name = cleanLine;
+
+        // Pattern 1: [digits][spaces or tabs][name]
+        const codeMatch = cleanLine.match(/^([0-9]{3,10})[\s\t]+(.+)$/);
+        if (codeMatch) {
+          code = codeMatch[1].trim();
+          name = codeMatch[2].trim();
+        } else {
+          // Check tab-delimited
+          const tabs = cleanLine.split('\t');
+          if (tabs.length >= 2) {
+            code = tabs[0].trim();
+            name = tabs[1].trim();
+          }
+        }
+
+        if (name) {
+          parsedStudents.push({
+            id: now + idx,
+            studentCode: code,
+            name: name,
+            classId: targetClassId
+          });
+        }
+      });
+
+      if (parsedStudents.length === 0) {
+        Swal.fire('นำเข้าไม่สำเร็จ', 'ไม่สามารถแยกรายชื่อนักเรียนได้ กรุณาตรวจสอบรูปแบบ', 'error');
+        return;
+      }
+
+      if (replaceExisting) {
+        dbCache.students = dbCache.students.filter(s => s.classId != targetClassId);
+      }
+
+      dbCache.students.push(...parsedStudents);
+
+      saveDatabase(() => {
+        closeModal('modal-crud');
+        renderStudentAdminTable();
+        Swal.fire({
+          icon: 'success',
+          title: 'นำเข้ารายชื่อสำเร็จ',
+          text: `นำเข้ารายชื่อนักเรียนจำนวน ${parsedStudents.length} คน เรียบร้อยแล้ว`,
+          confirmButtonColor: '#4F46E5'
+        });
       });
     }
 

@@ -779,7 +779,7 @@
   </div>
 
   <!-- ========================================================
-       MODAL: AUTH LOGIN (เข้าสู่ระบบครูและแอดมิน)
+       MODAL: AUTH LOGIN (เข้าสู่ระบบผู้ดูแลระบบ)
        ======================================================== -->
   <div id="modal-login" class="fixed inset-0 z-50 hidden overflow-y-auto modal-backdrop-custom flex items-center justify-center p-4">
     <div class="relative bg-white dark:bg-slate-800 rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
@@ -791,8 +791,8 @@
         <div class="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center mx-auto mb-2 text-xl">
           <i class="fas fa-shield-alt text-amber-300"></i>
         </div>
-        <h3 class="text-xl font-bold tracking-tight">เข้าสู่ระบบบุคลากร</h3>
-        <p class="text-xs text-brand-100 mt-0.5">สำหรับครูที่ปรึกษาชุมนุมและผู้ดูแลระบบ</p>
+        <h3 class="text-xl font-bold tracking-tight">เข้าสู่ระบบผู้ดูแลระบบ</h3>
+        <p class="text-xs text-brand-100 mt-0.5">Admin Management System</p>
       </div>
 
       <form id="form-login" onsubmit="handleLoginSubmit(event)" class="p-6 space-y-4">
@@ -800,7 +800,7 @@
           <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
             ชื่อผู้ใช้งาน (Username)
           </label>
-          <input type="text" id="login-input-username" required placeholder="เช่น admin หรือ user" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          <input type="text" id="login-input-username" required placeholder="admin" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
@@ -810,8 +810,8 @@
         </div>
 
         <button type="submit" class="w-full py-3 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-aurora transition-all btn-press flex items-center justify-center gap-2">
-          <i class="fas fa-sign-in-alt"></i>
-          <span>ยืนยันเข้าสู่ระบบ</span>
+          <i class="fas fa-lock-open"></i>
+          <span>เข้าสู่ระบบแอดมิน</span>
         </button>
       </form>
 
@@ -909,11 +909,7 @@
         endPeriod: "2026-11-30T16:30"
       },
       users: [
-        { id: 1, username: "admin", password: "123", name: "ครูก้องนที อุ่นเจริญ", role: "admin" },
-        { id: 2, username: "teacher1", password: "123", name: "ครูวชิราวุธ ขันติวงศ์", role: "teacher" },
-        { id: 3, username: "teacher2", password: "123", name: "ครูวัลย์วิภา บุญสมบัติ", role: "teacher" },
-        { id: 4, username: "teacher3", password: "123", name: "ครูประเสริฐ ชัยนาท", role: "teacher" },
-        { id: 5, username: "teacher4", password: "123", name: "ครูนภัสสร มณีโชติ", role: "teacher" }
+        { id: 1, username: "admin", password: "123", name: "ครูก้องนที อุ่นเจริญ", role: "admin" }
       ],
       classes: [
         { id: 101, name: "ม.1/1" },
@@ -931,42 +927,42 @@
           id: 1,
           name: "ชุมนุมหุ่นยนต์และปัญญาประดิษฐ์ (AI & Robotics)",
           cover: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=800&q=80",
-          teacherId: 1,
+          teachers: "ครูก้องนที อุ่นเจริญ, ครูวชิราวุธ ขันติวงศ์",
           capacity: 30
         },
         {
           id: 2,
           name: "ชุมนุมดนตรีสากลและวงดุริยางค์",
           cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80",
-          teacherId: 2,
+          teachers: "ครูวชิราวุธ ขันติวงศ์, ครูนภัสสร มณีโชติ",
           capacity: 25
         },
         {
           id: 3,
           name: "ชุมนุมคณิตศาสตร์คิดเร็วและโอลิมปิกวิชาการ",
           cover: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80",
-          teacherId: 3,
+          teachers: "ครูวัลย์วิภา บุญสมบัติ",
           capacity: 35
         },
         {
           id: 4,
           name: "ชุมนุมกีฬาบาสเกตบอลและสันทนาการ",
           cover: "https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80",
-          teacherId: 4,
+          teachers: "ครูประเสริฐ ชัยนาท, ครูก้องนที อุ่นเจริญ",
           capacity: 30
         },
         {
           id: 5,
           name: "ชุมนุมศิลปะสร้างสรรค์และดิจิทัลเพ้นท์ติ้ง",
           cover: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=800&q=80",
-          teacherId: 5,
+          teachers: "ครูนภัสสร มณีโชติ",
           capacity: 20
         },
         {
           id: 6,
           name: "ชุมนุมสวนพฤกษศาสตร์และเกษตรอินทรีย์",
           cover: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=800&q=80",
-          teacherId: 1,
+          teachers: "ครูประเสริฐ ชัยนาท, ครูวัลย์วิภา บุญสมบัติ",
           capacity: 40
         }
       ],
@@ -1040,6 +1036,31 @@
           renderApp();
         }, 400);
       }
+    }
+
+    function getClubTeachersText(club) {
+      if (!club) return '-';
+      if (club.teachers && typeof club.teachers === 'string' && club.teachers.trim()) {
+        return club.teachers.trim();
+      }
+      if (Array.isArray(club.teachers) && club.teachers.length > 0) {
+        return club.teachers.join(', ');
+      }
+      if (club.teacherId && dbCache && dbCache.users) {
+        const u = dbCache.users.find(usr => usr.id == club.teacherId);
+        if (u) return u.name;
+      }
+      return 'ไม่ระบุผู้สอน';
+    }
+
+    function escapeHTML(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
     function renderApp() {
@@ -1169,7 +1190,7 @@
           openModal('modal-login');
           return;
         }
-        renderWorkspace(currentUser.role === 'admin' ? 'adm_clubs' : 'tch_clubs');
+        renderWorkspace('adm_clubs');
       }
 
       // Scroll to top
@@ -1209,7 +1230,7 @@
 
         drawerHtml += `
           <div class="pt-3 pb-1 border-t border-slate-200 dark:border-slate-700">
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3">เมนูบุคลากร</span>
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3">ผู้ดูแลระบบ</span>
           </div>
           <button onclick="navigateTo('workspace'); toggleMobileDrawer(false);" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50">
             <i class="fas fa-sliders text-indigo-500 w-5"></i> แดชบอร์ดจัดการระบบ
@@ -1222,29 +1243,29 @@
         desktopAuth.innerHTML = `
           <div class="flex items-center gap-3 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-2xl border border-slate-200 dark:border-slate-700">
             <div class="w-8 h-8 rounded-xl bg-brand-600 text-white flex items-center justify-center text-xs font-bold shadow-sm">
-              <i class="fas fa-user-tie"></i>
+              <i class="fas fa-user-shield"></i>
             </div>
             <div class="text-left text-xs">
               <p class="font-bold text-slate-800 dark:text-white truncate max-w-[130px]">${currentUser.name}</p>
-              <p class="text-[10px] text-brand-600 dark:text-brand-400 font-medium">${currentUser.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ครูผู้สอน'}</p>
+              <p class="text-[10px] text-brand-600 dark:text-brand-400 font-medium">ผู้ดูแลระบบ (Admin)</p>
             </div>
             <button onclick="handleLogout()" class="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="ออกจากระบบ">
               <i class="fas fa-sign-out-alt text-sm"></i>
             </button>
           </div>
         `;
-        mobileAccountLabel.innerText = currentUser.role === 'admin' ? 'แอดมิน' : 'ครู';
+        mobileAccountLabel.innerText = 'แอดมิน';
       } else {
         desktopAuth.innerHTML = `
           <button onclick="openModal('modal-login')" class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-sm transition-all btn-press flex items-center gap-1.5">
-            <i class="fas fa-sign-in-alt"></i>
-            <span>เข้าสู่ระบบครู</span>
+            <i class="fas fa-lock"></i>
+            <span>เข้าสู่ระบบแอดมิน</span>
           </button>
         `;
         drawerHtml += `
           <div class="pt-3 border-t border-slate-200 dark:border-slate-700">
             <button onclick="openModal('modal-login'); toggleMobileDrawer(false);" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/30">
-              <i class="fas fa-sign-in-alt w-5"></i> เข้าสู่ระบบบุคลากร
+              <i class="fas fa-lock w-5"></i> เข้าสู่ระบบผู้ดูแลระบบ
             </button>
           </div>
         `;
@@ -1283,7 +1304,7 @@
       if (currentUser) {
         Swal.fire({
           title: currentUser.name,
-          text: `สิทธิ์การใช้งาน: ${currentUser.role === 'admin' ? 'ผู้ดูแลระบบสูงสุด' : 'ครูประจำชุมนุม'}`,
+          text: 'สิทธิ์การใช้งาน: ผู้ดูแลระบบ (Admin)',
           icon: 'info',
           showCancelButton: true,
           confirmButtonColor: '#DC2626',
@@ -1371,8 +1392,7 @@
         if (currentClubFilter === 'full' && !isFull) return false;
 
         if (searchQuery) {
-          const teacherObj = dbCache.users.find(u => u.id == club.teacherId);
-          const teacherName = teacherObj ? teacherObj.name : '';
+          const teacherName = getClubTeachersText(club);
           const matchName = club.name.toLowerCase().includes(searchQuery);
           const matchTeacher = teacherName.toLowerCase().includes(searchQuery);
           if (!matchName && !matchTeacher) return false;
@@ -1395,8 +1415,7 @@
         const remaining = Math.max(0, club.capacity - count);
         const percent = Math.min(100, Math.round((count / club.capacity) * 100));
 
-        const teacherObj = dbCache.users.find(u => u.id == club.teacherId);
-        const teacherName = teacherObj ? teacherObj.name : 'ไม่ระบุผู้สอน';
+        const teacherName = getClubTeachersText(club);
 
         // Progress bar color
         let barColor = 'bg-emerald-500';
@@ -1550,11 +1569,9 @@
         return;
       }
 
-      const teacherObj = dbCache.users.find(u => u.id == club.teacherId);
-
       document.getElementById('reg-modal-club-id').value = club.id;
       document.getElementById('reg-modal-club-name').innerText = club.name;
-      document.getElementById('reg-modal-teacher-name').innerText = teacherObj ? teacherObj.name : 'ไม่ระบุผู้สอน';
+      document.getElementById('reg-modal-teacher-name').innerText = getClubTeachersText(club);
       document.getElementById('reg-modal-avail-seats').innerText = club.capacity - regCount;
 
       // Reset form fields
@@ -1646,13 +1663,12 @@
     function showRegistrationTicket(regObj) {
       const club = dbCache.clubs.find(c => c.id == regObj.clubId);
       const classObj = dbCache.classes.find(c => c.id == regObj.classId);
-      const teacherObj = club ? dbCache.users.find(u => u.id == club.teacherId) : null;
 
       document.getElementById('ticket-ref-code').innerText = `MHC-${String(regObj.id).slice(-6)}`;
       document.getElementById('ticket-student-name').innerText = regObj.studentName;
       document.getElementById('ticket-student-class').innerText = `ชั้น ${classObj ? classObj.name : '-'}`;
       document.getElementById('ticket-club-name').innerText = club ? club.name : '-';
-      document.getElementById('ticket-teacher-name').innerHTML = `<i class="fas fa-chalkboard-user me-1"></i>ครูผู้ดูแล: ${teacherObj ? teacherObj.name : 'ไม่ระบุ'}`;
+      document.getElementById('ticket-teacher-name').innerHTML = `<i class="fas fa-chalkboard-user me-1"></i>ครูผู้ดูแล: ${getClubTeachersText(club)}`;
       document.getElementById('ticket-timestamp').innerText = formatThaiDateTime(regObj.timestamp);
 
       openModal('modal-ticket');
@@ -1738,7 +1754,7 @@
       matches.forEach((reg, idx) => {
         const club = dbCache.clubs.find(c => c.id == reg.clubId);
         const classObj = dbCache.classes.find(c => c.id == reg.classId);
-        const teacher = club ? dbCache.users.find(u => u.id == club.teacherId) : null;
+        const teacher = getClubTeachersText(club);
 
         rowsHtml += `
           <tr class="hover:bg-brand-50/40 dark:hover:bg-slate-700/30 transition-colors">
@@ -1754,8 +1770,8 @@
             <td class="py-3 px-4 font-semibold text-brand-600 dark:text-brand-400">
               <i class="fas fa-cubes me-1.5 text-xs text-brand-500"></i>${club ? club.name : '-'}
             </td>
-            <td class="py-3 px-4 text-xs text-slate-500 dark:text-slate-400 truncate max-w-[160px]">
-              <i class="fas fa-chalkboard-user me-1 text-slate-400"></i>${teacher ? teacher.name : '-'}
+            <td class="py-3 px-4 text-xs text-slate-500 dark:text-slate-400 truncate max-w-[160px]" title="${teacher}">
+              <i class="fas fa-chalkboard-user me-1 text-slate-400"></i>${teacher}
             </td>
             <td class="py-3 px-4 text-center text-xs text-slate-400 whitespace-nowrap">
               ${formatThaiDateTime(reg.timestamp)}
@@ -1856,14 +1872,14 @@
               ${matches.map((r, i) => {
                 const cls = dbCache.classes.find(c => c.id == r.classId);
                 const clb = dbCache.clubs.find(c => c.id == r.clubId);
-                const tch = clb ? dbCache.users.find(u => u.id == clb.teacherId) : null;
+                const tch = getClubTeachersText(clb);
                 return `
                   <tr>
                     <td style="border: 1px solid #333; padding: 6px; text-align: center;">${i + 1}</td>
                     <td style="border: 1px solid #333; padding: 6px;">${r.studentName}</td>
                     <td style="border: 1px solid #333; padding: 6px; text-align: center;">${cls ? cls.name : '-'}</td>
                     <td style="border: 1px solid #333; padding: 6px;">${clb ? clb.name : '-'}</td>
-                    <td style="border: 1px solid #333; padding: 6px;">${tch ? tch.name : '-'}</td>
+                    <td style="border: 1px solid #333; padding: 6px;">${tch}</td>
                     <td style="border: 1px solid #333; padding: 6px; text-align: center;">${formatThaiDateTime(r.timestamp)}</td>
                   </tr>
                 `;
@@ -1901,8 +1917,8 @@
       matches.forEach((r, idx) => {
         const cls = dbCache.classes.find(c => c.id == r.classId);
         const clb = dbCache.clubs.find(c => c.id == r.clubId);
-        const tch = clb ? dbCache.users.find(u => u.id == clb.teacherId) : null;
-        csv += `"${idx + 1}","${r.studentName}","${cls ? cls.name : ''}","${clb ? clb.name : ''}","${tch ? tch.name : ''}","${r.timestamp}"\n`;
+        const tch = getClubTeachersText(clb);
+        csv += `"${idx + 1}","${r.studentName}","${cls ? cls.name : ''}","${clb ? clb.name : ''}","${tch}","${r.timestamp}"\n`;
       });
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -1913,15 +1929,15 @@
     }
 
     /* --------------------------------------------------------
-       TEACHER & ADMIN WORKSPACE
+       ADMIN WORKSPACE (ผู้ดูแลระบบ)
        -------------------------------------------------------- */
-    function renderWorkspace(subViewKey) {
+    function renderWorkspace(subViewKey = 'adm_clubs') {
       if (!currentUser) {
         openModal('modal-login');
         return;
       }
 
-      document.getElementById('workspace-role-badge').innerText = currentUser.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ครูประจำชุมนุม';
+      document.getElementById('workspace-role-badge').innerText = 'ผู้ดูแลระบบ (Admin)';
       document.getElementById('workspace-user-display').innerText = currentUser.name;
 
       const subtabs = document.getElementById('workspace-subtabs');
@@ -1929,48 +1945,38 @@
       const content = document.getElementById('workspace-content');
       actionBtn.innerHTML = '';
 
-      let tabs = [];
-      if (currentUser.role === 'admin') {
-        tabs = [
-          { key: 'adm_clubs', label: 'จัดการชุมนุม (ทั้งหมด)', icon: 'fa-cubes' },
-          { key: 'adm_classes', label: 'จัดการชั้นเรียน', icon: 'fa-layer-group' },
-          { key: 'adm_users', label: 'จัดการผู้ใช้งาน', icon: 'fa-users-cog' },
-          { key: 'adm_reports', label: 'สรุปผล & ออกรายงาน', icon: 'fa-file-lines' },
-          { key: 'adm_settings', label: 'ตั้งค่าเวลาลงทะเบียน', icon: 'fa-clock' }
-        ];
-      } else {
-        tabs = [
-          { key: 'tch_clubs', label: 'ชุมนุมของฉัน', icon: 'fa-folder-open' },
-          { key: 'tch_reports', label: 'รายชื่อผู้ลงทะเบียน', icon: 'fa-clipboard-user' },
-          { key: 'tch_profile', label: 'แก้ไขโปรไฟล์', icon: 'fa-user-pen' }
-        ];
-      }
+      const tabs = [
+        { key: 'adm_clubs', label: 'จัดการกิจกรรมชุมนุม', icon: 'fa-cubes' },
+        { key: 'adm_classes', label: 'จัดการระดับชั้นเรียน', icon: 'fa-layer-group' },
+        { key: 'adm_reports', label: 'สรุปผล & ออกรายงาน', icon: 'fa-file-lines' },
+        { key: 'adm_settings', label: 'ตั้งค่าเวลาลงทะเบียน', icon: 'fa-clock' },
+        { key: 'adm_users', label: 'บัญชีผู้ดูแลระบบ (Admin)', icon: 'fa-user-shield' }
+      ];
 
       // Render Subtabs
       subtabs.innerHTML = tabs.map(t => `
-        <button onclick="renderWorkspace('${t.key}')" class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all btn-press ${subViewKey === t.key ? 'bg-brand-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'}">
+        <button onclick="renderWorkspace('${t.key}')" class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all btn-press ${subViewKey === t.key ? 'bg-brand-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'}">
           <i class="fas ${t.icon} me-1.5"></i> ${t.label}
         </button>
       `).join('');
 
-      // Subview: Manage Clubs (Admin or Teacher)
-      if (subViewKey === 'adm_clubs' || subViewKey === 'tch_clubs') {
-        const isTeacher = (subViewKey === 'tch_clubs');
-        document.getElementById('workspace-title').innerText = isTeacher ? 'จัดการชุมนุมของฉัน' : 'จัดการกิจกรรมชุมนุมทั้งหมด';
+      // 1. Subview: Manage Clubs (Admin)
+      if (subViewKey === 'adm_clubs') {
+        document.getElementById('workspace-title').innerText = 'จัดการกิจกรรมชุมนุมทั้งหมด';
         actionBtn.innerHTML = `
-          <button onclick="openClubModal(null, ${isTeacher})" class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white hover:bg-brand-700 transition-all btn-press flex items-center gap-1.5">
-            <i class="fas fa-plus-circle"></i> <span>เพิ่มชุมนุม</span>
+          <button onclick="openClubModal(null)" class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white hover:bg-brand-700 transition-all btn-press flex items-center gap-1.5 shadow-sm">
+            <i class="fas fa-plus-circle"></i> <span>เพิ่มชุมนุมใหม่</span>
           </button>
         `;
 
-        const targetedClubs = isTeacher ? dbCache.clubs.filter(c => c.teacherId == currentUser.id) : dbCache.clubs;
+        const targetedClubs = dbCache.clubs;
 
         if (targetedClubs.length === 0) {
           content.innerHTML = `
             <div class="text-center py-16 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 space-y-2">
               <i class="fas fa-cubes text-3xl text-slate-300"></i>
               <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300">ยังไม่มีรายการชุมนุม</h4>
-              <p class="text-xs text-slate-400">กดปุ่ม "+ เพิ่มชุมนุม" เพื่อเปิดรับสมัครกิจกรรมใหม่</p>
+              <p class="text-xs text-slate-400">กดปุ่ม "+ เพิ่มชุมนุมใหม่" เพื่อเปิดรับสมัครกิจกรรมใหม่</p>
             </div>
           `;
           return;
@@ -1979,31 +1985,32 @@
         const regCountMap = {};
         dbCache.registrations.forEach(r => { regCountMap[r.clubId] = (regCountMap[r.clubId] || 0) + 1; });
 
-        // Responsive Cards (Mobile friendly & Desktop grid)
         content.innerHTML = `
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             ${targetedClubs.map(c => {
               const regCount = regCountMap[c.id] || 0;
-              const teacherObj = dbCache.users.find(u => u.id == c.teacherId);
+              const teachersText = getClubTeachersText(c);
               return `
-                <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-soft space-y-3 flex flex-col justify-between">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-soft space-y-3 flex flex-col justify-between hover:border-brand-300 dark:hover:border-brand-700 transition-colors">
                   <div class="flex items-start gap-3">
-                    <img src="${c.cover || 'https://via.placeholder.com/150'}" class="w-16 h-16 rounded-xl object-cover border border-slate-200 dark:border-slate-700 flex-shrink-0">
+                    <img src="${c.cover || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80'}" class="w-16 h-16 rounded-xl object-cover border border-slate-200 dark:border-slate-700 flex-shrink-0" onerror="this.src='https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80'">
                     <div class="min-w-0 flex-1">
-                      <h4 class="font-bold text-slate-900 dark:text-white text-sm truncate">${c.name}</h4>
-                      <p class="text-xs text-slate-500 truncate mt-0.5"><i class="fas fa-chalkboard-user me-1"></i>${teacherObj ? teacherObj.name : '-'}</p>
+                      <h4 class="font-bold text-slate-900 dark:text-white text-sm line-clamp-1">${escapeHTML(c.name)}</h4>
+                      <p class="text-xs text-slate-500 line-clamp-2 mt-0.5" title="${escapeHTML(teachersText)}">
+                        <i class="fas fa-chalkboard-user text-brand-500 me-1"></i>${escapeHTML(teachersText)}
+                      </p>
                       <div class="mt-2 flex items-center gap-2">
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${regCount >= c.capacity ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">
-                          ${regCount} / ${c.capacity} คน
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${regCount >= c.capacity ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'}">
+                          ลงทะเบียนแล้ว ${regCount} / ${c.capacity} คน
                         </span>
                       </div>
                     </div>
                   </div>
                   <div class="pt-2 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-end gap-2">
-                    <button onclick="openClubModal(${c.id}, ${isTeacher})" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors">
-                      <i class="fas fa-edit me-1"></i> แก้ไข
+                    <button onclick="openClubModal(${c.id})" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition-colors btn-press">
+                      <i class="fas fa-edit me-1 text-brand-600"></i> แก้ไข
                     </button>
-                    <button onclick="deleteClubEntity(${c.id}, '${subViewKey}')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors">
+                    <button onclick="deleteClubEntity(${c.id})" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/30 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-300 transition-colors btn-press">
                       <i class="fas fa-trash me-1"></i> ลบ
                     </button>
                   </div>
@@ -2014,11 +2021,11 @@
         `;
       }
 
-      // Subview: Manage Classes (Admin)
+      // 2. Subview: Manage Classes
       else if (subViewKey === 'adm_classes') {
         document.getElementById('workspace-title').innerText = 'จัดการระดับชั้นเรียน';
         actionBtn.innerHTML = `
-          <button onclick="openClassModal(null)" class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white hover:bg-brand-700 transition-all btn-press flex items-center gap-1.5">
+          <button onclick="openClassModal(null)" class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white hover:bg-brand-700 transition-all btn-press flex items-center gap-1.5 shadow-sm">
             <i class="fas fa-plus-circle"></i> <span>เพิ่มชั้นเรียน</span>
           </button>
         `;
@@ -2041,11 +2048,11 @@
                     return `
                       <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/30">
                         <td class="py-3 px-4 text-center font-medium text-slate-400">${idx + 1}</td>
-                        <td class="py-3 px-4 font-bold text-slate-800 dark:text-slate-200">${cls.name}</td>
+                        <td class="py-3 px-4 font-bold text-slate-800 dark:text-slate-200">${escapeHTML(cls.name)}</td>
                         <td class="py-3 px-4 text-center"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">${stuCount} คน</span></td>
                         <td class="py-3 px-4 text-right space-x-1">
-                          <button onclick="openClassModal(${cls.id})" class="p-2 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-100 transition-colors"><i class="fas fa-edit"></i></button>
-                          <button onclick="deleteClassEntity(${cls.id})" class="p-2 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"><i class="fas fa-trash"></i></button>
+                          <button onclick="openClassModal(${cls.id})" class="p-2 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" title="แก้ไข"><i class="fas fa-edit"></i></button>
+                          <button onclick="deleteClassEntity(${cls.id})" class="p-2 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors" title="ลบ"><i class="fas fa-trash"></i></button>
                         </td>
                       </tr>
                     `;
@@ -2057,74 +2064,25 @@
         `;
       }
 
-      // Subview: Manage Users (Admin)
-      else if (subViewKey === 'adm_users') {
-        document.getElementById('workspace-title').innerText = 'จัดการบัญชีผู้ใช้งานระบบ';
-        actionBtn.innerHTML = `
-          <button onclick="openUserModal(null)" class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white hover:bg-brand-700 transition-all btn-press flex items-center gap-1.5">
-            <i class="fas fa-plus-circle"></i> <span>เพิ่มผู้ใช้งาน</span>
-          </button>
-        `;
-
-        content.innerHTML = `
-          <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-soft">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-sm">
-                <thead class="bg-slate-50 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 text-xs uppercase font-semibold border-b border-slate-200 dark:border-slate-700">
-                  <tr>
-                    <th class="py-3.5 px-4 w-16 text-center">ลำดับ</th>
-                    <th class="py-3.5 px-4">ชื่อผู้ใช้ (Username)</th>
-                    <th class="py-3.5 px-4">ชื่อ - นามสกุลจริง</th>
-                    <th class="py-3.5 px-4 text-center">สิทธิ์การใช้งาน</th>
-                    <th class="py-3.5 px-4 text-right">จัดการ</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
-                  ${dbCache.users.map((u, idx) => `
-                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/30">
-                      <td class="py-3 px-4 text-center text-slate-400">${idx + 1}</td>
-                      <td class="py-3 px-4 font-mono font-bold text-slate-800 dark:text-slate-200">${u.username}</td>
-                      <td class="py-3 px-4 font-medium text-slate-700 dark:text-slate-300">${u.name}</td>
-                      <td class="py-3 px-4 text-center">
-                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${u.role === 'admin' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'}">
-                          ${u.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ครูผู้สอน'}
-                        </span>
-                      </td>
-                      <td class="py-3 px-4 text-right space-x-1">
-                        <button onclick="openUserModal(${u.id})" class="p-2 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-100 transition-colors"><i class="fas fa-edit"></i></button>
-                        <button onclick="deleteUserEntity(${u.id})" class="p-2 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"><i class="fas fa-trash"></i></button>
-                      </td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        `;
-      }
-
-      // Subview: Reports & Summary (Admin & Teacher)
-      else if (subViewKey === 'adm_reports' || subViewKey === 'tch_reports') {
-        const isTeacherScope = (subViewKey === 'tch_reports');
+      // 3. Subview: Reports & Summary
+      else if (subViewKey === 'adm_reports') {
         document.getElementById('workspace-title').innerText = 'สรุปผลและรายงานผู้ลงทะเบียน';
-
-        const filteredClubs = isTeacherScope ? dbCache.clubs.filter(c => c.teacherId == currentUser.id) : dbCache.clubs;
 
         content.innerHTML = `
           <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-soft space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div class="flex-1 max-w-md">
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1">กรองข้อมูลตามชุมนุม</label>
-                <select id="report-filter-club" onchange="renderReportTable('${subViewKey}')" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                <select id="report-filter-club" onchange="renderReportTable()" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
                   <option value="all">-- แสดงนักเรียนจากทุกชุมนุม --</option>
-                  ${filteredClubs.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+                  ${dbCache.clubs.map(c => `<option value="${c.id}">${escapeHTML(c.name)}</option>`).join('')}
                 </select>
               </div>
               <div class="flex items-center gap-2 pt-2 sm:pt-4">
-                <button onclick="exportReportToPDF('${subViewKey}')" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition-all btn-press flex items-center gap-1.5 shadow-sm">
+                <button onclick="exportReportToPDF()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition-all btn-press flex items-center gap-1.5 shadow-sm">
                   <i class="fas fa-file-pdf"></i> <span>พิมพ์รายงาน A4</span>
                 </button>
-                <button onclick="exportReportToCSV('${subViewKey}')" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all btn-press flex items-center gap-1.5 shadow-sm">
+                <button onclick="exportReportToCSV()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all btn-press flex items-center gap-1.5 shadow-sm">
                   <i class="fas fa-file-excel"></i> <span>ส่งออก CSV</span>
                 </button>
               </div>
@@ -2136,10 +2094,10 @@
             </div>
           </div>
         `;
-        renderReportTable(subViewKey);
+        renderReportTable();
       }
 
-      // Subview: Registration Schedule Settings (Admin)
+      // 4. Subview: Registration Schedule Settings
       else if (subViewKey === 'adm_settings') {
         document.getElementById('workspace-title').innerText = 'ตั้งค่ากำหนดเวลาเปิด-ปิด ระบบลงทะเบียน';
         content.innerHTML = `
@@ -2169,47 +2127,60 @@
         `;
       }
 
-      // Subview: Profile Management (Teacher)
-      else if (subViewKey === 'tch_profile') {
-        document.getElementById('workspace-title').innerText = 'แก้ไขข้อมูลส่วนตัวบุคลากร';
+      // 5. Subview: Manage Users (Admin Accounts)
+      else if (subViewKey === 'adm_users') {
+        document.getElementById('workspace-title').innerText = 'จัดการบัญชีผู้ดูแลระบบ (Admin)';
+        actionBtn.innerHTML = `
+          <button onclick="openUserModal(null)" class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white hover:bg-brand-700 transition-all btn-press flex items-center gap-1.5 shadow-sm">
+            <i class="fas fa-user-plus"></i> <span>เพิ่มผู้ดูแลระบบ</span>
+          </button>
+        `;
+
         content.innerHTML = `
-          <div class="max-w-md bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-700 shadow-soft">
-            <form onsubmit="handleSaveProfile(event)" class="space-y-4">
-              <div>
-                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1.5">ชื่อผู้ใช้งาน (Username)</label>
-                <input type="text" id="prof-input-user" value="${currentUser.username}" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1.5">รหัสผ่านใหม่ (Password)</label>
-                <input type="password" id="prof-input-pass" value="${currentUser.password}" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1.5">ชื่อ - นามสกุลจริง</label>
-                <input type="text" id="prof-input-name" value="${currentUser.name}" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
-              </div>
-              <div class="pt-3">
-                <button type="submit" class="w-full py-3.5 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-aurora transition-all btn-press flex items-center justify-center gap-2">
-                  <i class="fas fa-check-double"></i> <span>บันทึกข้อมูลส่วนตัว</span>
-                </button>
-              </div>
-            </form>
+          <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-soft">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 text-xs uppercase font-semibold border-b border-slate-200 dark:border-slate-700">
+                  <tr>
+                    <th class="py-3.5 px-4 w-16 text-center">ลำดับ</th>
+                    <th class="py-3.5 px-4">ชื่อผู้ใช้ (Username)</th>
+                    <th class="py-3.5 px-4">ชื่อ - นามสกุลจริง</th>
+                    <th class="py-3.5 px-4 text-center">สิทธิ์การใช้งาน</th>
+                    <th class="py-3.5 px-4 text-right">จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                  ${dbCache.users.map((u, idx) => `
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/30">
+                      <td class="py-3 px-4 text-center text-slate-400">${idx + 1}</td>
+                      <td class="py-3 px-4 font-mono font-bold text-slate-800 dark:text-slate-200">${escapeHTML(u.username)}</td>
+                      <td class="py-3 px-4 font-medium text-slate-700 dark:text-slate-300">${escapeHTML(u.name)}</td>
+                      <td class="py-3 px-4 text-center">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300">
+                          <i class="fas fa-shield-alt text-[10px] me-1"></i>ผู้ดูแลระบบ (Admin)
+                        </span>
+                      </td>
+                      <td class="py-3 px-4 text-right space-x-1">
+                        <button onclick="openUserModal(${u.id})" class="p-2 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" title="แก้ไข"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteUserEntity(${u.id})" class="p-2 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors" title="ลบ"><i class="fas fa-trash"></i></button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
           </div>
         `;
       }
     }
 
-    function renderReportTable(subViewKey) {
+    function renderReportTable() {
       const select = document.getElementById('report-filter-club');
       const selectedClubId = select ? select.value : 'all';
       const wrapper = document.getElementById('report-table-wrapper');
       if (!wrapper) return;
 
-      let targetRegs = dbCache.registrations;
-
-      if (subViewKey === 'tch_reports') {
-        const myClubs = dbCache.clubs.filter(c => c.teacherId == currentUser.id).map(c => c.id);
-        targetRegs = targetRegs.filter(r => myClubs.includes(r.clubId));
-      }
+      let targetRegs = [...dbCache.registrations];
 
       if (selectedClubId !== 'all') {
         targetRegs = targetRegs.filter(r => r.clubId == parseInt(selectedClubId));
@@ -2239,6 +2210,7 @@
               <th class="py-3 px-4">ชื่อ - นามสกุล นักเรียน</th>
               <th class="py-3 px-4 text-center">ระดับชั้น</th>
               <th class="py-3 px-4">กิจกรรมชุมนุม</th>
+              <th class="py-3 px-4">ครูผู้ดูแลชุมนุม</th>
               <th class="py-3 px-4 text-center">เวลาลงทะเบียน</th>
               <th class="py-3 px-4 text-right">จัดการ</th>
             </tr>
@@ -2247,15 +2219,17 @@
             ${targetRegs.map((r, i) => {
               const cls = dbCache.classes.find(c => c.id == r.classId);
               const clb = dbCache.clubs.find(c => c.id == r.clubId);
+              const tch = getClubTeachersText(clb);
               return `
                 <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/30">
                   <td class="py-2.5 px-4 text-center font-medium text-slate-400">${i + 1}</td>
-                  <td class="py-2.5 px-4 font-bold text-slate-800 dark:text-slate-200">${r.studentName}</td>
-                  <td class="py-2.5 px-4 text-center"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 dark:bg-slate-700">${cls ? cls.name : '-'}</span></td>
-                  <td class="py-2.5 px-4 text-slate-600 dark:text-slate-300 font-medium">${clb ? clb.name : '-'}</td>
+                  <td class="py-2.5 px-4 font-bold text-slate-800 dark:text-slate-200">${escapeHTML(r.studentName)}</td>
+                  <td class="py-2.5 px-4 text-center"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 dark:bg-slate-700">${cls ? escapeHTML(cls.name) : '-'}</span></td>
+                  <td class="py-2.5 px-4 text-slate-700 dark:text-slate-200 font-medium">${clb ? escapeHTML(clb.name) : '-'}</td>
+                  <td class="py-2.5 px-4 text-xs text-slate-500 dark:text-slate-400"><i class="fas fa-chalkboard-user text-brand-500 me-1"></i>${escapeHTML(tch)}</td>
                   <td class="py-2.5 px-4 text-center text-xs text-slate-400">${formatThaiDateTime(r.timestamp)}</td>
                   <td class="py-2.5 px-4 text-right">
-                    <button onclick="deleteRegistrationEntity(${r.id}, '${subViewKey}')" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors">
+                    <button onclick="deleteRegistrationEntity(${r.id})" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 transition-colors">
                       <i class="fas fa-user-minus me-1"></i> ถอนสิทธิ์
                     </button>
                   </td>
@@ -2270,16 +2244,12 @@
     /* --------------------------------------------------------
        A4 OFFICIAL PRINT & CSV EXPORT
        -------------------------------------------------------- */
-    function exportReportToPDF(subViewKey) {
+    function exportReportToPDF() {
       const select = document.getElementById('report-filter-club');
       const selectedClubId = select ? select.value : 'all';
-      const selectedClubName = select && select.selectedIndex >= 0 ? select.options[select.selectedIndex].text : 'ทุกชุมนุม';
+      const selectedClubName = select && select.selectedIndex >= 0 ? select.options[select.selectedIndex].text : 'ทุกกิจกรรมชุมนุม';
 
-      let targetRegs = dbCache.registrations;
-      if (subViewKey === 'tch_reports') {
-        const myClubs = dbCache.clubs.filter(c => c.teacherId == currentUser.id).map(c => c.id);
-        targetRegs = targetRegs.filter(r => myClubs.includes(r.clubId));
-      }
+      let targetRegs = [...dbCache.registrations];
       if (selectedClubId !== 'all') {
         targetRegs = targetRegs.filter(r => r.clubId == parseInt(selectedClubId));
       }
@@ -2307,23 +2277,26 @@
           <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12pt;">
             <thead>
               <tr style="background-color: #f2f2f2;">
-                <th style="border: 1px solid #333; padding: 6px; width: 8%; text-align: center;">ลำดับ</th>
+                <th style="border: 1px solid #333; padding: 6px; width: 6%; text-align: center;">ลำดับ</th>
                 <th style="border: 1px solid #333; padding: 6px; text-align: left;">ชื่อ - นามสกุล นักเรียน</th>
-                <th style="border: 1px solid #333; padding: 6px; width: 15%; text-align: center;">ระดับชั้น</th>
-                <th style="border: 1px solid #333; padding: 6px; width: 35%; text-align: left;">ชื่อกิจกรรมชุมนุม</th>
-                <th style="border: 1px solid #333; padding: 6px; width: 12%; text-align: center;">หมายเหตุ</th>
+                <th style="border: 1px solid #333; padding: 6px; width: 14%; text-align: center;">ระดับชั้น</th>
+                <th style="border: 1px solid #333; padding: 6px; width: 28%; text-align: left;">กิจกรรมชุมนุม</th>
+                <th style="border: 1px solid #333; padding: 6px; width: 26%; text-align: left;">ครูผู้ดูแลชุมนุม</th>
+                <th style="border: 1px solid #333; padding: 6px; width: 8%; text-align: center;">หมายเหตุ</th>
               </tr>
             </thead>
             <tbody>
               ${targetRegs.map((r, i) => {
                 const cls = dbCache.classes.find(c => c.id == r.classId);
                 const clb = dbCache.clubs.find(c => c.id == r.clubId);
+                const tch = getClubTeachersText(clb);
                 return `
                   <tr>
                     <td style="border: 1px solid #333; padding: 6px; text-align: center;">${i + 1}</td>
-                    <td style="border: 1px solid #333; padding: 6px;">${r.studentName}</td>
-                    <td style="border: 1px solid #333; padding: 6px; text-align: center;">${cls ? cls.name : '-'}</td>
-                    <td style="border: 1px solid #333; padding: 6px;">${clb ? clb.name : '-'}</td>
+                    <td style="border: 1px solid #333; padding: 6px;">${escapeHTML(r.studentName)}</td>
+                    <td style="border: 1px solid #333; padding: 6px; text-align: center;">${cls ? escapeHTML(cls.name) : '-'}</td>
+                    <td style="border: 1px solid #333; padding: 6px;">${clb ? escapeHTML(clb.name) : '-'}</td>
+                    <td style="border: 1px solid #333; padding: 6px;">${escapeHTML(tch)}</td>
                     <td style="border: 1px solid #333; padding: 6px; text-align: center;">-</td>
                   </tr>
                 `;
@@ -2334,8 +2307,8 @@
           <div style="margin-top: 40px; display: flex; justify-content: space-between; text-align: center; font-size: 12pt;">
             <div style="width: 45%;">
               <p>ลงชื่อ......................................................ผู้รายงาน</p>
-              <p>( ${currentUser ? currentUser.name : '......................................................'} )</p>
-              <p>ตำแหน่ง ครู โรงเรียนมหาชัยพิทยาคาร</p>
+              <p>( ${currentUser ? escapeHTML(currentUser.name) : '......................................................'} )</p>
+              <p>ตำแหน่ง ผู้ดูแลระบบ / ครู โรงเรียนมหาชัยพิทยาคาร</p>
             </div>
             <div style="width: 45%;">
               <p>ลงชื่อ......................................................ผู้อนุมัติ</p>
@@ -2353,11 +2326,13 @@
       }, 1000);
     }
 
-    function exportReportToCSV(subViewKey) {
-      let targetRegs = dbCache.registrations;
-      if (subViewKey === 'tch_reports') {
-        const myClubs = dbCache.clubs.filter(c => c.teacherId == currentUser.id).map(c => c.id);
-        targetRegs = targetRegs.filter(r => myClubs.includes(r.clubId));
+    function exportReportToCSV() {
+      const select = document.getElementById('report-filter-club');
+      const selectedClubId = select ? select.value : 'all';
+
+      let targetRegs = [...dbCache.registrations];
+      if (selectedClubId !== 'all') {
+        targetRegs = targetRegs.filter(r => r.clubId == parseInt(selectedClubId));
       }
 
       if (targetRegs.length === 0) {
@@ -2365,106 +2340,217 @@
         return;
       }
 
-      let csv = '\uFEFFลำดับ,ชื่อ-นามสกุล,ระดับชั้น,กิจกรรมชุมนุม,ครูประจำชุมนุม,วันเวลาลงทะเบียน\n';
+      let csv = '\uFEFFลำดับ,ชื่อ-นามสกุล,ระดับชั้น,กิจกรรมชุมนุม,ครูผู้ดูแลชุมนุม,วันเวลาลงทะเบียน\n';
       targetRegs.forEach((r, idx) => {
         const cls = dbCache.classes.find(c => c.id == r.classId);
         const clb = dbCache.clubs.find(c => c.id == r.clubId);
-        const tch = clb ? dbCache.users.find(u => u.id == clb.teacherId) : null;
-        csv += `"${idx + 1}","${r.studentName}","${cls ? cls.name : ''}","${clb ? clb.name : ''}","${tch ? tch.name : ''}","${r.timestamp}"\n`;
+        const tch = getClubTeachersText(clb);
+        csv += `"${idx + 1}","${r.studentName}","${cls ? cls.name : ''}","${clb ? clb.name : ''}","${tch}","${r.timestamp}"\n`;
       });
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `รายชื่อลงทะเบียนชุมนุม_${new Date().toISOString().slice(0,10)}.csv`;
+      link.download = `รายชื่อลงทะเบียนชุมนุม_${new Date().toISOString().slice(0, 10)}.csv`;
       link.click();
     }
 
     /* --------------------------------------------------------
        CRUD MODALS & ENTITY MANAGEMENT
        -------------------------------------------------------- */
-    function openClubModal(clubId, isTeacherView) {
+    window.editingClubTeachers = [];
+
+    function renderClubTeacherChips() {
+      const container = document.getElementById('mcl-teacher-chips');
+      if (!container) return;
+
+      if (!window.editingClubTeachers || window.editingClubTeachers.length === 0) {
+        container.innerHTML = `
+          <div class="w-full text-center py-2 text-xs text-slate-400 dark:text-slate-500 italic">
+            <i class="fas fa-info-circle me-1"></i>ยังไม่มีรายชื่อครูผู้ดูแล (โปรดพิมพ์ชื่อด้านบนแล้วกดเพิ่ม)
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = window.editingClubTeachers.map((tch, idx) => `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-600 shadow-sm animate-in fade-in zoom-in-95">
+          <i class="fas fa-chalkboard-user text-brand-600 dark:text-brand-400 text-[11px]"></i>
+          <span>${escapeHTML(tch)}</span>
+          <button type="button" onclick="removeClubTeacherChip(${idx})" class="w-4 h-4 rounded-full hover:bg-rose-100 dark:hover:bg-rose-900/50 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors ml-0.5" title="ลบรายชื่อ">
+            <i class="fas fa-times text-[10px]"></i>
+          </button>
+        </span>
+      `).join('');
+    }
+
+    function addClubTeacherFromInput() {
+      const input = document.getElementById('mcl-teacher-input');
+      if (!input) return;
+      const val = input.value.trim();
+      if (!val) return;
+
+      const names = val.split(/[,،\n]+/).map(s => s.trim()).filter(Boolean);
+      names.forEach(name => {
+        if (name && !window.editingClubTeachers.includes(name)) {
+          window.editingClubTeachers.push(name);
+        }
+      });
+
+      input.value = '';
+      input.focus();
+      renderClubTeacherChips();
+    }
+
+    function removeClubTeacherChip(idx) {
+      if (window.editingClubTeachers && idx >= 0 && idx < window.editingClubTeachers.length) {
+        window.editingClubTeachers.splice(idx, 1);
+        renderClubTeacherChips();
+      }
+    }
+
+    function openClubModal(clubId) {
       const isEdit = clubId !== null;
       const clubData = isEdit ? dbCache.clubs.find(c => c.id == clubId) : {
         name: '',
         cover: '',
-        teacherId: (isTeacherView ? currentUser.id : ''),
+        teachers: '',
         capacity: 30
       };
 
-      document.getElementById('crud-modal-title').innerText = isEdit ? 'แก้ไขข้อมูลชุมนุม' : 'เพิ่มกิจกรรมชุมนุมใหม่';
+      // Populate teachers list
+      window.editingClubTeachers = [];
+      if (clubData) {
+        if (clubData.teachers) {
+          if (Array.isArray(clubData.teachers)) {
+            window.editingClubTeachers = clubData.teachers.map(t => String(t).trim()).filter(Boolean);
+          } else if (typeof clubData.teachers === 'string') {
+            window.editingClubTeachers = clubData.teachers.split(/[,،\n]+/).map(t => t.trim()).filter(Boolean);
+          }
+        } else if (clubData.teacherId) {
+          const u = dbCache.users.find(usr => usr.id == clubData.teacherId);
+          if (u) window.editingClubTeachers = [u.name];
+        }
+      }
 
-      const teachers = dbCache.users.filter(u => u.role === 'teacher' || u.role === 'admin');
+      document.getElementById('crud-modal-title').innerText = isEdit ? 'แก้ไขข้อมูลกิจกรรมชุมนุม' : 'เพิ่มกิจกรรมชุมนุมใหม่';
 
       document.getElementById('crud-modal-body').innerHTML = `
-        <form onsubmit="handleSaveClub(event, ${isEdit ? clubId : 'null'}, ${isTeacherView})" class="space-y-4">
+        <form onsubmit="handleSaveClub(event, ${isEdit ? clubId : 'null'})" class="space-y-4">
           <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">ชื่อกิจกรรมชุมนุม <span class="text-rose-500">*</span></label>
-            <input type="text" id="mcl-name" required value="${clubData.name}" placeholder="เช่น ชุมนุมวิทยาศาสตร์และอวกาศ" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+              ชื่อกิจกรรมชุมนุม <span class="text-rose-500">*</span>
+            </label>
+            <input type="text" id="mcl-name" required value="${escapeHTML(clubData.name)}" placeholder="เช่น ชุมนุมวิทยาศาสตร์และปัญญาประดิษฐ์" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">ลิงก์รูปภาพหน้าปก (URL)</label>
-            <input type="url" id="mcl-cover" value="${clubData.cover}" placeholder="https://example.com/cover.jpg" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
-            <p class="text-[11px] text-slate-400 mt-1">สามารถใส่ลิงก์รูปภาพจากเว็บ หรือเว้นว่างเพื่อใช้รูปมาตรฐาน</p>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+              ลิงก์รูปภาพหน้าปก (URL)
+            </label>
+            <input type="url" id="mcl-cover" value="${escapeHTML(clubData.cover || '')}" placeholder="https://images.unsplash.com/..." class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            <p class="text-[11px] text-slate-400 mt-1">สามารถใส่ URL รูปภาพ หรือเว้นว่างเพื่อใช้ภาพอัตโนมัติ</p>
           </div>
 
-          ${!isTeacherView ? `
-            <div>
-              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">ครูผู้ดูแลชุมนุม <span class="text-rose-500">*</span></label>
-              <select id="mcl-teacher" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
-                <option value="" disabled ${!clubData.teacherId ? 'selected' : ''}>-- เลือกครูผู้รับผิดชอบ --</option>
-                ${teachers.map(t => `<option value="${t.id}" ${t.id == clubData.teacherId ? 'selected' : ''}>${t.name}</option>`).join('')}
-              </select>
+          <!-- Multi-teacher Management -->
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">
+              ครูผู้ดูแลชุมนุม (พิมพ์ชื่อและเพิ่มได้หลายท่าน) <span class="text-rose-500">*</span>
+            </label>
+            <div class="flex gap-2">
+              <input type="text" id="mcl-teacher-input" placeholder="พิมพ์ชื่อ-นามสกุลครูผู้ดูแลชุมนุม..."
+                onkeydown="if(event.key==='Enter'){event.preventDefault();addClubTeacherFromInput();}"
+                class="flex-1 px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              <button type="button" onclick="addClubTeacherFromInput()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white transition-all btn-press flex items-center gap-1.5 flex-shrink-0 shadow-sm">
+                <i class="fas fa-plus"></i> <span>เพิ่มครู</span>
+              </button>
             </div>
-          ` : `<input type="hidden" id="mcl-teacher" value="${currentUser.id}">`}
+            <p class="text-[11px] text-slate-400">
+              <i class="fas fa-lightbulb text-amber-500 me-1"></i>กด <b>Enter</b> หรือปุ่ม <b>+ เพิ่มครู</b> (สามารถวางหลายชื่อคั่นด้วยเครื่องหมาย <b>,</b> ได้)
+            </p>
+
+            <div id="mcl-teacher-chips" class="flex flex-wrap gap-2 p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-700 min-h-[50px] items-center">
+              <!-- Rendered by renderClubTeacherChips() -->
+            </div>
+          </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">จำนวนรับสูงสุด (คน) <span class="text-rose-500">*</span></label>
-            <input type="number" id="mcl-cap" min="1" max="200" required value="${clubData.capacity}" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+              จำนวนรับสูงสุด (คน) <span class="text-rose-500">*</span>
+            </label>
+            <input type="number" id="mcl-cap" min="1" max="500" required value="${clubData.capacity || 30}" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
           </div>
 
           <div class="pt-2">
-            <button type="submit" class="w-full py-3 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-aurora transition-all btn-press">
-              บันทึกข้อมูลชุมนุม
+            <button type="submit" class="w-full py-3 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-aurora transition-all btn-press flex items-center justify-center gap-2">
+              <i class="fas fa-save"></i> <span>บันทึกข้อมูลชุมนุม</span>
             </button>
           </div>
         </form>
       `;
 
       openModal('modal-crud');
+      renderClubTeacherChips();
     }
 
-    function handleSaveClub(e, clubId, isTeacherView) {
+    function handleSaveClub(e, clubId) {
       e.preventDefault();
       const name = document.getElementById('mcl-name').value.trim();
       const cover = document.getElementById('mcl-cover').value.trim();
-      const teacherId = parseInt(document.getElementById('mcl-teacher').value);
       const capacity = parseInt(document.getElementById('mcl-cap').value);
+
+      // Check if user has leftover text in input field
+      const teacherInput = document.getElementById('mcl-teacher-input');
+      if (teacherInput && teacherInput.value.trim()) {
+        const leftover = teacherInput.value.trim().split(/[,،\n]+/).map(s => s.trim()).filter(Boolean);
+        leftover.forEach(t => {
+          if (!window.editingClubTeachers.includes(t)) window.editingClubTeachers.push(t);
+        });
+      }
+
+      if (!window.editingClubTeachers || window.editingClubTeachers.length === 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'โปรดระบุครูผู้ดูแลชุมนุม',
+          text: 'กรุณาพิมพ์ชื่อครูผู้ดูแลชุมนุมอย่างน้อย 1 ท่าน แล้วกดปุ่มเพิ่มครู',
+          confirmButtonColor: '#4F46E5'
+        });
+        return;
+      }
+
+      const teachersText = window.editingClubTeachers.join(', ');
 
       if (clubId) {
         const idx = dbCache.clubs.findIndex(c => c.id == clubId);
         if (idx !== -1) {
-          dbCache.clubs[idx] = { ...dbCache.clubs[idx], name, cover, teacherId, capacity };
+          dbCache.clubs[idx] = {
+            ...dbCache.clubs[idx],
+            name,
+            cover: cover || dbCache.clubs[idx].cover || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80',
+            teachers: teachersText,
+            capacity
+          };
         }
       } else {
         dbCache.clubs.push({
           id: Date.now(),
           name,
-          cover,
-          teacherId,
+          cover: cover || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80',
+          teachers: teachersText,
           capacity
         });
       }
 
       saveDatabase(() => {
         closeModal('modal-crud');
+        populateClassDropdowns();
+        renderPublicHome();
+        renderWorkspace('adm_clubs');
         Swal.fire({ icon: 'success', title: 'บันทึกข้อมูลเรียบร้อย', timer: 1500, showConfirmButton: false });
-        renderWorkspace(isTeacherView ? 'tch_clubs' : 'adm_clubs');
       });
     }
 
-    function deleteClubEntity(id, sourceView) {
+    function deleteClubEntity(id) {
       Swal.fire({
         title: 'ยืนยันลบกิจกรรมชุมนุม?',
         text: 'การลบชุมนุมจะลบข้อมูลการลงทะเบียนของนักเรียนในชุมนุมนี้ทั้งหมดด้วย!',
@@ -2478,15 +2564,19 @@
           dbCache.clubs = dbCache.clubs.filter(c => c.id != id);
           dbCache.registrations = dbCache.registrations.filter(r => r.clubId != id);
           saveDatabase(() => {
-            renderWorkspace(sourceView);
+            populateClassDropdowns();
+            renderPublicHome();
+            renderWorkspace('adm_clubs');
+            Swal.fire({ icon: 'success', title: 'ลบกิจกรรมชุมนุมเรียบร้อย', timer: 1200, showConfirmButton: false });
           });
         }
       });
     }
 
-    function deleteRegistrationEntity(regId, sourceView) {
+    function deleteRegistrationEntity(regId) {
       Swal.fire({
         title: 'ยืนยันถอนสิทธิ์นักเรียน?',
+        text: 'การถอนสิทธิ์จะทำให้นักเรียนพ้นจากกิจกรรมชุมนุมนี้',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#DC2626',
@@ -2496,7 +2586,8 @@
         if (res.isConfirmed) {
           dbCache.registrations = dbCache.registrations.filter(r => r.id != regId);
           saveDatabase(() => {
-            renderReportTable(sourceView);
+            renderReportTable();
+            populateClassDropdowns();
             Swal.fire({ icon: 'success', title: 'ถอนสิทธิ์เรียบร้อย', timer: 1200, showConfirmButton: false });
           });
         }
@@ -2512,7 +2603,7 @@
         <form onsubmit="handleSaveClass(event, ${isEdit ? classId : 'null'})" class="space-y-4">
           <div>
             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">ชื่อระดับชั้นเรียน <span class="text-rose-500">*</span></label>
-            <input type="text" id="mcls-name" required value="${cData.name}" placeholder="เช่น ม.1/3" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            <input type="text" id="mcls-name" required value="${escapeHTML(cData.name)}" placeholder="เช่น ม.1/3" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
           </div>
           <div class="pt-2">
             <button type="submit" class="w-full py-3 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-aurora transition-all btn-press">
@@ -2560,33 +2651,38 @@
 
     function openUserModal(userId) {
       const isEdit = userId !== null;
-      const uData = isEdit ? dbCache.users.find(u => u.id == userId) : { username: '', password: '', name: '', role: 'teacher' };
-      document.getElementById('crud-modal-title').innerText = isEdit ? 'แก้ไขผู้ใช้งาน' : 'เพิ่มผู้ใช้งานระบบใหม่';
+      const uData = isEdit ? dbCache.users.find(u => u.id == userId) : { username: '', password: '', name: '', role: 'admin' };
+      document.getElementById('crud-modal-title').innerText = isEdit ? 'แก้ไขผู้ดูแลระบบ' : 'เพิ่มผู้ดูแลระบบ (Admin)';
 
       document.getElementById('crud-modal-body').innerHTML = `
         <form onsubmit="handleSaveUser(event, ${isEdit ? userId : 'null'})" class="space-y-4">
           <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">ชื่อผู้ใช้งาน (Username) <span class="text-rose-500">*</span></label>
-            <input type="text" id="mu-user" required value="${uData.username}" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+              ชื่อผู้ใช้งาน (Username) <span class="text-rose-500">*</span>
+            </label>
+            <input type="text" id="mu-user" required value="${escapeHTML(uData.username)}" placeholder="เช่น admin2" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">รหัสผ่าน (Password) <span class="text-rose-500">*</span></label>
-            <input type="password" id="mu-pass" required value="${uData.password}" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+              รหัสผ่าน (Password) <span class="text-rose-500">*</span>
+            </label>
+            <input type="password" id="mu-pass" required value="${escapeHTML(uData.password)}" placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">ชื่อ - นามสกุลจริง <span class="text-rose-500">*</span></label>
-            <input type="text" id="mu-name" required value="${uData.name}" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+              ชื่อ - นามสกุลจริง <span class="text-rose-500">*</span>
+            </label>
+            <input type="text" id="mu-name" required value="${escapeHTML(uData.name)}" placeholder="เช่น ครูก้องนที อุ่นเจริญ" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">สิทธิ์การใช้งาน</label>
-            <select id="mu-role" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
-              <option value="teacher" ${uData.role === 'teacher' ? 'selected' : ''}>ครูผู้สอน / ครูประจำชุมนุม (Teacher)</option>
-              <option value="admin" ${uData.role === 'admin' ? 'selected' : ''}>ผู้ดูแลระบบสูงสุด (Admin)</option>
-            </select>
+            <div class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-sm font-bold text-indigo-700 dark:text-indigo-300 flex items-center gap-2">
+              <i class="fas fa-shield-alt"></i> ผู้ดูแลระบบ (Admin)
+            </div>
           </div>
           <div class="pt-2">
-            <button type="submit" class="w-full py-3 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-aurora transition-all btn-press">
-              บันทึกข้อมูลผู้ใช้
+            <button type="submit" class="w-full py-3 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-aurora transition-all btn-press flex items-center justify-center gap-2">
+              <i class="fas fa-save"></i> <span>บันทึกบัญชีผู้ดูแลระบบ</span>
             </button>
           </div>
         </form>
@@ -2599,11 +2695,18 @@
       const username = document.getElementById('mu-user').value.trim();
       const password = document.getElementById('mu-pass').value;
       const name = document.getElementById('mu-name').value.trim();
-      const role = document.getElementById('mu-role').value;
+      const role = 'admin';
 
       if (userId) {
         const idx = dbCache.users.findIndex(u => u.id == userId);
-        if (idx !== -1) dbCache.users[idx] = { id: userId, username, password, name, role };
+        if (idx !== -1) {
+          dbCache.users[idx] = { id: userId, username, password, name, role };
+          if (currentUser && currentUser.id == userId) {
+            currentUser = dbCache.users[idx];
+            sessionStorage.setItem('mhc_reg_user', JSON.stringify(currentUser));
+            renderNavigation();
+          }
+        }
       } else {
         dbCache.users.push({ id: Date.now(), username, password, name, role });
       }
@@ -2611,21 +2714,34 @@
       saveDatabase(() => {
         closeModal('modal-crud');
         renderWorkspace('adm_users');
+        Swal.fire({ icon: 'success', title: 'บันทึกบัญชีผู้ดูแลระบบสำเร็จ', timer: 1500, showConfirmButton: false });
       });
     }
 
     function deleteUserEntity(id) {
+      if (dbCache.users.length <= 1) {
+        Swal.fire('ไม่สามารถลบได้', 'ระบบต้องมีบัญชีผู้ดูแลระบบอย่างน้อย 1 บัญชี', 'error');
+        return;
+      }
+
       Swal.fire({
-        title: 'ยืนยันลบผู้ใช้งาน?',
+        title: 'ยืนยันลบผู้ดูแลระบบ?',
+        text: 'เมื่อลบแล้วจะไม่สามารถกู้คืนบัญชีนี้ได้',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#DC2626',
-        confirmButtonText: 'ลบผู้ใช้'
+        confirmButtonText: 'ลบบัญชี',
+        cancelButtonText: 'ยกเลิก'
       }).then((res) => {
         if (res.isConfirmed) {
           dbCache.users = dbCache.users.filter(u => u.id != id);
           saveDatabase(() => {
-            renderWorkspace('adm_users');
+            if (currentUser && currentUser.id == id) {
+              handleLogout();
+            } else {
+              renderWorkspace('adm_users');
+              Swal.fire({ icon: 'success', title: 'ลบบัญชีเรียบร้อย', timer: 1200, showConfirmButton: false });
+            }
           });
         }
       });
@@ -2640,23 +2756,6 @@
         Swal.fire({ icon: 'success', title: 'อัปเดตกำหนดเวลาสำเร็จ', timer: 1500, showConfirmButton: false });
         renderPublicHome();
       });
-    }
-
-    function handleSaveProfile(e) {
-      e.preventDefault();
-      const idx = dbCache.users.findIndex(u => u.id == currentUser.id);
-      if (idx !== -1) {
-        dbCache.users[idx].username = document.getElementById('prof-input-user').value.trim();
-        dbCache.users[idx].password = document.getElementById('prof-input-pass').value;
-        dbCache.users[idx].name = document.getElementById('prof-input-name').value.trim();
-
-        saveDatabase(() => {
-          currentUser = dbCache.users[idx];
-          sessionStorage.setItem('mhc_reg_user', JSON.stringify(currentUser));
-          renderNavigation();
-          Swal.fire({ icon: 'success', title: 'อัปเดตข้อมูลส่วนตัวแล้ว', timer: 1500, showConfirmButton: false });
-        });
-      }
     }
 
     /* --------------------------------------------------------
@@ -2679,7 +2778,7 @@
         Swal.fire({
           icon: 'success',
           title: `ยินดีต้อนรับ ${matched.name}`,
-          text: `เข้าสู่ระบบในฐานะ: ${matched.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ครูผู้สอน'}`,
+          text: 'เข้าสู่ระบบผู้ดูแลระบบ (Admin) เรียบร้อยแล้ว',
           timer: 1800,
           showConfirmButton: false
         });

@@ -156,7 +156,7 @@ function readUsersSheet(ss) {
       username: String(row[1] || ''),
       password: String(row[2] || ''),
       name: String(row[3] || ''),
-      role: String(row[4] || 'teacher')
+      role: 'admin' // ระบบใช้เฉพาะผู้ดูแลระบบ (Admin)
     });
   }
   return users;
@@ -190,7 +190,7 @@ function readClubsSheet(ss) {
       id: Number(row[0]) || (i),
       name: String(row[1] || ''),
       cover: String(row[2] || ''),
-      teacherId: Number(row[3]) || 1,
+      teachers: String(row[3] || ''), // รายชื่อครูผู้ดูแลชุมนุม (สามารถใส่ได้หลายคน)
       capacity: Number(row[4]) || 30
     });
   }
@@ -254,9 +254,10 @@ function writeClassesSheet(ss, classes) {
 function writeClubsSheet(ss, clubs) {
   const sheet = ss.getSheetByName('Clubs');
   sheet.clearContents();
-  const rows = [['ID', 'ClubName', 'CoverURL', 'TeacherID', 'Capacity']];
+  const rows = [['ID', 'ClubName', 'CoverURL', 'Teachers', 'Capacity']];
   clubs.forEach(c => {
-    rows.push([c.id, c.name, c.cover, c.teacherId, c.capacity]);
+    const teachersVal = c.teachers ? (Array.isArray(c.teachers) ? c.teachers.join(', ') : String(c.teachers)) : '';
+    rows.push([c.id, c.name, c.cover, teachersVal, c.capacity]);
   });
   sheet.getRange(1, 1, rows.length, 5).setValues(rows);
 }
@@ -292,10 +293,7 @@ function ensureSheetsInitialized(ss) {
     const userSheet = ss.getSheetByName('Users');
     if (userSheet.getLastRow() <= 1) {
       writeUsersSheet(ss, [
-        { id: 1, username: 'admin', password: '123', name: 'ครูก้องนที อุ่นเจริญ', role: 'admin' },
-        { id: 2, username: 'teacher1', password: '123', name: 'ครูวชิราวุธ ขันติวงศ์', role: 'teacher' },
-        { id: 3, username: 'teacher2', password: '123', name: 'ครูวัลย์วิภา บุญสมบัติ', role: 'teacher' },
-        { id: 4, username: 'teacher3', password: '123', name: 'ครูประเสริฐ ชัยนาท', role: 'teacher' }
+        { id: 1, username: 'admin', password: '123', name: 'ครูก้องนที อุ่นเจริญ', role: 'admin' }
       ]);
     }
 
@@ -317,10 +315,10 @@ function ensureSheetsInitialized(ss) {
     const clubSheet = ss.getSheetByName('Clubs');
     if (clubSheet.getLastRow() <= 1) {
       writeClubsSheet(ss, [
-        { id: 1, name: 'ชุมนุมหุ่นยนต์และปัญญาประดิษฐ์ (AI & Robotics)', cover: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=800&q=80', teacherId: 1, capacity: 30 },
-        { id: 2, name: 'ชุมนุมดนตรีสากลและวงดุริยางค์', cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80', teacherId: 2, capacity: 25 },
-        { id: 3, name: 'ชุมนุมคณิตศาสตร์คิดเร็วและโอลิมปิกวิชาการ', cover: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80', teacherId: 3, capacity: 35 },
-        { id: 4, name: 'ชุมนุมกีฬาบาสเกตบอลและสันทนาการ', cover: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80', teacherId: 4, capacity: 30 }
+        { id: 1, name: 'ชุมนุมหุ่นยนต์และปัญญาประดิษฐ์ (AI & Robotics)', cover: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=800&q=80', teachers: 'ครูก้องนที อุ่นเจริญ, ครูวชิราวุธ ขันติวงศ์', capacity: 30 },
+        { id: 2, name: 'ชุมนุมดนตรีสากลและวงดุริยางค์', cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80', teachers: 'ครูวชิราวุธ ขันติวงศ์, ครูนภัสสร มณีโชติ', capacity: 25 },
+        { id: 3, name: 'ชุมนุมคณิตศาสตร์คิดเร็วและโอลิมปิกวิชาการ', cover: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80', teachers: 'ครูวัลย์วิภา บุญสมบัติ', capacity: 35 },
+        { id: 4, name: 'ชุมนุมกีฬาบาสเกตบอลและสันทนาการ', cover: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80', teachers: 'ครูประเสริฐ ชัยนาท, ครูก้องนที อุ่นเจริญ', capacity: 30 }
       ]);
     }
 

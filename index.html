@@ -895,6 +895,121 @@
   </div>
 
   <!-- ========================================================
+       MODAL: IMPORT CSV STUDENTS (นำเข้าข้อมูลนักเรียน CSV / Excel)
+       ======================================================== -->
+  <div id="modal-import-csv" onclick="if(event.target === this) closeModal('modal-import-csv')" class="fixed inset-0 z-50 hidden overflow-y-auto modal-backdrop-custom flex items-center justify-center p-4">
+    <div class="relative bg-white dark:bg-slate-800 rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Modal Header -->
+      <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-lg">
+            <i class="fas fa-file-csv"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold tracking-tight">นำเข้าข้อมูลนักเรียน (CSV / Excel)</h3>
+            <p class="text-xs text-slate-400">อัปโหลดไฟล์ .CSV หรือคัดลอกรายชื่อจาก Excel มาวาง</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-import-csv')" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
+          <i class="fas fa-times text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Action helper banner -->
+      <div class="bg-emerald-50 dark:bg-emerald-950/40 border-b border-emerald-100 dark:border-emerald-800/40 px-5 py-3 flex flex-wrap items-center justify-between gap-2">
+        <div class="text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+          <i class="fas fa-circle-info text-emerald-600"></i>
+          <span>มีไฟล์แม่แบบพร้อมคอลัมน์: <b>เลขประจำตัว, ชื่อ-นามสกุล, ระดับชั้น</b></span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="downloadStudentCSVTemplate()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all btn-press flex items-center gap-1 shadow-sm">
+            <i class="fas fa-download"></i> <span>โหลดเทมเพลต CSV</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Import Form Body -->
+      <form id="form-import-csv" onsubmit="handleImportStudentsCSVSubmit(event)" class="p-6 space-y-4">
+        
+        <!-- Tab selector for File upload vs Paste text -->
+        <div class="flex items-center p-1 bg-slate-100 dark:bg-slate-900 rounded-xl">
+          <button type="button" id="tab-btn-csv-file" onclick="switchImportMethod('file')" class="flex-1 py-2 rounded-lg text-xs font-bold transition-all bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm flex items-center justify-center gap-1.5">
+            <i class="fas fa-file-arrow-up"></i> <span>อัปโหลดไฟล์ .CSV</span>
+          </button>
+          <button type="button" id="tab-btn-csv-text" onclick="switchImportMethod('text')" class="flex-1 py-2 rounded-lg text-xs font-bold transition-all text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center justify-center gap-1.5">
+            <i class="fas fa-paste"></i> <span>คัดลอกข้อความมาวาง (Copy-Paste)</span>
+          </button>
+        </div>
+
+        <!-- Mode 1: File Upload Section -->
+        <div id="import-section-file" class="space-y-3">
+          <div id="csv-dropzone" onclick="document.getElementById('mimp-csv-file').click()" class="border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-brand-500 dark:hover:border-brand-400 rounded-2xl p-6 text-center cursor-pointer bg-slate-50/60 dark:bg-slate-900/40 transition-colors group">
+            <input type="file" id="mimp-csv-file" accept=".csv,text/csv" class="hidden" onchange="handleStudentCSVFileSelect(event)">
+            <div class="w-12 h-12 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl mb-2 group-hover:scale-110 transition-transform">
+              <i class="fas fa-file-csv"></i>
+            </div>
+            <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200" id="mimp-file-label">คลิกเพื่อเลือกไฟล์ .CSV หรือลากไฟล์มาวางที่นี่</h4>
+            <p class="text-xs text-slate-400 mt-1" id="mimp-file-sublabel">รองรับไฟล์ CSV จาก Excel และ Google Sheets (รองรับภาษาไทย UTF-8 และ Windows-874)</p>
+          </div>
+        </div>
+
+        <!-- Mode 2: Paste Text Section -->
+        <div id="import-section-text" class="hidden space-y-2">
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">
+            วางข้อมูลนักเรียนจาก Excel หรือตาราง
+          </label>
+          <textarea id="mimp-csv-text" rows="6" oninput="handleStudentCSVTextChange()" placeholder="ตัวอย่างรูปแบบ (1 บรรทัดต่อ 1 คน):&#10;10001,เด็กชายสมชาย ใจดี,ม.1/1&#10;10002,เด็กหญิงสมหญิง รักเรียน,ม.1/1&#10;หรือคัดลอก 2-3 คอลัมน์จาก Excel มาวางได้เลย" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
+        </div>
+
+        <!-- Target Class Selection -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+            การกำหนดระดับชั้นเรียน <span class="text-rose-500">*</span>
+          </label>
+          <select id="mimp-csv-target-class" onchange="refreshCSVPreview()" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            <option value="auto">⭐ ตรวจหาระดับชั้นตามข้อมูลในไฟล์อัตโนมัติ (เช่น ม.1/1, ม.1/2)</option>
+            <!-- Populated by openImportStudentsModal() -->
+          </select>
+          <p class="text-[11px] text-slate-400 mt-1">หากในไฟล์ไม่มีคอลัมน์ระดับชั้น ระบบจะใช้ระดับชั้นที่คุณเลือกเป็นค่าเริ่มต้น</p>
+        </div>
+
+        <!-- Live Preview Area -->
+        <div id="mimp-csv-preview-container" class="hidden p-3.5 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <i class="fas fa-list-check text-brand-600"></i> ตัวอย่างข้อมูลที่จะนำเข้า
+            </span>
+            <span id="mimp-csv-detected-count" class="font-bold text-emerald-600 dark:text-emerald-400">0 คน</span>
+          </div>
+          <div id="mimp-csv-preview-list" class="max-h-36 overflow-y-auto divide-y divide-slate-200/60 dark:divide-slate-700/60 text-xs text-slate-600 dark:text-slate-300 font-mono">
+            <!-- Rendered preview items -->
+          </div>
+        </div>
+
+        <!-- Overwrite Checkbox -->
+        <div class="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 rounded-xl flex items-start gap-2.5">
+          <input type="checkbox" id="mimp-csv-replace-existing" class="mt-0.5 rounded text-amber-600 focus:ring-amber-500 w-4 h-4 cursor-pointer">
+          <label for="mimp-csv-replace-existing" class="text-xs text-amber-900 dark:text-amber-200 cursor-pointer">
+            <strong>ล้างรายชื่อเดิม</strong> ในระดับชั้นที่ระบุก่อนนำเข้าใหม่ (หากไม่ติ๊ก จะเป็นการเพิ่มต่อท้าย)
+          </label>
+        </div>
+
+        <!-- Modal Footer Buttons -->
+        <div class="pt-2 flex items-center gap-3">
+          <button type="button" onclick="closeModal('modal-import-csv')" class="flex-1 py-3 rounded-xl text-sm font-semibold border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors btn-press">
+            ยกเลิก
+          </button>
+          <button type="submit" id="btn-confirm-import-csv" disabled class="flex-1 py-3 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-white shadow-aurora transition-all btn-press flex items-center justify-center gap-2">
+            <i class="fas fa-file-import"></i> <span>ยืนยันการนำเข้า</span>
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ========================================================
        MOBILE DRAWER (เมนูด้านข้างสำหรับมือถือ)
        ======================================================== -->
   <div id="mobile-drawer-backdrop" onclick="toggleMobileDrawer(false)" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
@@ -2463,12 +2578,18 @@
       else if (subViewKey === 'adm_students') {
         document.getElementById('workspace-title').innerText = 'จัดการรายชื่อนักเรียนในระบบ';
         actionBtn.innerHTML = `
-          <div class="flex items-center gap-2">
-            <button onclick="openStudentModal(null)" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white hover:bg-brand-700 transition-all btn-press flex items-center gap-1.5 shadow-sm">
-              <i class="fas fa-user-plus"></i> <span>เพิ่มนักเรียน</span>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="downloadStudentCSVTemplate()" class="px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition-all btn-press flex items-center gap-1.5 border border-slate-200 dark:border-slate-600 shadow-sm" title="ดาวน์โหลดไฟล์ตัวอย่างแบบฟอร์ม CSV สำหรับนำเข้า">
+              <i class="fas fa-download text-emerald-600 dark:text-emerald-400"></i> <span>โหลดเทมเพลต CSV</span>
+            </button>
+            <button onclick="exportStudentsToCSV()" class="px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition-all btn-press flex items-center gap-1.5 border border-slate-200 dark:border-slate-600 shadow-sm" title="ดาวน์โหลดรายชื่อนักเรียนในระบบเป็น CSV">
+              <i class="fas fa-file-excel text-emerald-600 dark:text-emerald-400"></i> <span>ส่งออก CSV</span>
             </button>
             <button onclick="openImportStudentsModal()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-all btn-press flex items-center gap-1.5 shadow-sm">
-              <i class="fas fa-file-import"></i> <span>นำเข้าจาก Excel</span>
+              <i class="fas fa-file-import"></i> <span>นำเข้า CSV / Excel</span>
+            </button>
+            <button onclick="openStudentModal(null)" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white hover:bg-brand-700 transition-all btn-press flex items-center gap-1.5 shadow-sm">
+              <i class="fas fa-user-plus"></i> <span>เพิ่มนักเรียน</span>
             </button>
           </div>
         `;
@@ -3438,132 +3559,441 @@
       });
     }
 
-    function openImportStudentsModal() {
-      document.getElementById('crud-modal-title').innerText = 'นำเข้ารายชื่อนักเรียน (ชุดใหญ่ / คัดลอกจาก Excel)';
+    /* --------------------------------------------------------
+       STUDENT CSV EXPORT & TEMPLATE DOWNLOAD
+       -------------------------------------------------------- */
+    function downloadStudentCSVTemplate() {
+      const sampleClass1 = (dbCache.classes && dbCache.classes[0]) ? dbCache.classes[0].name : 'ม.1/1';
+      const sampleClass2 = (dbCache.classes && dbCache.classes[1]) ? dbCache.classes[1].name : sampleClass1;
 
-      document.getElementById('crud-modal-body').innerHTML = `
-        <form onsubmit="handleImportStudentsSubmit(event)" class="space-y-4">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-              นำเข้าสู่ระดับชั้นเรียน <span class="text-rose-500">*</span>
-            </label>
-            <select id="mimp-class" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
-              ${(dbCache.classes || []).map(c => `
-                <option value="${c.id}">${escapeHTML(c.name)}</option>
-              `).join('')}
-            </select>
-          </div>
+      let csv = '\uFEFFเลขประจำตัว,ชื่อ-นามสกุล,ระดับชั้น\n';
+      csv += `10001,เด็กชายสมชาย ใจดี,${sampleClass1}\n`;
+      csv += `10002,เด็กหญิงสมหญิง รักเรียน,${sampleClass1}\n`;
+      csv += `10003,เด็กชายธนกฤต มุ่งมั่น,${sampleClass2}\n`;
+      csv += `10004,เด็กหญิงกัญญาณัฐ วงศ์วิจิตร,${sampleClass2}\n`;
 
-          <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-              วางรายชื่อนักเรียน (คัดลอกจาก Excel หรือ Word) <span class="text-rose-500">*</span>
-            </label>
-            <textarea id="mimp-text" rows="8" required oninput="updateImportPreview()" placeholder="ตัวอย่างรูปแบบที่รองรับ (1 บรรทัดต่อ 1 คน):\n10001 เด็กชายกิตติศักดิ์ ศรีวิชัย\n10002 เด็กหญิงพรพิมล ชื่นใจ\nหรือวางเฉพาะชื่อ:\nนายธนกฤต สุขเกษม\nนางสาวกัญญาณัฐ วงศ์วิจิตร" class="w-full p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
-            <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1">
-              <span><i class="fas fa-info-circle me-1"></i> รองรับทั้งมีเลขประจำตัว และไม่มีเลขประจำตัว</span>
-              <span id="mimp-preview-count" class="font-bold text-brand-600 dark:text-brand-400">ยังไม่มีข้อมูล</span>
-            </div>
-          </div>
-
-          <div class="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 rounded-xl flex items-start gap-2.5">
-            <input type="checkbox" id="mimp-replace-existing" class="mt-0.5 rounded text-amber-600 focus:ring-amber-500 w-4 h-4 cursor-pointer">
-            <label for="mimp-replace-existing" class="text-xs text-amber-900 dark:text-amber-200 cursor-pointer">
-              <strong>ล้างรายชื่อเดิม</strong> ในระดับชั้นนี้ออกทั้งหมดก่อนนำเข้าใหม่ (หากไม่ติ๊ก จะเป็นการเพิ่มต่อท้าย)
-            </label>
-          </div>
-
-          <div class="pt-2 flex items-center gap-3">
-            <button type="button" onclick="closeModal('modal-crud')" class="flex-1 py-3 rounded-xl text-sm font-semibold border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 transition-colors btn-press">
-              ยกเลิก
-            </button>
-            <button type="submit" class="flex-1 py-3 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-aurora transition-all btn-press flex items-center justify-center gap-2">
-              <i class="fas fa-file-import"></i> <span>เริ่มการนำเข้า</span>
-            </button>
-          </div>
-        </form>
-      `;
-
-      openModal('modal-crud');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'แบบฟอร์มนำเข้ารายชื่อนักเรียน_MHC.csv';
+      link.click();
     }
 
-    function updateImportPreview() {
-      const textarea = document.getElementById('mimp-text');
-      const countEl = document.getElementById('mimp-preview-count');
-      if (!textarea || !countEl) return;
+    function exportStudentsToCSV() {
+      const classSelect = document.getElementById('adm-stu-filter-class');
+      const statusSelect = document.getElementById('adm-stu-filter-status');
+      const searchInput = document.getElementById('adm-stu-search');
 
-      const lines = textarea.value.split('\n').map(l => l.trim()).filter(Boolean);
-      countEl.innerText = lines.length > 0 ? `ตรวจพบ ${lines.length} รายชื่อ` : 'ยังไม่มีข้อมูล';
-    }
+      const selectedClass = classSelect ? classSelect.value : 'all';
+      const selectedStatus = statusSelect ? statusSelect.value : 'all';
+      const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
 
-    function handleImportStudentsSubmit(e) {
-      e.preventDefault();
-      const targetClassId = parseInt(document.getElementById('mimp-class').value);
-      const text = document.getElementById('mimp-text').value;
-      const replaceExisting = document.getElementById('mimp-replace-existing').checked;
+      let list = [...(dbCache.students || [])];
 
-      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-      if (lines.length === 0) {
-        Swal.fire('ไม่พบข้อมูลรายชื่อ', 'กรุณาวางรายชื่อนักเรียนอย่างน้อย 1 รายชื่อ', 'warning');
+      if (selectedClass !== 'all') {
+        const clsId = parseInt(selectedClass);
+        list = list.filter(s => s.classId == clsId);
+      }
+
+      if (selectedStatus === 'registered') {
+        list = list.filter(s => (dbCache.registrations || []).some(r => r.studentName.trim() === s.name.trim()));
+      } else if (selectedStatus === 'unregistered') {
+        list = list.filter(s => !(dbCache.registrations || []).some(r => r.studentName.trim() === s.name.trim()));
+      }
+
+      if (query) {
+        list = list.filter(s => {
+          const nameMatch = (s.name || '').toLowerCase().includes(query);
+          const codeMatch = (s.studentCode || '').toLowerCase().includes(query);
+          return nameMatch || codeMatch;
+        });
+      }
+
+      list.sort((a, b) => {
+        if (a.classId !== b.classId) return a.classId - b.classId;
+        if (a.studentCode && b.studentCode) {
+          return a.studentCode.localeCompare(b.studentCode, undefined, { numeric: true });
+        }
+        return (a.name || '').localeCompare(b.name || '', 'th');
+      });
+
+      if (list.length === 0) {
+        Swal.fire('ไม่พบข้อมูล', 'ไม่มีรายชื่อนักเรียนตามเงื่อนไขที่เลือกสำหรับส่งออก CSV', 'warning');
         return;
       }
 
-      if (!dbCache.students) dbCache.students = [];
+      let csv = '\uFEFFลำดับ,เลขประจำตัว,ชื่อ-นามสกุล,ระดับชั้น,สถานะลงทะเบียน,กิจกรรมชุมนุม\n';
+      list.forEach((s, idx) => {
+        const cls = (dbCache.classes || []).find(c => c.id == s.classId);
+        const reg = (dbCache.registrations || []).find(r => r.studentName.trim() === s.name.trim());
+        const regClub = reg ? (dbCache.clubs || []).find(c => c.id == reg.clubId) : null;
+        const statusText = reg ? 'ลงทะเบียนแล้ว' : 'ยังไม่ลงทะเบียน';
+        const clubName = regClub ? regClub.name : '-';
+        csv += `"${idx + 1}","${s.studentCode || ''}","${s.name}","${cls ? cls.name : ''}","${statusText}","${clubName}"\n`;
+      });
 
-      // Parse lines
-      const parsedStudents = [];
-      const now = Date.now();
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `รายชื่อนักเรียน_${new Date().toISOString().slice(0, 10)}.csv`;
+      link.click();
+    }
 
-      lines.forEach((line, idx) => {
-        // Remove leading numbering like "1. ", "1) ", "1  " if present
-        let cleanLine = line.replace(/^\d+[\.\)\s\-]\s*/, '').trim();
-        if (!cleanLine) cleanLine = line;
+    /* --------------------------------------------------------
+       STUDENT CSV & TEXT IMPORT LOGIC
+       -------------------------------------------------------- */
+    let currentImportMethod = 'file'; // 'file' | 'text'
+    window.parsedCSVRows = [];
+    window.currentRawCSVText = '';
 
-        // Try extracting student code if starts with digits
-        let code = '';
-        let name = cleanLine;
+    function openImportStudentsModal() {
+      // Reset state
+      window.parsedCSVRows = [];
+      window.currentRawCSVText = '';
+      currentImportMethod = 'file';
 
-        // Pattern 1: [digits][spaces or tabs][name]
-        const codeMatch = cleanLine.match(/^([0-9]{3,10})[\s\t]+(.+)$/);
-        if (codeMatch) {
-          code = codeMatch[1].trim();
-          name = codeMatch[2].trim();
+      const fileInput = document.getElementById('mimp-csv-file');
+      if (fileInput) fileInput.value = '';
+
+      const textArea = document.getElementById('mimp-csv-text');
+      if (textArea) textArea.value = '';
+
+      const fileLabel = document.getElementById('mimp-file-label');
+      if (fileLabel) fileLabel.innerText = 'คลิกเพื่อเลือกไฟล์ .CSV หรือลากไฟล์มาวางที่นี่';
+
+      const subLabel = document.getElementById('mimp-file-sublabel');
+      if (subLabel) subLabel.innerText = 'รองรับไฟล์ CSV จาก Excel และ Google Sheets (รองรับภาษาไทย UTF-8 และ Windows-874)';
+
+      // Populate classes into target class dropdown
+      const targetSelect = document.getElementById('mimp-csv-target-class');
+      if (targetSelect && dbCache.classes) {
+        targetSelect.innerHTML = `
+          <option value="auto">⭐ ตรวจหาระดับชั้นตามข้อมูลในไฟล์อัตโนมัติ (เช่น ม.1/1, ม.1/2)</option>
+          ${dbCache.classes.map(c => `<option value="${c.id}">กำหนดเป็น ${escapeHTML(c.name)} ทั้งหมด</option>`).join('')}
+        `;
+      }
+
+      switchImportMethod('file');
+      refreshCSVPreview();
+
+      openModal('modal-import-csv');
+    }
+
+    function switchImportMethod(method) {
+      currentImportMethod = method;
+      const fileTabBtn = document.getElementById('tab-btn-csv-file');
+      const textTabBtn = document.getElementById('tab-btn-csv-text');
+      const fileSec = document.getElementById('import-section-file');
+      const textSec = document.getElementById('import-section-text');
+
+      if (method === 'file') {
+        fileTabBtn.className = 'flex-1 py-2 rounded-lg text-xs font-bold transition-all bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm flex items-center justify-center gap-1.5';
+        textTabBtn.className = 'flex-1 py-2 rounded-lg text-xs font-bold transition-all text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center justify-center gap-1.5';
+        if (fileSec) fileSec.classList.remove('hidden');
+        if (textSec) textSec.classList.add('hidden');
+        processRawCSVText(window.currentRawCSVText || '');
+      } else {
+        textTabBtn.className = 'flex-1 py-2 rounded-lg text-xs font-bold transition-all bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm flex items-center justify-center gap-1.5';
+        fileTabBtn.className = 'flex-1 py-2 rounded-lg text-xs font-bold transition-all text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center justify-center gap-1.5';
+        if (fileSec) fileSec.classList.add('hidden');
+        if (textSec) textSec.classList.remove('hidden');
+        const textVal = document.getElementById('mimp-csv-text') ? document.getElementById('mimp-csv-text').value : '';
+        processRawCSVText(textVal);
+      }
+      refreshCSVPreview();
+    }
+
+    function decodeCSVArrayBuffer(buffer) {
+      try {
+        const utf8 = new TextDecoder('utf-8', { fatal: true });
+        return utf8.decode(buffer);
+      } catch (_) {
+        try {
+          const thai = new TextDecoder('windows-874');
+          return thai.decode(buffer);
+        } catch (e) {
+          const fallback = new TextDecoder('utf-8');
+          return fallback.decode(buffer);
+        }
+      }
+    }
+
+    function handleStudentCSVFileSelect(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const fileLabel = document.getElementById('mimp-file-label');
+      const subLabel = document.getElementById('mimp-file-sublabel');
+
+      if (fileLabel) fileLabel.innerHTML = `<i class="fas fa-check-circle text-emerald-500 me-1"></i> ${escapeHTML(file.name)}`;
+      if (subLabel) subLabel.innerText = `ขนาดไฟล์: ${(file.size / 1024).toFixed(1)} KB (กำลังอ่านข้อมูล...)`;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const buffer = evt.target.result;
+        const text = decodeCSVArrayBuffer(buffer);
+        window.currentRawCSVText = text;
+        processRawCSVText(text);
+
+        if (subLabel) {
+          subLabel.innerText = `ขนาดไฟล์: ${(file.size / 1024).toFixed(1)} KB | ตรวจพบ ${window.parsedCSVRows.length} รายการ`;
+        }
+        refreshCSVPreview();
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function handleStudentCSVTextChange() {
+      const text = document.getElementById('mimp-csv-text') ? document.getElementById('mimp-csv-text').value : '';
+      processRawCSVText(text);
+      refreshCSVPreview();
+    }
+
+    function parseCSVLine(line) {
+      let delimiter = ',';
+      if (!line.includes(',') && line.includes(';')) delimiter = ';';
+      else if (!line.includes(',') && line.includes('\t')) delimiter = '\t';
+
+      const values = [];
+      let current = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+          if (inQuotes && line[i + 1] === '"') {
+            current += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === delimiter && !inQuotes) {
+          values.push(current.trim());
+          current = '';
         } else {
-          // Check tab-delimited
-          const tabs = cleanLine.split('\t');
-          if (tabs.length >= 2) {
-            code = tabs[0].trim();
-            name = tabs[1].trim();
+          current += char;
+        }
+      }
+      values.push(current.trim());
+      return values;
+    }
+
+    function findClassIdByNameOrQuery(classStr, defaultClassId) {
+      if (!classStr) return defaultClassId;
+      const clean = classStr.toString().trim().replace(/[\s\.]+/g, '').toLowerCase();
+
+      // 1. Direct match by class name
+      let found = (dbCache.classes || []).find(c => c.name.replace(/[\s\.]+/g, '').toLowerCase() === clean);
+      if (found) return found.id;
+
+      // 2. Direct match by ID
+      found = (dbCache.classes || []).find(c => String(c.id) === clean);
+      if (found) return found.id;
+
+      // 3. Partial match (e.g. "1/1" inside "ม.1/1")
+      found = (dbCache.classes || []).find(c => c.name.toLowerCase().includes(clean));
+      if (found) return found.id;
+
+      return defaultClassId;
+    }
+
+    function processRawCSVText(rawText) {
+      window.parsedCSVRows = [];
+      if (!rawText || !rawText.trim()) return;
+
+      const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      if (lines.length === 0) return;
+
+      let startIndex = 0;
+      let codeIdx = -1;
+      let nameIdx = -1;
+      let classIdx = -1;
+
+      // Check if first line is a header row
+      const firstLineTokens = parseCSVLine(lines[0]).map(t => t.toLowerCase());
+      const hasHeader = firstLineTokens.some(t => 
+        t.includes('เลข') || t.includes('รหัส') || t.includes('code') || t === 'id' ||
+        t.includes('ชื่อ') || t.includes('name') || t.includes('สกุล') ||
+        t.includes('ชั้น') || t.includes('ห้อง') || t.includes('class') || t.includes('grade')
+      );
+
+      if (hasHeader) {
+        startIndex = 1;
+        firstLineTokens.forEach((t, i) => {
+          if (codeIdx === -1 && (t.includes('เลข') || t.includes('รหัส') || t.includes('code') || t === 'id')) codeIdx = i;
+          else if (nameIdx === -1 && (t.includes('ชื่อ') || t.includes('name') || t.includes('สกุล'))) nameIdx = i;
+          else if (classIdx === -1 && (t.includes('ชั้น') || t.includes('ห้อง') || t.includes('class') || t.includes('grade'))) classIdx = i;
+        });
+      }
+
+      for (let i = startIndex; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line) continue;
+        const tokens = parseCSVLine(line);
+
+        let code = '';
+        let name = '';
+        let rawClass = '';
+
+        if (codeIdx !== -1 && nameIdx !== -1) {
+          code = tokens[codeIdx] || '';
+          name = tokens[nameIdx] || '';
+          rawClass = classIdx !== -1 ? (tokens[classIdx] || '') : '';
+        } else if (tokens.length >= 3) {
+          code = tokens[0];
+          name = tokens[1];
+          rawClass = tokens[2];
+        } else if (tokens.length === 2) {
+          if (/^\d+$/.test(tokens[0])) {
+            code = tokens[0];
+            name = tokens[1];
+          } else {
+            name = tokens[0];
+            rawClass = tokens[1];
+          }
+        } else if (tokens.length === 1) {
+          // Line might be formatted like "10001 เด็กชายสมชาย ใจดี ม.1/1"
+          const matchWithClass = line.match(/^(\d{3,10})?[\s\t]*(.+?)[\s\t]+(ม\.?\d+\/\d+|\d+\/\d+)$/i);
+          if (matchWithClass) {
+            code = matchWithClass[1] || '';
+            name = matchWithClass[2] || '';
+            rawClass = matchWithClass[3] || '';
+          } else {
+            const matchSimple = line.match(/^(\d{3,10})?[\s\t]*(.+)$/);
+            if (matchSimple) {
+              code = matchSimple[1] || '';
+              name = matchSimple[2] || '';
+            } else {
+              name = line;
+            }
           }
         }
 
+        // Clean up numbering from name like "1. ", "1) "
+        name = (name || '').replace(/^\d+[\.\)\s\-]\s*/, '').trim();
+
         if (name) {
-          parsedStudents.push({
-            id: now + idx,
-            studentCode: code,
+          window.parsedCSVRows.push({
+            code: (code || '').trim(),
             name: name,
-            classId: targetClassId
+            rawClass: (rawClass || '').trim()
           });
         }
-      });
+      }
+    }
 
-      if (parsedStudents.length === 0) {
-        Swal.fire('นำเข้าไม่สำเร็จ', 'ไม่สามารถแยกรายชื่อนักเรียนได้ กรุณาตรวจสอบรูปแบบ', 'error');
+    function refreshCSVPreview() {
+      const container = document.getElementById('mimp-csv-preview-container');
+      const countEl = document.getElementById('mimp-csv-detected-count');
+      const listEl = document.getElementById('mimp-csv-preview-list');
+      const confirmBtn = document.getElementById('btn-confirm-import-csv');
+      const targetSelect = document.getElementById('mimp-csv-target-class');
+
+      if (!container || !countEl || !listEl || !confirmBtn) return;
+
+      const total = window.parsedCSVRows ? window.parsedCSVRows.length : 0;
+      if (total === 0) {
+        container.classList.add('hidden');
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="fas fa-file-import"></i> <span>ยืนยันการนำเข้า</span>';
         return;
       }
 
-      if (replaceExisting) {
-        dbCache.students = dbCache.students.filter(s => s.classId != targetClassId);
+      container.classList.remove('hidden');
+      confirmBtn.disabled = false;
+      confirmBtn.innerHTML = `<i class="fas fa-file-import"></i> <span>ยืนยันการนำเข้า (${total} คน)</span>`;
+      countEl.innerText = `${total} คน`;
+
+      const targetClassVal = targetSelect ? targetSelect.value : 'auto';
+      const defaultClassId = (targetClassVal !== 'auto' && parseInt(targetClassVal))
+        ? parseInt(targetClassVal)
+        : ((dbCache.classes && dbCache.classes[0]) ? dbCache.classes[0].id : 0);
+
+      // Render first 5 items preview
+      const previewItems = window.parsedCSVRows.slice(0, 5);
+      listEl.innerHTML = previewItems.map((item, idx) => {
+        const classId = targetClassVal !== 'auto'
+          ? parseInt(targetClassVal)
+          : findClassIdByNameOrQuery(item.rawClass, defaultClassId);
+        const cls = (dbCache.classes || []).find(c => c.id == classId);
+        const className = cls ? cls.name : (item.rawClass || 'ไม่ระบุชั้น');
+
+        return `
+          <div class="py-1.5 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 truncate">
+              <span class="text-slate-400 text-[10px] w-5">${idx + 1}.</span>
+              ${item.code ? `<span class="px-1.5 py-0.2 rounded bg-slate-200 dark:bg-slate-700 text-[11px] font-semibold">${escapeHTML(item.code)}</span>` : ''}
+              <span class="font-medium text-slate-800 dark:text-slate-200 truncate">${escapeHTML(item.name)}</span>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300 flex-shrink-0">
+              ${escapeHTML(className)}
+            </span>
+          </div>
+        `;
+      }).join('');
+
+      if (total > 5) {
+        listEl.innerHTML += `
+          <div class="py-1 text-center text-[11px] text-slate-400 italic">
+            ... และรายชื่ออื่นอีก ${total - 5} คน
+          </div>
+        `;
+      }
+    }
+
+    function handleImportStudentsCSVSubmit(e) {
+      e.preventDefault();
+
+      if (!window.parsedCSVRows || window.parsedCSVRows.length === 0) {
+        Swal.fire('ไม่พบข้อมูล', 'กรุณาเลือกไฟล์ .CSV หรือวางข้อความรายชื่อนักเรียนก่อนกดยืนยัน', 'warning');
+        return;
       }
 
-      dbCache.students.push(...parsedStudents);
+      const targetSelect = document.getElementById('mimp-csv-target-class');
+      const targetClassVal = targetSelect ? targetSelect.value : 'auto';
+      const defaultClassId = (targetClassVal !== 'auto' && parseInt(targetClassVal))
+        ? parseInt(targetClassVal)
+        : ((dbCache.classes && dbCache.classes[0]) ? dbCache.classes[0].id : 0);
+
+      const replaceExisting = document.getElementById('mimp-csv-replace-existing')
+        ? document.getElementById('mimp-csv-replace-existing').checked
+        : false;
+
+      if (!dbCache.students) dbCache.students = [];
+
+      const now = Date.now();
+      const newStudents = [];
+      const affectedClassIds = new Set();
+
+      window.parsedCSVRows.forEach((row, idx) => {
+        const classId = targetClassVal !== 'auto'
+          ? parseInt(targetClassVal)
+          : findClassIdByNameOrQuery(row.rawClass, defaultClassId);
+
+        affectedClassIds.add(classId);
+
+        newStudents.push({
+          id: now + idx,
+          studentCode: row.code,
+          name: row.name,
+          classId: classId
+        });
+      });
+
+      if (replaceExisting) {
+        // Remove existing students in all affected classes
+        dbCache.students = dbCache.students.filter(s => !affectedClassIds.has(s.classId));
+      }
+
+      dbCache.students.push(...newStudents);
 
       saveDatabase(() => {
-        closeModal('modal-crud');
+        closeModal('modal-import-csv');
         renderStudentAdminTable();
         Swal.fire({
           icon: 'success',
-          title: 'นำเข้ารายชื่อสำเร็จ',
-          text: `นำเข้ารายชื่อนักเรียนจำนวน ${parsedStudents.length} คน เรียบร้อยแล้ว`,
+          title: 'นำเข้าข้อมูลนักเรียนสำเร็จ!',
+          html: `นำเข้ารายชื่อนักเรียนจำนวน <strong>${newStudents.length} คน</strong> เรียบร้อยแล้ว<br><small class="text-slate-500">บันทึกลงในสเปรดชีต Google Sheets เรียบร้อย</small>`,
           confirmButtonColor: '#4F46E5'
         });
       });

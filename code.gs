@@ -388,3 +388,39 @@ function ensureSheetsInitialized(ss) {
     }
   }
 }
+
+/* ============================================================
+ *  HELPER: UPLOAD IMAGE TO GOOGLE DRIVE (MHC_Club_Covers)
+ * ============================================================ */
+
+/**
+ * อัปโหลดรูปภาพหน้าปกชุมนุมขึ้น Google Drive โดยตรงในโฟลเดอร์ MHC_Club_Covers
+ * @param {string} base64Data - Data URL ของรูปภาพ
+ * @param {string} fileName - ชื่อไฟล์
+ * @return {string} URL ของรูปภาพ (Google Drive direct CDN link)
+ */
+function uploadClubCoverImage(base64Data, fileName) {
+  try {
+    const splitIndex = base64Data.indexOf('base64,');
+    if (splitIndex === -1) throw new Error('รูปแบบ Base64 ไม่ถูกต้อง');
+
+    const contentTypeMatch = base64Data.match(/^data:(image\/[a-zA-Z0-9\+\.-]+);base64,/);
+    const contentType = contentTypeMatch ? contentTypeMatch[1] : 'image/jpeg';
+    const rawBase64 = base64Data.substring(splitIndex + 7);
+    const bytes = Utilities.base64Decode(rawBase64);
+    const safeName = (fileName || `club_${Date.now()}`).replace(/[^a-zA-Z0-9_\-\.]/g, '_');
+    const blob = Utilities.newBlob(bytes, contentType, safeName.endsWith('.jpg') ? safeName : safeName + '.jpg');
+
+    // ค้นหาหรือสร้างโฟลเดอร์เก็บภาพปกชุมนุม
+    const folderName = 'MHC_Club_Covers';
+    const folders = DriveApp.getFoldersByName(folderName);
+    const folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
+
+    const file = folder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+    return `https://lh3.googleusercontent.com/d/${file.getId()}`;
+  } catch (err) {
+    throw new Error('ไม่สามารถบันทึกภาพลง Google Drive ได้: ' + err.message);
+  }
+}

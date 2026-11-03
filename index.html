@@ -1178,10 +1178,42 @@
       setInterval(updateCountdownDisplay, 1000);
     });
 
+    /* --------------------------------------------------------
+       GOOGLE APPS SCRIPT WEB APP API INTEGRATION
+       -------------------------------------------------------- */
+    const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbx79ojObja7oU77bogadWeOVaMIIarafEHyawUrBA28z8WFtwNZsxX-a5AGJANCl4yD/exec';
+
+    function getGASUrl() {
+      return localStorage.getItem('mhc_gas_url') || DEFAULT_GAS_URL;
+    }
+
+    function setGASUrl(url) {
+      if (url) localStorage.setItem('mhc_gas_url', url.trim());
+    }
+
+    async function rpcGAS(fn, ...args) {
+      const url = getGASUrl();
+      if (!url) throw new Error('ยังไม่ได้กำหนด URL ของ Google Apps Script');
+
+      // Use text/plain;charset=utf-8 to avoid CORS preflight options
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ fn, args }),
+        redirect: 'follow'
+      });
+
+      const json = await res.json();
+      if (!json || json.ok === false) {
+        throw new Error(json ? (json.message || json.error) : 'เกิดข้อผิดพลาดในการเชื่อมต่อ Google Sheets');
+      }
+      return json.data !== undefined ? json.data : json;
+    }
+
     function loadInitialDatabase() {
       showLoading('กำลังโหลดข้อมูล...', 'เชื่อมต่อฐานข้อมูล Google Sheets');
 
-      // Check if running in GAS environment
+      // 1. Running inside Google Apps Script Web App environment
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
           .withSuccessHandler((data) => {
@@ -1198,37 +1230,58 @@
           })
           .withFailureHandler((err) => {
             hideLoading();
-            console.warn('GAS fetch failed, falling back to cached/mock:', err);
-            dbCache = JSON.parse(JSON.stringify(DEFAULT_MOCK_DB));
-            renderApp();
-            Swal.fire({
-              icon: 'warning',
-              title: 'โหมดออฟไลน์ / จำลอง',
-              text: 'ไม่สามารถเชื่อมต่อ Google Sheets โดยตรงได้ กำลังแสดงข้อมูลจำลองเพื่อการทดสอบ',
-              confirmButtonColor: '#4F46E5'
-            });
+            console.warn('GAS fetch failed:', err);
+            fallbackToLocalStorage();
           })
           .getDatabaseFromSheet();
-      } else {
-        // Running locally in browser without GAS
-        setTimeout(() => {
-          hideLoading();
-          const localSaved = localStorage.getItem('mhc_local_db');
-          if (localSaved) {
-            try {
-              dbCache = JSON.parse(localSaved);
+        return;
+      }
+
+      // 2. Running externally (e.g. GitHub Pages) -> Fetch from Google Apps Script Web App API
+      const gasUrl = getGASUrl();
+      if (gasUrl) {
+        rpcGAS('getDatabaseFromSheet')
+          .then((data) => {
+            hideLoading();
+            if (data && typeof data === 'object') {
+              dbCache = data;
               if (!Array.isArray(dbCache.students)) {
                 dbCache.students = JSON.parse(JSON.stringify(DEFAULT_MOCK_DB.students || []));
               }
-            } catch(e) {
-              dbCache = JSON.parse(JSON.stringify(DEFAULT_MOCK_DB));
+              try {
+                localStorage.setItem('mhc_local_db', JSON.stringify(dbCache));
+              } catch (_) {}
+              console.log('✓ เชื่อมต่อฐานข้อมูล Google Sheets ผ่าน Web App สำเร็จ');
+            } else {
+              fallbackToLocalStorage();
             }
-          } else {
-            dbCache = JSON.parse(JSON.stringify(DEFAULT_MOCK_DB));
-          }
-          renderApp();
-        }, 400);
+            renderApp();
+          })
+          .catch((err) => {
+            console.warn('Direct fetch to GAS failed, falling back to local storage:', err);
+            fallbackToLocalStorage();
+          });
+      } else {
+        fallbackToLocalStorage();
       }
+    }
+
+    function fallbackToLocalStorage() {
+      hideLoading();
+      const localSaved = localStorage.getItem('mhc_local_db');
+      if (localSaved) {
+        try {
+          dbCache = JSON.parse(localSaved);
+          if (!Array.isArray(dbCache.students)) {
+            dbCache.students = JSON.parse(JSON.stringify(DEFAULT_MOCK_DB.students || []));
+          }
+        } catch(e) {
+          dbCache = JSON.parse(JSON.stringify(DEFAULT_MOCK_DB));
+        }
+      } else {
+        dbCache = JSON.parse(JSON.stringify(DEFAULT_MOCK_DB));
+      }
+      renderApp();
     }
 
     function getClubTeachersText(club) {
@@ -1268,6 +1321,12 @@
     function saveDatabase(callback) {
       showLoading('กำลังบันทึกข้อมูล...', 'อัปเดตสเปรดชีต Google Sheets');
 
+      // Always save to localStorage as backup
+      try {
+        localStorage.setItem('mhc_local_db', JSON.stringify(dbCache));
+      } catch (_) {}
+
+      // 1. Running inside Google Apps Script Web App
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
           .withSuccessHandler((updatedDb) => {
@@ -1280,14 +1339,58 @@
             Swal.fire('เกิดข้อผิดพลาดในการบันทึก', err.message || 'กรุณาลองใหม่อีกครั้ง', 'error');
           })
           .saveDatabaseToSheet(dbCache);
+        return;
+      }
+
+      // 2. Running externally (e.g. GitHub Pages) -> Call Google Apps Script Web App API
+      const gasUrl = getGASUrl();
+      if (gasUrl) {
+        rpcGAS('saveDatabaseToSheet', dbCache)
+          .then((updatedDb) => {
+            hideLoading();
+            if (updatedDb) dbCache = updatedDb;
+            try {
+              localStorage.setItem('mhc_local_db', JSON.stringify(dbCache));
+            } catch (_) {}
+            if (callback) callback();
+          })
+          .catch((err) => {
+            hideLoading();
+            console.warn('API save to GAS failed:', err);
+            // It is saved to localStorage, but warn the user that Google Sheet was not updated
+            Swal.fire({
+              icon: 'warning',
+              title: 'บันทึกในเครื่องแล้ว (ยังไม่เข้า Google Sheet)',
+              html: `<div class="text-left text-xs space-y-2">
+                <p>ข้อมูลถูกบันทึกไว้ในอุปกรณ์นี้เรียบร้อยแล้ว แต่ยังไม่สามารถส่งไปยัง Google Sheet ได้เนื่องจาก:</p>
+                <ul class="list-disc pl-5 text-slate-600 dark:text-slate-300">
+                  <li>ยังไม่ได้นำโค้ด <code>code.gs</code> ไปวางทับใน Google Apps Script หรือ</li>
+                  <li>ยังไม่ได้ Deploy <strong>"การทำให้ใช้งานได้เวอร์ชันใหม่ (New version)"</strong> บน Google Apps Script</li>
+                </ul>
+                <p class="pt-1 text-brand-600 dark:text-brand-400 font-semibold">เมื่ออัปเดตโค้ดบน Apps Script แล้ว สามารถมากดปุ่ม "ซิงค์ขึ้น Google Sheet" ในหน้าตั้งค่าได้ทันที ข้อมูลจะไม่สูญหายครับ</p>
+              </div>`,
+              confirmButtonColor: '#4F46E5'
+            });
+            if (callback) callback();
+          });
       } else {
-        // Save to localStorage in local mode
         setTimeout(() => {
-          localStorage.setItem('mhc_local_db', JSON.stringify(dbCache));
           hideLoading();
           if (callback) callback();
         }, 300);
       }
+    }
+
+    function syncLocalDatabaseToSheet() {
+      showLoading('กำลังซิงค์ข้อมูล...', 'ส่งข้อมูลทั้งหมดจากเครื่องขึ้น Google Sheets');
+      saveDatabase(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'ซิงค์ข้อมูลสำเร็จ!',
+          text: 'ข้อมูลทั้งหมด (ชุมนุม, นักเรียน, ชั้นเรียน, การลงทะเบียน) ถูกบันทึกลงใน Google Sheets เรียบร้อยแล้ว',
+          confirmButtonColor: '#4F46E5'
+        });
+      });
     }
 
     /* --------------------------------------------------------
@@ -2678,30 +2781,80 @@
 
       // 4. Subview: Registration Schedule Settings
       else if (subViewKey === 'adm_settings') {
-        document.getElementById('workspace-title').innerText = 'ตั้งค่ากำหนดเวลาเปิด-ปิด ระบบลงทะเบียน';
+        document.getElementById('workspace-title').innerText = 'ตั้งค่ากำหนดเวลา & เชื่อมโยงฐานข้อมูล Google Sheets';
         content.innerHTML = `
-          <div class="max-w-xl bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-700 shadow-soft">
-            <form onsubmit="handleSaveSettings(event)" class="space-y-5">
-              <div>
-                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-                  <i class="fas fa-calendar-check text-emerald-500 me-1"></i> วันที่และเวลาเริ่มต้น (เปิดระบบ)
-                </label>
-                <input type="datetime-local" id="input-set-start" value="${dbCache.settings.startPeriod || ''}" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- Card 1: Time Window -->
+            <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-700 shadow-soft space-y-4">
+              <div class="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-700">
+                <i class="fas fa-clock text-brand-600 text-lg"></i>
+                <h4 class="font-bold text-slate-800 dark:text-slate-100 text-sm sm:text-base">กำหนดเวลาเปิด-ปิด ระบบลงทะเบียน</h4>
               </div>
 
-              <div>
-                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-                  <i class="fas fa-calendar-xmark text-rose-500 me-1"></i> วันที่และเวลาสิ้นสุด (ปิดรับสมัคร)
-                </label>
-                <input type="datetime-local" id="input-set-end" value="${dbCache.settings.endPeriod || ''}" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              <form onsubmit="handleSaveSettings(event)" class="space-y-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    <i class="fas fa-calendar-check text-emerald-500 me-1"></i> วันที่และเวลาเริ่มต้น (เปิดระบบ)
+                  </label>
+                  <input type="datetime-local" id="input-set-start" value="${dbCache.settings.startPeriod || ''}" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    <i class="fas fa-calendar-xmark text-rose-500 me-1"></i> วันที่และเวลาสิ้นสุด (ปิดรับสมัคร)
+                  </label>
+                  <input type="datetime-local" id="input-set-end" value="${dbCache.settings.endPeriod || ''}" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                </div>
+
+                <div class="pt-2">
+                  <button type="submit" class="w-full py-3 rounded-xl text-xs sm:text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-aurora transition-all btn-press flex items-center justify-center gap-2">
+                    <i class="fas fa-save"></i> <span>บันทึกกำหนดเวลา</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Card 2: Google Sheets Connection & Sync -->
+            <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-700 shadow-soft space-y-4">
+              <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-700">
+                <div class="flex items-center gap-2">
+                  <i class="fas fa-file-excel text-emerald-600 text-lg"></i>
+                  <h4 class="font-bold text-slate-800 dark:text-slate-100 text-sm sm:text-base">เชื่อมโยง Google Sheets</h4>
+                </div>
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold ${typeof google !== 'undefined' && google.script && google.script.run ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700'}">
+                  ${typeof google !== 'undefined' && google.script && google.script.run ? 'Apps Script Mode' : 'Web API Mode'}
+                </span>
               </div>
 
-              <div class="pt-3">
-                <button type="submit" class="w-full py-3.5 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-aurora transition-all btn-press flex items-center justify-center gap-2">
-                  <i class="fas fa-save"></i> <span>บันทึกกำหนดเวลา</span>
-                </button>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    Google Apps Script Web App URL
+                  </label>
+                  <div class="flex gap-2">
+                    <input type="url" id="input-set-gas-url" value="${getGASUrl()}" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    <button type="button" onclick="setGASUrl(document.getElementById('input-set-gas-url').value); Swal.fire({ icon: 'success', title: 'บันทึก Web App URL สำเร็จ', timer: 1200, showConfirmButton: false });" class="px-3 py-2.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors btn-press flex-shrink-0">
+                      บันทึก URL
+                    </button>
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-1">URL ของเว็บแอปที่ได้จากการ Deploy ใน Google Apps Script</p>
+                </div>
+
+                <div class="p-4 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 rounded-2xl space-y-2.5">
+                  <h5 class="text-xs font-bold text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
+                    <i class="fas fa-arrows-rotate text-emerald-600"></i> ซิงค์ข้อมูลขึ้น Google Sheets
+                  </h5>
+                  <p class="text-xs text-emerald-800/80 dark:text-emerald-300/80 leading-relaxed">
+                    หากคุณเพิ่มรายชื่อนักเรียน ชุมนุม หรือข้อมูลอื่นๆ บนหน้าเว็บนี้ สามารถกดปุ่มด้านล่างเพื่อส่งข้อมูลทั้งหมดขึ้นไปบันทึกลงในสเปรดชีต Google Sheet ได้ทันที
+                  </p>
+                  <button type="button" onclick="syncLocalDatabaseToSheet()" class="w-full py-3 rounded-xl text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all btn-press flex items-center justify-center gap-2">
+                    <i class="fas fa-cloud-arrow-up"></i> <span>⚡ ซิงค์ข้อมูลทั้งหมดขึ้น Google Sheets เดี๋ยวนี้</span>
+                  </button>
+                </div>
               </div>
-            </form>
+            </div>
+
           </div>
         `;
       }

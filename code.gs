@@ -23,8 +23,7 @@ function doGet(e) {
   // รองรับ JSON API เผื่อเรียกทดสอบภายนอก (?api=getDatabase)
   if (e && e.parameter && e.parameter.api === 'getDatabase') {
     const data = getDatabaseFromSheet();
-    return ContentService.createTextOutput(JSON.stringify(data))
-      .setMimeType(ContentService.MimeType.JSON);
+    return jsonOut_({ ok: true, data: data });
   }
 
   const htmlOutput = HtmlService.createTemplateFromFile('index')
@@ -34,6 +33,45 @@ function doGet(e) {
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 
   return htmlOutput;
+}
+
+/**
+ * Web App API Entry Point: รองรับการเรียกจาก GitHub Pages หรือภายนอกผ่าน HTTP POST
+ */
+function doPost(e) {
+  try {
+    let payload = {};
+    if (e && e.postData && e.postData.contents) {
+      try {
+        payload = JSON.parse(e.postData.contents);
+      } catch (_) {
+        payload = {};
+      }
+    }
+
+    const fn = payload.fn;
+    const args = payload.args || [];
+
+    if (fn === 'getDatabaseFromSheet') {
+      return jsonOut_({ ok: true, data: getDatabaseFromSheet() });
+    } else if (fn === 'saveDatabaseToSheet') {
+      const updated = saveDatabaseToSheet(args[0]);
+      return jsonOut_({ ok: true, data: updated });
+    } else if (fn === 'uploadClubCoverImage') {
+      const url = uploadClubCoverImage(args[0], args[1]);
+      return jsonOut_({ ok: true, data: url });
+    }
+
+    return jsonOut_({ ok: false, message: 'Forbidden or unknown function: ' + fn });
+  } catch (err) {
+    Logger.log('[doPost] Error: ' + (err.stack || err.message));
+    return jsonOut_({ ok: false, message: err.message || 'Server error' });
+  }
+}
+
+function jsonOut_(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 /**

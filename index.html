@@ -1393,6 +1393,55 @@
       });
     }
 
+    function setupRemoteDatabase() {
+      Swal.fire({
+        title: 'ยืนยันสร้างโครงสร้างฐานข้อมูล?',
+        text: 'ระบบจะสร้างชีตทั้ง 6 ชีต (Settings, Users, Classes, Clubs, Registrations, Students) บน Google Sheet พร้อมจัดหัวตารางให้อัตโนมัติ',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#4F46E5',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: 'ยืนยันสร้าง Database',
+        cancelButtonText: 'ยกเลิก'
+      }).then((result) => {
+        if (!result.isConfirmed) return;
+
+        showLoading('กำลังติดตั้งฐานข้อมูล...', 'สร้างชีตและโครงสร้างบน Google Sheets');
+
+        const onSuccess = () => {
+          hideLoading();
+          Swal.fire({
+            icon: 'success',
+            title: 'ติดตั้งฐานข้อมูลสำเร็จ 🎉',
+            text: 'ระบบได้สร้างชีตและโครงสร้างทั้ง 6 ชีตบน Google Sheet เรียบร้อยแล้ว',
+            confirmButtonColor: '#4F46E5'
+          });
+          loadInitialDatabase();
+        };
+
+        const onError = (err) => {
+          hideLoading();
+          Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: err ? (err.message || String(err)) : 'ไม่สามารถติดตั้งฐานข้อมูลได้',
+            confirmButtonColor: '#EF4444'
+          });
+        };
+
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+          google.script.run
+            .withSuccessHandler(onSuccess)
+            .withFailureHandler(onError)
+            .setupDatabase();
+        } else {
+          rpcGAS('setupDatabase')
+            .then(onSuccess)
+            .catch(onError);
+        }
+      });
+    }
+
     /* --------------------------------------------------------
        TIME WINDOW VALIDATION
        -------------------------------------------------------- */
@@ -2850,6 +2899,18 @@
                   </p>
                   <button type="button" onclick="syncLocalDatabaseToSheet()" class="w-full py-3 rounded-xl text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all btn-press flex items-center justify-center gap-2">
                     <i class="fas fa-cloud-arrow-up"></i> <span>⚡ ซิงค์ข้อมูลทั้งหมดขึ้น Google Sheets เดี๋ยวนี้</span>
+                  </button>
+                </div>
+
+                <div class="p-4 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/40 rounded-2xl space-y-2.5">
+                  <h5 class="text-xs font-bold text-indigo-900 dark:text-indigo-200 flex items-center gap-1.5">
+                    <i class="fas fa-database text-indigo-600"></i> ติดตั้ง / สร้างโครงสร้างฐานข้อมูล (Setup Database)
+                  </h5>
+                  <p class="text-xs text-indigo-800/80 dark:text-indigo-300/80 leading-relaxed">
+                    กดปุ่มนี้เพื่อสร้างชีตที่จำเป็นทั้ง 6 ชีตอัตโนมัติบน Google Sheets พร้อมจัดรูปแบบหัวตารางสีครามและข้อมูลเริ่มต้น (Settings, Users, Classes, Clubs, Registrations, Students)
+                  </p>
+                  <button type="button" onclick="setupRemoteDatabase()" class="w-full py-3 rounded-xl text-xs sm:text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-all btn-press flex items-center justify-center gap-2">
+                    <i class="fas fa-hammer"></i> <span>🛠️ ติดตั้ง / สร้างโครงสร้าง Database บน Sheet อัตโนมัติ</span>
                   </button>
                 </div>
               </div>

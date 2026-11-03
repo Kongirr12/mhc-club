@@ -60,6 +60,9 @@ function doPost(e) {
     } else if (fn === 'uploadClubCoverImage') {
       const url = uploadClubCoverImage(args[0], args[1]);
       return jsonOut_({ ok: true, data: url });
+    } else if (fn === 'setupDatabase' || fn === 'createDatabase') {
+      const res = setupDatabase();
+      return jsonOut_({ ok: true, data: res });
     }
 
     return jsonOut_({ ok: false, message: 'Forbidden or unknown function: ' + fn });
@@ -347,84 +350,174 @@ function writeStudentsSheet(ss, students) {
 }
 
 /* ============================================================
- *  HELPER: INITIALIZE DEFAULT SHEETS & DATA IF FRESH
+ *  DATABASE SETUP & INITIALIZATION (สร้างฐานข้อมูลอัตโนมัติ)
  * ============================================================ */
+
+/**
+ * ฟังก์ชันหลักสำหรับติดตั้ง / สร้างโครงสร้างฐานข้อมูลใน Google Sheet
+ * สามารถกด "เรียกใช้ (Run)" ฟังก์ชันนี้ได้โดยตรงใน Apps Script Editor
+ */
+function createDatabase() {
+  return setupDatabase();
+}
+
+function setupDatabase() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  // 1. ชีต Settings
+  let setSheet = ss.getSheetByName('Settings');
+  if (!setSheet) setSheet = ss.insertSheet('Settings');
+  if (setSheet.getLastRow() <= 1) {
+    writeSettingsSheet(ss, {
+      startPeriod: '2026-10-01T08:00',
+      endPeriod: '2026-11-30T16:30'
+    });
+  }
+  formatHeaderRow_(setSheet, 2, '#4F46E5');
+
+  // 2. ชีต Users (บัญชีแอดมินเริ่มต้น)
+  let userSheet = ss.getSheetByName('Users');
+  if (!userSheet) userSheet = ss.insertSheet('Users');
+  if (userSheet.getLastRow() <= 1) {
+    writeUsersSheet(ss, [
+      { id: 1, username: 'admin', password: '123', name: 'ครูก้องนที อุ่นเจริญ', role: 'admin' }
+    ]);
+  }
+  formatHeaderRow_(userSheet, 5, '#4F46E5');
+
+  // 3. ชีต Classes (ระดับชั้นเรียน)
+  let classSheet = ss.getSheetByName('Classes');
+  if (!classSheet) classSheet = ss.insertSheet('Classes');
+  if (classSheet.getLastRow() <= 1) {
+    writeClassesSheet(ss, [
+      { id: 101, name: 'ม.1/1' },
+      { id: 102, name: 'ม.1/2' },
+      { id: 201, name: 'ม.2/1' },
+      { id: 202, name: 'ม.2/2' },
+      { id: 301, name: 'ม.3/1' },
+      { id: 302, name: 'ม.3/2' },
+      { id: 401, name: 'ม.4/1' },
+      { id: 501, name: 'ม.5/1' },
+      { id: 601, name: 'ม.6/1' }
+    ]);
+  }
+  formatHeaderRow_(classSheet, 2, '#4F46E5');
+
+  // 4. ชีต Clubs (กิจกรรมชุมนุม)
+  let clubSheet = ss.getSheetByName('Clubs');
+  if (!clubSheet) clubSheet = ss.insertSheet('Clubs');
+  if (clubSheet.getLastRow() <= 1) {
+    writeClubsSheet(ss, [
+      { id: 1, name: 'ชุมนุมหุ่นยนต์และปัญญาประดิษฐ์ (AI & Robotics)', cover: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=800&q=80', teachers: 'ครูก้องนที อุ่นเจริญ, ครูวชิราวุธ ขันติวงศ์', capacity: 30 },
+      { id: 2, name: 'ชุมนุมดนตรีสากลและวงดุริยางค์', cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80', teachers: 'ครูวชิราวุธ ขันติวงศ์, ครูนภัสสร มณีโชติ', capacity: 25 },
+      { id: 3, name: 'ชุมนุมคณิตศาสตร์คิดเร็วและโอลิมปิกวิชาการ', cover: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80', teachers: 'ครูวัลย์วิภา บุญสมบัติ', capacity: 35 },
+      { id: 4, name: 'ชุมนุมกีฬาบาสเกตบอลและสันทนาการ', cover: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80', teachers: 'ครูประเสริฐ ชัยนาท, ครูก้องนที อุ่นเจริญ', capacity: 30 },
+      { id: 5, name: 'ชุมนุมศิลปะสร้างสรรค์และดิจิทัลเพ้นท์ติ้ง', cover: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=800&q=80', teachers: 'ครูนภัสสร มณีโชติ', capacity: 20 },
+      { id: 6, name: 'ชุมนุมสวนพฤกษศาสตร์และเกษตรอินทรีย์', cover: 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=800&q=80', teachers: 'ครูประเสริฐ ชัยนาท, ครูวัลย์วิภา บุญสมบัติ', capacity: 40 }
+    ]);
+  }
+  formatHeaderRow_(clubSheet, 5, '#4F46E5');
+
+  // 5. ชีต Registrations (ประวัติการลงทะเบียน)
+  let regSheet = ss.getSheetByName('Registrations');
+  if (!regSheet) regSheet = ss.insertSheet('Registrations');
+  if (regSheet.getLastRow() === 0) {
+    regSheet.appendRow(['ID', 'StudentName', 'ClassID', 'ClubID', 'Timestamp']);
+  }
+  formatHeaderRow_(regSheet, 5, '#4F46E5');
+
+  // 6. ชีต Students (รายชื่อนักเรียน)
+  let stuSheet = ss.getSheetByName('Students');
+  if (!stuSheet) stuSheet = ss.insertSheet('Students');
+  if (stuSheet.getLastRow() <= 1) {
+    writeStudentsSheet(ss, [
+      { id: 1, studentCode: '10001', name: 'เด็กชายกิตติศักดิ์ ศรีวิชัย', classId: 101 },
+      { id: 2, studentCode: '10002', name: 'เด็กหญิงพรพิมล ชื่นใจ', classId: 101 },
+      { id: 3, studentCode: '10003', name: 'เด็กชายธนกฤต สุขเกษม', classId: 101 },
+      { id: 4, studentCode: '10004', name: 'เด็กหญิงกัญญาณัฐ วงศ์วิจิตร', classId: 101 },
+      { id: 5, studentCode: '10005', name: 'เด็กชายณัฐวุฒิ ทองหล่อ', classId: 102 },
+      { id: 6, studentCode: '10006', name: 'เด็กหญิงอารียา สมบัติเจริญ', classId: 102 },
+      { id: 7, studentCode: '20001', name: 'เด็กชายพงศกร พัฒนกิจ', classId: 201 },
+      { id: 8, studentCode: '20002', name: 'เด็กหญิงกมลวรรณ บุญมี', classId: 201 },
+      { id: 9, studentCode: '30001', name: 'เด็กชายนพรัตน์ แสนสุข', classId: 301 },
+      { id: 10, studentCode: '40001', name: 'นายณัฐดนัย รัตนโชติ', classId: 401 }
+    ]);
+  }
+  formatHeaderRow_(stuSheet, 4, '#4F46E5');
+
+  // ลบ Sheet1 หรือ ชีต1 เริ่มต้น หากเป็นชีตเปล่า
+  try {
+    const defaultSheetNames = ['Sheet1', 'ชีต1', 'Sheet 1'];
+    defaultSheetNames.forEach(dName => {
+      const dSheet = ss.getSheetByName(dName);
+      if (dSheet && ss.getSheets().length > 1 && dSheet.getLastRow() <= 1) {
+        ss.deleteSheet(dSheet);
+      }
+    });
+  } catch (_) {}
+
+  // เคลียร์แคชระบบ
+  clearSystemCache();
+  SpreadsheetApp.flush();
+
+  // แจ้งเตือนผู้ใช้งาน
+  try {
+    const ui = SpreadsheetApp.getUi();
+    ui.alert(
+      'ติดตั้งฐานข้อมูลสำเร็จ 🎉',
+      'ระบบได้สร้างและจัดรูปแบบชีตทั้ง 6 ชีตเรียบร้อยแล้ว:\n\n' +
+      '1. Settings (กำหนดเวลาเปิด-ปิด)\n' +
+      '2. Users (บัญชีผู้ดูแล: admin / 123)\n' +
+      '3. Classes (ระดับชั้น ม.1 - ม.6)\n' +
+      '4. Clubs (กิจกรรมชุมนุม)\n' +
+      '5. Registrations (ผลการลงทะเบียน)\n' +
+      '6. Students (รายชื่อนักเรียน)\n\n' +
+      'ผู้พัฒนาระบบ: ครูก้องนที อุ่นเจริญ | MHC Smart School v3.3.32',
+      ui.ButtonSet.OK
+    );
+  } catch (e) {
+    Logger.log('Database initialized successfully: Settings, Users, Classes, Clubs, Registrations, Students');
+  }
+
+  return { ok: true, message: 'Database setup completed successfully' };
+}
 
 function ensureSheetsInitialized(ss) {
   const required = ['Settings', 'Users', 'Classes', 'Clubs', 'Registrations', 'Students'];
-  let createdAny = false;
-
-  required.forEach(name => {
-    let sheet = ss.getSheetByName(name);
-    if (!sheet) {
-      sheet = ss.insertSheet(name);
-      createdAny = true;
-    }
-  });
-
-  if (createdAny) {
-    // ตรวจสอบและลงข้อมูลเริ่มต้น
-    const userSheet = ss.getSheetByName('Users');
-    if (userSheet.getLastRow() <= 1) {
-      writeUsersSheet(ss, [
-        { id: 1, username: 'admin', password: '123', name: 'ครูก้องนที อุ่นเจริญ', role: 'admin' }
-      ]);
-    }
-
-    const classSheet = ss.getSheetByName('Classes');
-    if (classSheet.getLastRow() <= 1) {
-      writeClassesSheet(ss, [
-        { id: 101, name: 'ม.1/1' },
-        { id: 102, name: 'ม.1/2' },
-        { id: 201, name: 'ม.2/1' },
-        { id: 202, name: 'ม.2/2' },
-        { id: 301, name: 'ม.3/1' },
-        { id: 302, name: 'ม.3/2' },
-        { id: 401, name: 'ม.4/1' },
-        { id: 501, name: 'ม.5/1' },
-        { id: 601, name: 'ม.6/1' }
-      ]);
-    }
-
-    const clubSheet = ss.getSheetByName('Clubs');
-    if (clubSheet.getLastRow() <= 1) {
-      writeClubsSheet(ss, [
-        { id: 1, name: 'ชุมนุมหุ่นยนต์และปัญญาประดิษฐ์ (AI & Robotics)', cover: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=800&q=80', teachers: 'ครูก้องนที อุ่นเจริญ, ครูวชิราวุธ ขันติวงศ์', capacity: 30 },
-        { id: 2, name: 'ชุมนุมดนตรีสากลและวงดุริยางค์', cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80', teachers: 'ครูวชิราวุธ ขันติวงศ์, ครูนภัสสร มณีโชติ', capacity: 25 },
-        { id: 3, name: 'ชุมนุมคณิตศาสตร์คิดเร็วและโอลิมปิกวิชาการ', cover: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80', teachers: 'ครูวัลย์วิภา บุญสมบัติ', capacity: 35 },
-        { id: 4, name: 'ชุมนุมกีฬาบาสเกตบอลและสันทนาการ', cover: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80', teachers: 'ครูประเสริฐ ชัยนาท, ครูก้องนที อุ่นเจริญ', capacity: 30 }
-      ]);
-    }
-
-    const setSheet = ss.getSheetByName('Settings');
-    if (setSheet.getLastRow() <= 1) {
-      writeSettingsSheet(ss, {
-        startPeriod: '2026-10-01T08:00',
-        endPeriod: '2026-11-30T16:30'
-      });
-    }
-
-    const regSheet = ss.getSheetByName('Registrations');
-    if (regSheet.getLastRow() === 0) {
-      regSheet.appendRow(['ID', 'StudentName', 'ClassID', 'ClubID', 'Timestamp']);
-    }
-
-    const stuSheet = ss.getSheetByName('Students');
-    if (stuSheet.getLastRow() <= 1) {
-      writeStudentsSheet(ss, [
-        { id: 1, studentCode: '10001', name: 'เด็กชายกิตติศักดิ์ ศรีวิชัย', classId: 101 },
-        { id: 2, studentCode: '10002', name: 'เด็กหญิงพรพิมล ชื่นใจ', classId: 101 },
-        { id: 3, studentCode: '10003', name: 'เด็กชายธนกฤต สุขเกษม', classId: 101 },
-        { id: 4, studentCode: '10004', name: 'เด็กหญิงกัญญาณัฐ วงศ์วิจิตร', classId: 101 },
-        { id: 5, studentCode: '10005', name: 'เด็กชายณัฐวุฒิ ทองหล่อ', classId: 102 },
-        { id: 6, studentCode: '10006', name: 'เด็กหญิงอารียา สมบัติเจริญ', classId: 102 },
-        { id: 7, studentCode: '20001', name: 'เด็กชายพงศกร พัฒนกิจ', classId: 201 },
-        { id: 8, studentCode: '20002', name: 'เด็กหญิงกมลวรรณ บุญมี', classId: 201 },
-        { id: 9, studentCode: '30001', name: 'เด็กชายนพรัตน์ แสนสุข', classId: 301 },
-        { id: 10, studentCode: '40001', name: 'นายณัฐดนัย รัตนโชติ', classId: 401 }
-      ]);
-    }
+  const hasAll = required.every(name => ss.getSheetByName(name));
+  if (!hasAll) {
+    setupDatabase();
   }
+}
+
+function clearSystemCache() {
+  const cache = CacheService.getScriptCache();
+  cache.remove('mhc_club_db');
+  Logger.log('System cache cleared.');
+}
+
+function formatHeaderRow_(sheet, colCount, bgColor) {
+  try {
+    sheet.setFrozenRows(1);
+    const range = sheet.getRange(1, 1, 1, colCount);
+    range.setBackground(bgColor || '#4F46E5');
+    range.setFontColor('#FFFFFF');
+    range.setFontWeight('bold');
+    range.setHorizontalAlignment('center');
+  } catch (_) {}
+}
+
+/**
+ * เมนูภาษาไทยใน Google Sheets
+ */
+function onOpen() {
+  try {
+    SpreadsheetApp.getUi()
+      .createMenu('🏫 ระบบลงทะเบียนชุมนุม')
+      .addItem('⚡ ติดตั้ง / สร้างโครงสร้างฐานข้อมูล (Setup Database)', 'setupDatabase')
+      .addItem('🔄 ล้างแคชระบบ (Clear Cache)', 'clearSystemCache')
+      .addToUi();
+  } catch (_) {}
 }
 
 /* ============================================================

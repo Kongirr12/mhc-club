@@ -317,10 +317,10 @@
               โรงเรียนมหาชัยพิทยาคาร มุ่งเน้นการจัดกิจกรรมพัฒนาผู้เรียนให้นักเรียนมีทักษะ ศักยภาพ และความสุขในการเรียนรู้
             </p>
             <div class="flex flex-wrap items-center gap-2.5 pt-2">
-              <a href="#clubs-section" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-brand-700 hover:bg-brand-50 text-xs sm:text-sm font-bold shadow-md transition-all btn-press">
+              <button type="button" onclick="scrollToClubsSection()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-brand-700 hover:bg-brand-50 text-xs sm:text-sm font-bold shadow-md transition-all btn-press">
                 <i class="fas fa-cubes text-brand-600"></i> <span>เลือกลงทะเบียนชุมนุม</span>
-              </a>
-              <button onclick="navigateTo('check')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs sm:text-sm font-bold backdrop-blur-md transition-all btn-press border border-white/25">
+              </button>
+              <button type="button" onclick="navigateTo('check')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs sm:text-sm font-bold backdrop-blur-md transition-all btn-press border border-white/25">
                 <i class="fas fa-clipboard-check text-amber-300"></i> <span>ตรวจสอบผลการลงทะเบียน</span>
               </button>
             </div>
@@ -1217,12 +1217,27 @@
       'adm_users': 'adm_users'
     };
 
+    const VALID_PAGES = ['home', 'check', 'workspace'];
+
     function parseHash(hashStr = window.location.hash) {
       const clean = (hashStr || '').replace(/^#\/?/, '').trim();
       if (!clean) return { page: 'home', subview: null };
       const parts = clean.split('/');
-      const page = parts[0] || 'home';
+      let page = parts[0] || 'home';
       let subview = parts[1] || null;
+
+      // Guard: if user lands on an unknown hash or in-page anchor like #clubs-section
+      if (!VALID_PAGES.includes(page)) {
+        const anchorEl = document.getElementById(page);
+        if (anchorEl) {
+          setTimeout(() => {
+            anchorEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 100);
+        }
+        page = 'home';
+        subview = null;
+      }
+
       if (page === 'workspace') {
         subview = WORKSPACE_SUBVIEWS[subview] || 'adm_clubs';
       }
@@ -1239,11 +1254,28 @@
       return `#/${pageTarget}`;
     }
 
+    function scrollToClubsSection() {
+      if (activePage !== 'home') {
+        navigateTo('home', null, true);
+      }
+      setTimeout(() => {
+        const el = document.getElementById('clubs-section');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 50);
+    }
+
     function navigateTo(pageTarget, subview = null, updateHistory = true) {
       // If navigating to workspace and not logged in, prompt login modal
       if (pageTarget === 'workspace' && !currentUser) {
         openModal('modal-login');
         return;
+      }
+
+      // Guard: validate pageTarget
+      if (!VALID_PAGES.includes(pageTarget)) {
+        pageTarget = 'home';
       }
 
       activePage = pageTarget;
@@ -1261,7 +1293,13 @@
         panel.classList.remove('animate-in', 'fade-in', 'duration-200');
       });
 
-      const target = document.getElementById(`view-${pageTarget}`);
+      let target = document.getElementById(`view-${pageTarget}`);
+      if (!target) {
+        pageTarget = 'home';
+        activePage = 'home';
+        target = document.getElementById('view-home');
+      }
+
       if (target) {
         target.classList.remove('hidden');
         target.classList.add('animate-in', 'fade-in', 'duration-200');

@@ -66,18 +66,40 @@ function doGet(e) {
     }
   }
 
-  const htmlOutput = HtmlService.createTemplateFromFile('index')
-    .evaluate()
-    .setTitle(APP_CONFIG.APP_NAME)
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-
-  // ตั้งค่า Favicon อย่างปลอดภัยด้วย try-catch ป้องกัน Exception ใน Apps Script
+  // 2. ถ้าเปิดหน้าเว็บโดยตรง: แสดงผลจาก index (ถ้ามี) หรือพาไปยัง GitHub Pages อัตโนมัติ
   try {
-    htmlOutput.setFaviconUrl('https://kongirr12.github.io/mhc-club/favicon.ico');
-  } catch (_) {}
+    const htmlOutput = HtmlService.createTemplateFromFile('index')
+      .evaluate()
+      .setTitle(APP_CONFIG.APP_NAME)
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 
-  return htmlOutput;
+    try {
+      htmlOutput.setFaviconUrl('https://kongirr12.github.io/mhc-club/favicon.ico');
+    } catch (_) {}
+
+    return htmlOutput;
+  } catch (_) {
+    // หากไม่มีไฟล์ index ใน Apps Script ให้ส่งกลับหน้าเว็บที่ Redirect ไปยัง GitHub Pages ทันที
+    return HtmlService.createHtmlOutput(`
+      <!DOCTYPE html>
+      <html lang="th">
+      <head>
+        <meta charset="UTF-8">
+        <title>ระบบลงทะเบียนชุมนุมออนไลน์ — โรงเรียนมหาชัยพิทยาคาร</title>
+        <meta http-equiv="refresh" content="0; url=https://kongirr12.github.io/mhc-club/">
+        <script>window.location.replace("https://kongirr12.github.io/mhc-club/");</script>
+      </head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #EEF2FF; color: #312E81; text-align: center;">
+        <div style="background: white; padding: 32px 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(79,70,229,0.15); max-width: 480px;">
+          <h2 style="margin: 0 0 12px; font-size: 20px;">กำลังนำท่านไปยังระบบลงทะเบียนชุมนุมออนไลน์</h2>
+          <p style="color: #64748B; font-size: 14px; line-height: 1.6; margin: 0 0 24px;">โรงเรียนมหาชัยพิทยาคาร สพม.มหาสารคาม</p>
+          <a href="https://kongirr12.github.io/mhc-club/" style="display: inline-block; background: #4F46E5; color: white; padding: 12px 28px; border-radius: 12px; font-weight: bold; text-decoration: none; font-size: 14px;">คลิกที่นี่หากระบบไม่เปลี่ยนหน้าอัตโนมัติ</a>
+        </div>
+      </body>
+      </html>
+    `).setTitle(APP_CONFIG.APP_NAME);
+  }
 }
 
 /**

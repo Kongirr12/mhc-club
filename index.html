@@ -1469,6 +1469,188 @@
       }
     }
 
+    /* --------------------------------------------------------
+       GRANULAR FAST SYNC (DIRECT GOOGLE SHEET OPERATIONS)
+       -------------------------------------------------------- */
+
+    function saveClubOnline(clubObj, callback) {
+      showLoading('กำลังบันทึกข้อมูลชุมนุม...', 'ส่งข้อมูลลง Google Sheets ทันที');
+
+      const onSuccess = (saved) => {
+        hideLoading();
+        if (callback) callback(saved);
+      };
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(onSuccess)
+          .withFailureHandler((err) => {
+            hideLoading();
+            Swal.fire('บันทึกไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อ Google Sheets', 'error');
+          })
+          .saveClub(clubObj);
+        return;
+      }
+
+      const gasUrl = getGASUrl();
+      if (gasUrl) {
+        rpcGAS('saveClub', clubObj)
+          .then(onSuccess)
+          .catch(async (postErr) => {
+            console.warn('POST saveClub failed, trying GET fallback...', postErr);
+            try {
+              const res = await fetch(`${gasUrl}?action=saveClub&data=${encodeURIComponent(JSON.stringify(clubObj))}`, { redirect: 'follow' });
+              const json = await res.json();
+              if (json && (json.ok || json.data)) {
+                onSuccess(json.data || json);
+                return;
+              }
+            } catch (getErr) {
+              console.warn('GET saveClub also failed:', getErr);
+            }
+            hideLoading();
+            Swal.fire({
+              icon: 'error',
+              title: 'ไม่สามารถบันทึกลง Google Sheet ได้',
+              html: `<div class="text-left text-xs space-y-2">
+                <p>เกิดข้อผิดพลาดในการเชื่อมต่อ Google Sheets:</p>
+                <p class="font-mono text-rose-600 bg-rose-50 dark:bg-rose-950/40 p-2 rounded">${escapeHTML(postErr.message || String(postErr))}</p>
+                <p class="text-slate-500">กรุณาตรวจสอบว่าได้วางโค้ด <code>code.gs</code> ล่าสุด และกด Deploy "เวอร์ชันใหม่" แล้วหรือยัง</p>
+              </div>`,
+              confirmButtonColor: '#4F46E5'
+            });
+          });
+      } else {
+        onSuccess(clubObj);
+      }
+    }
+
+    function deleteClubOnline(clubId, callback) {
+      showLoading('กำลังลบกิจกรรมชุมนุม...', 'อัปเดต Google Sheets');
+
+      const onSuccess = () => {
+        hideLoading();
+        if (callback) callback();
+      };
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(onSuccess)
+          .withFailureHandler((err) => {
+            hideLoading();
+            Swal.fire('เกิดข้อผิดพลาด', err.message, 'error');
+          })
+          .deleteClub(clubId);
+        return;
+      }
+
+      const gasUrl = getGASUrl();
+      if (gasUrl) {
+        rpcGAS('deleteClub', clubId)
+          .then(onSuccess)
+          .catch(async (err) => {
+            try {
+              const res = await fetch(`${gasUrl}?action=deleteClub&id=${clubId}`, { redirect: 'follow' });
+              const json = await res.json();
+              if (json && json.ok) {
+                onSuccess();
+                return;
+              }
+            } catch (_) {}
+            hideLoading();
+            Swal.fire('เกิดข้อผิดพลาด', err.message || 'ไม่สามารถลบข้อมูลบน Google Sheet ได้', 'error');
+          });
+      } else {
+        onSuccess();
+      }
+    }
+
+    function registerStudentOnline(studentName, classId, clubId, callback) {
+      showLoading('กำลังบันทึกการลงทะเบียน...', 'บันทึกรายชื่อลง Google Sheets');
+
+      const onSuccess = (reg) => {
+        hideLoading();
+        if (callback) callback(reg);
+      };
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(onSuccess)
+          .withFailureHandler((err) => {
+            hideLoading();
+            Swal.fire('ลงทะเบียนไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาด', 'error');
+          })
+          .registerStudent(studentName, classId, clubId);
+        return;
+      }
+
+      const gasUrl = getGASUrl();
+      if (gasUrl) {
+        rpcGAS('registerStudent', studentName, classId, clubId)
+          .then(onSuccess)
+          .catch(async (err) => {
+            try {
+              const url = `${gasUrl}?action=registerStudent&studentName=${encodeURIComponent(studentName)}&classId=${classId}&clubId=${clubId}`;
+              const res = await fetch(url, { redirect: 'follow' });
+              const json = await res.json();
+              if (json && json.ok) {
+                onSuccess(json.data);
+                return;
+              }
+              if (json && json.message) throw new Error(json.message);
+            } catch (err2) {
+              hideLoading();
+              Swal.fire('ลงทะเบียนไม่สำเร็จ', err2.message || err.message, 'error');
+              return;
+            }
+            hideLoading();
+            Swal.fire('ลงทะเบียนไม่สำเร็จ', err.message || 'ไม่สามารถเชื่อมต่อ Google Sheets', 'error');
+          });
+      } else {
+        onSuccess({ id: Date.now(), studentName, classId, clubId, timestamp: new Date().toISOString() });
+      }
+    }
+
+    function deleteRegistrationOnline(regId, callback) {
+      showLoading('กำลังถอนสิทธิ์การลงทะเบียน...', 'อัปเดต Google Sheets');
+
+      const onSuccess = () => {
+        hideLoading();
+        if (callback) callback();
+      };
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(onSuccess)
+          .withFailureHandler((err) => {
+            hideLoading();
+            Swal.fire('เกิดข้อผิดพลาด', err.message, 'error');
+          })
+          .deleteRegistration(regId);
+        return;
+      }
+
+      const gasUrl = getGASUrl();
+      if (gasUrl) {
+        rpcGAS('deleteRegistration', regId)
+          .then(onSuccess)
+          .catch(async (err) => {
+            try {
+              const res = await fetch(`${gasUrl}?action=deleteRegistration&id=${regId}`, { redirect: 'follow' });
+              const json = await res.json();
+              if (json && json.ok) {
+                onSuccess();
+                return;
+              }
+            } catch (_) {}
+            hideLoading();
+            Swal.fire('เกิดข้อผิดพลาด', err.message || 'ไม่สามารถลบข้อมูลบน Google Sheet ได้', 'error');
+          });
+      } else {
+        onSuccess();
+      }
+    }
+
     function syncLocalDatabaseToSheet() {
       showLoading('กำลังซิงค์ข้อมูล...', 'ส่งข้อมูลทั้งหมดจากเครื่องขึ้น Google Sheets');
       saveDatabase(() => {
@@ -2388,9 +2570,13 @@
         timestamp: new Date().toISOString()
       };
 
-      dbCache.registrations.push(newRegistration);
+      registerStudentOnline(fullStudentName, classId, clubId, (savedReg) => {
+        const regObj = savedReg || newRegistration;
+        dbCache.registrations.push(regObj);
+        try {
+          localStorage.setItem('mhc_local_db', JSON.stringify(dbCache));
+        } catch (_) {}
 
-      saveDatabase(() => {
         closeModal('modal-student-reg');
 
         // Confetti celebration!
@@ -2401,7 +2587,7 @@
         });
 
         // Show Ticket Modal
-        showRegistrationTicket(newRegistration);
+        showRegistrationTicket(regObj);
         renderPublicHome();
       });
     }
@@ -3663,33 +3849,39 @@
 
       const teachersText = window.editingClubTeachers.join(', ');
 
-      if (clubId) {
-        const idx = dbCache.clubs.findIndex(c => c.id == clubId);
-        if (idx !== -1) {
-          dbCache.clubs[idx] = {
-            ...dbCache.clubs[idx],
-            name,
-            cover: cover || dbCache.clubs[idx].cover || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80',
-            teachers: teachersText,
-            capacity
-          };
-        }
-      } else {
-        dbCache.clubs.push({
-          id: Date.now(),
-          name,
-          cover: cover || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80',
-          teachers: teachersText,
-          capacity
-        });
-      }
+      const clubPayload = {
+        id: clubId ? Number(clubId) : Date.now(),
+        name,
+        cover: cover || (clubId && dbCache.clubs.find(c => c.id == clubId)?.cover) || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80',
+        teachers: teachersText,
+        capacity: capacity || 30
+      };
 
-      saveDatabase(() => {
+      saveClubOnline(clubPayload, (savedClub) => {
+        const finalClub = savedClub || clubPayload;
+        if (clubId) {
+          const idx = dbCache.clubs.findIndex(c => c.id == clubId);
+          if (idx !== -1) {
+            dbCache.clubs[idx] = { ...dbCache.clubs[idx], ...finalClub };
+          }
+        } else {
+          dbCache.clubs.push(finalClub);
+        }
+        try {
+          localStorage.setItem('mhc_local_db', JSON.stringify(dbCache));
+        } catch (_) {}
+
         closeModal('modal-crud');
         populateClassDropdowns();
         renderPublicHome();
         renderWorkspace('adm_clubs');
-        Swal.fire({ icon: 'success', title: 'บันทึกข้อมูลเรียบร้อย', timer: 1500, showConfirmButton: false });
+        Swal.fire({
+          icon: 'success',
+          title: 'บันทึกข้อมูลเรียบร้อย 🎉',
+          text: `บันทึก "${escapeHTML(name)}" ลง Google Sheets สำเร็จแล้ว`,
+          timer: 1600,
+          showConfirmButton: false
+        });
       });
     }
 
@@ -3704,9 +3896,12 @@
         cancelButtonText: 'ยกเลิก'
       }).then((res) => {
         if (res.isConfirmed) {
-          dbCache.clubs = dbCache.clubs.filter(c => c.id != id);
-          dbCache.registrations = dbCache.registrations.filter(r => r.clubId != id);
-          saveDatabase(() => {
+          deleteClubOnline(id, () => {
+            dbCache.clubs = dbCache.clubs.filter(c => c.id != id);
+            dbCache.registrations = dbCache.registrations.filter(r => r.clubId != id);
+            try {
+              localStorage.setItem('mhc_local_db', JSON.stringify(dbCache));
+            } catch (_) {}
             populateClassDropdowns();
             renderPublicHome();
             renderWorkspace('adm_clubs');
@@ -3727,8 +3922,11 @@
         cancelButtonText: 'ยกเลิก'
       }).then((res) => {
         if (res.isConfirmed) {
-          dbCache.registrations = dbCache.registrations.filter(r => r.id != regId);
-          saveDatabase(() => {
+          deleteRegistrationOnline(regId, () => {
+            dbCache.registrations = dbCache.registrations.filter(r => r.id != regId);
+            try {
+              localStorage.setItem('mhc_local_db', JSON.stringify(dbCache));
+            } catch (_) {}
             renderReportTable();
             populateClassDropdowns();
             Swal.fire({ icon: 'success', title: 'ถอนสิทธิ์เรียบร้อย', timer: 1200, showConfirmButton: false });

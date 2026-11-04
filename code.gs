@@ -20,15 +20,49 @@ const APP_CONFIG = {
  * Web App Entry Point: ให้บริการหน้าเว็บ HTML
  */
 function doGet(e) {
-  // รองรับ JSON API เผื่อเรียกทดสอบภายนอก (?api=getDatabase หรือ ?api=setupDatabase)
+  // รองรับ JSON API เผื่อเรียกทดสอบภายนอก (?api=getDatabase หรือ ?api=setupDatabase หรือการบันทึกข้อมูล)
   if (e && e.parameter) {
-    if (e.parameter.api === 'getDatabase') {
+    const api = e.parameter.api || e.parameter.action;
+    if (api === 'getDatabase') {
       const data = getDatabaseFromSheet();
       return jsonOut_({ ok: true, data: data });
     }
-    if (e.parameter.api === 'setupDatabase' || e.parameter.api === 'createDatabase') {
+    if (api === 'setupDatabase' || api === 'createDatabase') {
       const res = setupDatabase();
       return jsonOut_({ ok: true, data: res });
+    }
+    if (api === 'saveClub' && e.parameter.data) {
+      try {
+        const club = JSON.parse(e.parameter.data);
+        const res = saveClub(club);
+        return jsonOut_({ ok: true, data: res });
+      } catch (err) {
+        return jsonOut_({ ok: false, message: err.message });
+      }
+    }
+    if (api === 'deleteClub' && e.parameter.id) {
+      try {
+        const res = deleteClub(e.parameter.id);
+        return jsonOut_({ ok: true, data: res });
+      } catch (err) {
+        return jsonOut_({ ok: false, message: err.message });
+      }
+    }
+    if (api === 'registerStudent') {
+      try {
+        const res = registerStudent(e.parameter.studentName, e.parameter.classId, e.parameter.clubId);
+        return jsonOut_({ ok: true, data: res });
+      } catch (err) {
+        return jsonOut_({ ok: false, message: err.message });
+      }
+    }
+    if (api === 'deleteRegistration' && e.parameter.id) {
+      try {
+        const res = deleteRegistration(e.parameter.id);
+        return jsonOut_({ ok: true, data: res });
+      } catch (err) {
+        return jsonOut_({ ok: false, message: err.message });
+      }
     }
   }
 
@@ -64,6 +98,18 @@ function doPost(e) {
     } else if (fn === 'saveDatabaseToSheet') {
       const updated = saveDatabaseToSheet(args[0]);
       return jsonOut_({ ok: true, data: updated });
+    } else if (fn === 'saveClub') {
+      const saved = saveClub(args[0]);
+      return jsonOut_({ ok: true, data: saved });
+    } else if (fn === 'deleteClub') {
+      const res = deleteClub(args[0]);
+      return jsonOut_({ ok: true, data: res });
+    } else if (fn === 'registerStudent') {
+      const res = registerStudent(args[0], args[1], args[2]);
+      return jsonOut_({ ok: true, data: res });
+    } else if (fn === 'deleteRegistration') {
+      const res = deleteRegistration(args[0]);
+      return jsonOut_({ ok: true, data: res });
     } else if (fn === 'uploadClubCoverImage') {
       const url = uploadClubCoverImage(args[0], args[1]);
       return jsonOut_({ ok: true, data: url });
@@ -299,59 +345,300 @@ function readStudentsSheet(ss) {
 }
 
 /* ============================================================
+ *  GRANULAR DATA OPERATIONS (HIGH SPEED DIRECT CELL UPDATES)
+ * ============================================================ */
+
+/**
+ * บันทึกหรืออัปเดตกิจกรรมชุมนุมรายตัวแบบทันที ไม่ต้องเขียนทับทั้งชีต
+ */
+function saveClub(club) {
+  if (!club || !club.name) throw new Error('กรุณาระบุชื่อกิจกรรมชุมนุม');
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName('Clubs');
+  if (!sheet) sheet = ss.insertSheet('Clubs');
+
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+  } catch (_) {}
+
+  try {
+    const values = sheet.getDataRange().getValues();
+    const clubId = club.id ? Number(club.id) : Date.now();
+    const teachersVal = club.teachers ? (Array.isArray(club.teachers) ? club.teachers.join(', ') : String(club.teachers)) : '';
+    const nameVal = String(club.name || '').trim();
+    const coverVal = String(club.cover || '').trim();
+    const capVal = Number(club.capacity) || 30;
+
+    let foundRow = -1;
+    for (let i = 1; i < values.length; i++) {
+      if (Number(values[i][0]) === clubId) {
+        foundRow = i + 1; // 1-indexed in Google Sheets
+        break;
+      }
+    }
+
+    if (foundRow > 0) {
+      // Direct Cell Update: อัปเดตแถวเดิมทันที
+      sheet.getRange(foundRow, 1, 1, 5).setValues([[clubId, nameVal, coverVal, teachersVal, capVal]]);
+    } else {
+      // ถ้าชีตยังว่างอยู่ ให้สร้างหัวตารางก่อน
+      if (values.length <= 1 && (!values[0] || values[0].length < 5)) {
+        sheet.clearContents();
+        sheet.appendRow(['ID', 'ClubName', 'CoverURL', 'Teachers', 'Capacity']);
+        formatHeaderRow_(sheet, 5, '#4F46E5');
+      }
+      sheet.appendRow([clubId, nameVal, coverVal, teachersVal, capVal]);
+    }
+
+    clearSystemCache();
+    SpreadsheetApp.flush();
+
+    return {
+      id: clubId,
+      name: nameVal,
+      cover: coverVal,
+      teachers: teachersVal,
+      capacity: capVal
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * ลบกิจกรรมชุมนุมรายตัวและถอนการลงทะเบียนที่ผูกกับชุมนุมนี้
+ */
+function deleteClub(clubId) {
+  if (!clubId) throw new Error('กรุณาระบุรหัสชุมนุมที่ต้องการลบ');
+  const targetId = Number(clubId);
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName('Clubs');
+  if (!sheet) return { ok: true };
+
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+  } catch (_) {}
+
+  try {
+    const values = sheet.getDataRange().getValues();
+    for (let i = values.length - 1; i >= 1; i--) {
+      if (Number(values[i][0]) === targetId) {
+        sheet.deleteRow(i + 1);
+        break;
+      }
+    }
+
+    // ลบการลงทะเบียนที่ผูกกับชุมนุมนี้ออกด้วย
+    const regSheet = ss.getSheetByName('Registrations');
+    if (regSheet) {
+      const regValues = regSheet.getDataRange().getValues();
+      for (let i = regValues.length - 1; i >= 1; i--) {
+        if (Number(regValues[i][3]) === targetId) {
+          regSheet.deleteRow(i + 1);
+        }
+      }
+    }
+
+    clearSystemCache();
+    SpreadsheetApp.flush();
+    return { ok: true, deletedId: targetId };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * ลงทะเบียนนักเรียนเข้าชุมนุมแบบทันที พร้อม Concurrency Lock
+ */
+function registerStudent(studentName, classId, clubId) {
+  const name = String(studentName || '').trim();
+  const clsId = Number(classId) || 0;
+  const clbId = Number(clubId) || 0;
+
+  if (!name) throw new Error('กรุณาระบุชื่อ-นามสกุลนักเรียน');
+  if (!clsId) throw new Error('กรุณาระบุระดับชั้นเรียน');
+  if (!clbId) throw new Error('กรุณาเลือกรหัสกิจกรรมชุมนุม');
+
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let regSheet = ss.getSheetByName('Registrations');
+  if (!regSheet) regSheet = ss.insertSheet('Registrations');
+
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(15000);
+  } catch (_) {
+    throw new Error('ระบบกำลังมีผู้ใช้งานบันทึกข้อมูลหนาแน่น กรุณาลองใหม่อีกครั้ง');
+  }
+
+  try {
+    const regValues = regSheet.getDataRange().getValues();
+
+    // 1. ตรวจสอบการลงซ้ำในทุกชุมนุม
+    for (let i = 1; i < regValues.length; i++) {
+      if (String(regValues[i][1]).trim() === name) {
+        throw new Error('นักเรียนชื่อ ' + name + ' ได้ลงทะเบียนในระบบเรียบร้อยแล้ว');
+      }
+    }
+
+    // 2. ตรวจสอบโควตาชุมนุม
+    let countInClub = 0;
+    for (let i = 1; i < regValues.length; i++) {
+      if (Number(regValues[i][3]) === clbId) {
+        countInClub++;
+      }
+    }
+
+    const clubs = readClubsSheet(ss);
+    const targetClub = clubs.find(c => Number(c.id) === clbId);
+    if (!targetClub) throw new Error('ไม่พบข้อมูลชุมนุมที่เลือก');
+    if (countInClub >= Number(targetClub.capacity)) {
+      throw new Error('ขออภัย ขณะนี้มีผู้ลงทะเบียนครบจำนวนโควตาแล้ว กรุณาเลือกชุมนุมอื่น');
+    }
+
+    // 3. บันทึกลงชีต Registrations
+    const newId = Date.now();
+    const nowIso = new Date().toISOString();
+    if (regValues.length === 0 || !regValues[0] || regValues[0].length < 5) {
+      regSheet.clearContents();
+      regSheet.appendRow(['ID', 'StudentName', 'ClassID', 'ClubID', 'Timestamp']);
+      formatHeaderRow_(regSheet, 5, '#4F46E5');
+    }
+    regSheet.appendRow([newId, name, clsId, clbId, nowIso]);
+
+    clearSystemCache();
+    SpreadsheetApp.flush();
+
+    return {
+      id: newId,
+      studentName: name,
+      classId: clsId,
+      clubId: clbId,
+      timestamp: nowIso
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * ถอนสิทธิ์ / ยกเลิกการลงทะเบียนของนักเรียนรายบุคคล
+ */
+function deleteRegistration(regId) {
+  if (!regId) throw new Error('กรุณาระบุรหัสการลงทะเบียน');
+  const targetId = Number(regId);
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const regSheet = ss.getSheetByName('Registrations');
+  if (!regSheet) return { ok: true };
+
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+  } catch (_) {}
+
+  try {
+    const regValues = regSheet.getDataRange().getValues();
+    for (let i = regValues.length - 1; i >= 1; i--) {
+      if (Number(regValues[i][0]) === targetId) {
+        regSheet.deleteRow(i + 1);
+        break;
+      }
+    }
+    clearSystemCache();
+    SpreadsheetApp.flush();
+    return { ok: true, deletedId: targetId };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/* ============================================================
  *  HELPER: WRITE SHEET DATA (BATCH OPERATIONS)
  * ============================================================ */
 
 function writeSettingsSheet(ss, settings) {
-  const sheet = ss.getSheetByName('Settings');
+  let sheet = ss.getSheetByName('Settings');
+  if (!sheet) sheet = ss.insertSheet('Settings');
   sheet.clearContents();
+  const s = settings || {};
   const rows = [
     ['Key', 'Value'],
-    ['startPeriod', settings.startPeriod || ''],
-    ['endPeriod', settings.endPeriod || '']
+    ['startPeriod', String(s.startPeriod || '')],
+    ['endPeriod', String(s.endPeriod || '')]
   ];
   sheet.getRange(1, 1, rows.length, 2).setValues(rows);
+  formatHeaderRow_(sheet, 2, '#4F46E5');
 }
 
 function writeUsersSheet(ss, users) {
-  const sheet = ss.getSheetByName('Users');
+  let sheet = ss.getSheetByName('Users');
+  if (!sheet) sheet = ss.insertSheet('Users');
   sheet.clearContents();
   const rows = [['ID', 'Username', 'Password', 'Name', 'Role']];
-  users.forEach(u => {
-    rows.push([u.id, u.username, u.password, u.name, u.role]);
+  (users || []).forEach((u, idx) => {
+    rows.push([
+      u.id !== undefined && u.id !== null ? u.id : (idx + 1),
+      String(u.username || ''),
+      String(u.password || ''),
+      String(u.name || ''),
+      String(u.role || 'admin')
+    ]);
   });
   sheet.getRange(1, 1, rows.length, 5).setValues(rows);
+  formatHeaderRow_(sheet, 5, '#4F46E5');
 }
 
 function writeClassesSheet(ss, classes) {
-  const sheet = ss.getSheetByName('Classes');
+  let sheet = ss.getSheetByName('Classes');
+  if (!sheet) sheet = ss.insertSheet('Classes');
   sheet.clearContents();
   const rows = [['ID', 'ClassName']];
-  classes.forEach(c => {
-    rows.push([c.id, c.name]);
+  (classes || []).forEach((c, idx) => {
+    rows.push([
+      c.id !== undefined && c.id !== null ? c.id : (idx + 1),
+      String(c.name || '')
+    ]);
   });
   sheet.getRange(1, 1, rows.length, 2).setValues(rows);
+  formatHeaderRow_(sheet, 2, '#4F46E5');
 }
 
 function writeClubsSheet(ss, clubs) {
-  const sheet = ss.getSheetByName('Clubs');
+  let sheet = ss.getSheetByName('Clubs');
+  if (!sheet) sheet = ss.insertSheet('Clubs');
   sheet.clearContents();
   const rows = [['ID', 'ClubName', 'CoverURL', 'Teachers', 'Capacity']];
-  clubs.forEach(c => {
+  (clubs || []).forEach((c, idx) => {
     const teachersVal = c.teachers ? (Array.isArray(c.teachers) ? c.teachers.join(', ') : String(c.teachers)) : '';
-    rows.push([c.id, c.name, c.cover, teachersVal, c.capacity]);
+    rows.push([
+      c.id !== undefined && c.id !== null ? c.id : (idx + 1),
+      String(c.name || '').trim(),
+      String(c.cover || '').trim(),
+      teachersVal.trim(),
+      Number(c.capacity) || 30
+    ]);
   });
   sheet.getRange(1, 1, rows.length, 5).setValues(rows);
+  formatHeaderRow_(sheet, 5, '#4F46E5');
 }
 
 function writeRegistrationsSheet(ss, registrations) {
-  const sheet = ss.getSheetByName('Registrations');
+  let sheet = ss.getSheetByName('Registrations');
+  if (!sheet) sheet = ss.insertSheet('Registrations');
   sheet.clearContents();
   const rows = [['ID', 'StudentName', 'ClassID', 'ClubID', 'Timestamp']];
-  registrations.forEach(r => {
-    rows.push([r.id, r.studentName, r.classId, r.clubId, r.timestamp]);
+  (registrations || []).forEach((r, idx) => {
+    rows.push([
+      r.id !== undefined && r.id !== null ? r.id : (idx + 1),
+      String(r.studentName || ''),
+      Number(r.classId) || 0,
+      Number(r.clubId) || 0,
+      String(r.timestamp || new Date().toISOString())
+    ]);
   });
   sheet.getRange(1, 1, rows.length, 5).setValues(rows);
+  formatHeaderRow_(sheet, 5, '#4F46E5');
 }
 
 function writeStudentsSheet(ss, students) {
@@ -359,10 +646,16 @@ function writeStudentsSheet(ss, students) {
   if (!sheet) sheet = ss.insertSheet('Students');
   sheet.clearContents();
   const rows = [['ID', 'StudentCode', 'StudentName', 'ClassID']];
-  students.forEach((s, idx) => {
-    rows.push([s.id || (idx + 1), s.studentCode || '', s.name || '', s.classId || 0]);
+  (students || []).forEach((s, idx) => {
+    rows.push([
+      s.id !== undefined && s.id !== null ? s.id : (idx + 1),
+      String(s.studentCode || ''),
+      String(s.name || ''),
+      Number(s.classId) || 0
+    ]);
   });
   sheet.getRange(1, 1, rows.length, 4).setValues(rows);
+  formatHeaderRow_(sheet, 4, '#4F46E5');
 }
 
 /* ============================================================

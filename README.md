@@ -14,6 +14,7 @@
 - ใช้ชุดฟอนต์มาตรฐานสากล: **Plus Jakarta Sans** คู่กับ **Noto Sans Thai** ทำให้อ่านง่าย ชัดเจน สบายตา
 - รองรับ **Dark Mode / Light Mode** สลับธีมได้ทันทีและจดจำการตั้งค่าในเครื่อง
 - ติดตั้งตราสัญลักษณ์ (โลโก้) โรงเรียนมหาชัยพิทยาคาร ความคมชัดสูง
+- **ชุด Favicon & App Icons ครบวงจร:** รองรับทุกเบราว์เซอร์และทุกอุปกรณ์ ทั้ง Desktop, iOS (Apple Touch Icon), Android (WebManifest) และรองรับ Vector SVG Favicon แสดงผลคมชัดในแท็บเบราว์เซอร์ทั้งแบบสว่างและมืด
 
 ### 2. 📱 ใช้งานง่ายบนมือถือและการย้อนกลับ (Mobile-First & Page Routing)
 - **ระบบแยกหน้าอิสระและการย้อนกลับ (Separate Page Routing & History API):**

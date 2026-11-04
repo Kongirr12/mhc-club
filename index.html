@@ -3522,7 +3522,7 @@
       return trimmed;
     }
 
-    function compressImageFile(file, maxWidth = 900, maxHeight = 600, quality = 0.8) {
+    function compressImageFile(file, maxWidth = 480, maxHeight = 300, quality = 0.6) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -3588,25 +3588,39 @@
 
       if (statusEl) statusEl.innerHTML = '<span class="text-amber-500 font-medium"><i class="fas fa-spinner fa-spin me-1"></i> กำลังบีบอัดรูปภาพ...</span>';
 
-      compressImageFile(file, 900, 600, 0.8)
+      compressImageFile(file, 480, 300, 0.6)
         .then((compressedBase64) => {
           if (preview) preview.src = compressedBase64;
           if (input) input.value = compressedBase64;
 
-          // Check if running in GAS to upload to Google Drive permanently
+          const onUploadSuccess = (driveUrl) => {
+            if (input) input.value = driveUrl;
+            if (preview) preview.src = driveUrl;
+            if (statusEl) statusEl.innerHTML = '<span class="text-emerald-600 font-medium"><i class="fas fa-check-circle me-1"></i> อัปขึ้น Google Drive สำเร็จ</span>';
+          };
+
+          const onUploadError = (err) => {
+            console.warn('Drive upload failed, using safe compressed base64:', err);
+            if (statusEl) statusEl.innerHTML = '<span class="text-emerald-600 font-medium"><i class="fas fa-check-circle me-1"></i> ภาพพร้อมบันทึก (ขนาดปลอดภัย)</span>';
+          };
+
+          // 1. In Google Apps Script environment
           if (typeof google !== 'undefined' && google.script && google.script.run) {
             if (statusEl) statusEl.innerHTML = '<span class="text-brand-600 font-medium"><i class="fas fa-cloud-arrow-up fa-bounce me-1"></i> กำลังบันทึกลง Google Drive...</span>';
             google.script.run
-              .withSuccessHandler((driveUrl) => {
-                if (input) input.value = driveUrl;
-                if (preview) preview.src = driveUrl;
-                if (statusEl) statusEl.innerHTML = '<span class="text-emerald-600 font-medium"><i class="fas fa-check-circle me-1"></i> อัปขึ้น Google Drive สำเร็จ</span>';
-              })
-              .withFailureHandler((err) => {
-                console.warn('Drive upload failed, using local compressed base64:', err);
-                if (statusEl) statusEl.innerHTML = '<span class="text-emerald-600 font-medium"><i class="fas fa-check-circle me-1"></i> บันทึกภาพเรียบร้อย</span>';
-              })
+              .withSuccessHandler(onUploadSuccess)
+              .withFailureHandler(onUploadError)
               .uploadClubCoverImage(compressedBase64, file.name);
+            return;
+          }
+
+          // 2. On GitHub Pages -> Upload via rpcGAS to Google Drive
+          const gasUrl = getGASUrl();
+          if (gasUrl) {
+            if (statusEl) statusEl.innerHTML = '<span class="text-brand-600 font-medium"><i class="fas fa-cloud-arrow-up fa-bounce me-1"></i> กำลังอัปโหลดภาพขึ้น Google Drive...</span>';
+            rpcGAS('uploadClubCoverImage', compressedBase64, file.name)
+              .then(onUploadSuccess)
+              .catch(onUploadError);
           } else {
             if (statusEl) statusEl.innerHTML = '<span class="text-emerald-600 font-medium"><i class="fas fa-check-circle me-1"></i> บันทึกภาพเรียบร้อย</span>';
           }

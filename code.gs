@@ -393,8 +393,24 @@ function saveClub(club) {
     const clubId = club.id ? Number(club.id) : Date.now();
     const teachersVal = club.teachers ? (Array.isArray(club.teachers) ? club.teachers.join(', ') : String(club.teachers)) : '';
     const nameVal = String(club.name || '').trim();
-    const coverVal = String(club.cover || '').trim();
+    let coverVal = String(club.cover || '').trim();
     const capVal = Number(club.capacity) || 30;
+
+    // ป้องกัน Error เซลล์เกิน 50,000 ตัวอักษร:
+    // หาก cover เป็นรูป Base64 จากการอัปโหลดไฟล์ ให้บันทึกลง Google Drive แล้วแปลงเป็นลิงก์อัตโนมัติ
+    if (coverVal.startsWith('data:image/') && coverVal.length > 500) {
+      try {
+        coverVal = uploadClubCoverImage(coverVal, `club_cover_${clubId}`);
+      } catch (err) {
+        Logger.log('Drive auto-upload failed in saveClub: ' + err.message);
+        // หากอัปโหลด Google Drive ขัดข้องและ Base64 มีขนาดเกิน 40,000 ตัวอักษร ให้ใช้ภาพปกเริ่มต้นแทน ป้องกันเซลล์ชีตพัง
+        if (coverVal.length > 40000) {
+          coverVal = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80';
+        }
+      }
+    } else if (coverVal.length > 45000) {
+      coverVal = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80';
+    }
 
     let foundRow = -1;
     for (let i = 1; i < values.length; i++) {
@@ -636,11 +652,24 @@ function writeClubsSheet(ss, clubs) {
   sheet.clearContents();
   const rows = [['ID', 'ClubName', 'CoverURL', 'Teachers', 'Capacity']];
   (clubs || []).forEach((c, idx) => {
+    let coverVal = String(c.cover || '').trim();
+    if (coverVal.startsWith('data:image/') && coverVal.length > 500) {
+      try {
+        coverVal = uploadClubCoverImage(coverVal, `club_cover_${c.id || idx}`);
+      } catch (_) {
+        if (coverVal.length > 40000) {
+          coverVal = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80';
+        }
+      }
+    } else if (coverVal.length > 45000) {
+      coverVal = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80';
+    }
+
     const teachersVal = c.teachers ? (Array.isArray(c.teachers) ? c.teachers.join(', ') : String(c.teachers)) : '';
     rows.push([
       c.id !== undefined && c.id !== null ? c.id : (idx + 1),
       String(c.name || '').trim(),
-      String(c.cover || '').trim(),
+      coverVal,
       teachersVal.trim(),
       Number(c.capacity) || 30
     ]);

@@ -69,9 +69,13 @@ function doGet(e) {
   const htmlOutput = HtmlService.createTemplateFromFile('index')
     .evaluate()
     .setTitle(APP_CONFIG.APP_NAME)
-    .setFaviconUrl('https://lh3.googleusercontent.com/d/19aXvolxpVK5GndtRSMFP6sEdl7oa5PzN')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+
+  // ตั้งค่า Favicon อย่างปลอดภัยด้วย try-catch ป้องกัน Exception ใน Apps Script
+  try {
+    htmlOutput.setFaviconUrl('https://kongirr12.github.io/mhc-club/favicon.ico');
+  } catch (_) {}
 
   return htmlOutput;
 }

@@ -20,10 +20,13 @@
   <!-- Fallback online logo for Google Apps Script Web App environment -->
   <link rel="shortcut icon" href="https://kongirr12.github.io/mhc-club/favicon.ico">
 
-  <!-- Google Fonts: Plus Jakarta Sans, Noto Sans Thai, Sarabun -->
+  <!-- Google Fonts: Plus Jakarta Sans, Noto Sans Thai, Sarabun (TH Sarabun Standard) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&display=swap" rel="stylesheet">
+
+  <!-- MHC Logo Base64 for instant zero-latency printing -->
+  <script src="logo.js?v=3.3.33"></script>
 
   <!-- Font Awesome 6.6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
@@ -220,24 +223,110 @@
     .ticket-rip::before { left: -12px; }
     .ticket-rip::after { right: -12px; }
 
-    /* Print styling */
+    /* ========================================================
+       A4 OFFICIAL THAI CIVIL SERVICE PRINT STYLING (TH SARABUN)
+       ======================================================== */
+    @page {
+      size: A4 portrait;
+      margin: 12mm 15mm 15mm 15mm;
+    }
+
+    @font-face {
+      font-family: 'TH Sarabun New';
+      src: local('TH Sarabun New'), local('THSarabunNew'), url('https://fonts.gstatic.com/s/sarabun/v14/DtVmJxOaAag79-H1-6ikbZZKm-c.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'TH Sarabun New';
+      src: local('TH Sarabun New Bold'), local('THSarabunNew-Bold'), url('https://fonts.gstatic.com/s/sarabun/v14/DtVkJxOaAag79-H1-6ikTZ1cm-0M.woff2') format('woff2');
+      font-weight: 700;
+      font-style: normal;
+    }
+
     @media print {
+      html, body {
+        width: 100% !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-family: 'TH Sarabun New', 'THSarabunNew', 'TH SarabunPSK', 'Sarabun', 'Cordia New', sans-serif !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
       body * {
-        visibility: hidden;
+        visibility: hidden !important;
       }
+
       #print-area, #print-area * {
-        visibility: visible;
+        visibility: visible !important;
       }
+
       #print-area {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        margin: 0;
-        padding: 10mm;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        font-family: 'TH Sarabun New', 'THSarabunNew', 'TH SarabunPSK', 'Sarabun', 'Cordia New', sans-serif !important;
       }
+
       .no-print {
         display: none !important;
+      }
+
+      /* Official Civil Service Table Formatting */
+      .a4-print-sheet {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+        color: #000000 !important;
+        font-family: 'TH Sarabun New', 'THSarabunNew', 'TH SarabunPSK', 'Sarabun', 'Cordia New', sans-serif !important;
+      }
+
+      .a4-print-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin-top: 10px !important;
+        page-break-inside: auto !important;
+        font-family: 'TH Sarabun New', 'THSarabunNew', 'TH SarabunPSK', 'Sarabun', 'Cordia New', sans-serif !important;
+      }
+
+      .a4-print-table thead {
+        display: table-header-group !important;
+      }
+
+      .a4-print-table tfoot {
+        display: table-footer-group !important;
+      }
+
+      .a4-print-table th, .a4-print-table td {
+        border: 1px solid #111111 !important;
+        padding: 5px 6px !important;
+        line-height: 1.35 !important;
+      }
+
+      .a4-print-table th {
+        background-color: #f1f5f9 !important;
+        font-weight: 700 !important;
+        text-align: center !important;
+      }
+
+      .a4-print-table tr {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+
+      .print-avoid-break {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
     }
   </style>
@@ -254,7 +343,7 @@
         <!-- School Brand & Identity -->
         <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('home')">
           <div class="relative flex-shrink-0">
-            <img id="nav-school-logo" src="https://lh3.googleusercontent.com/d/19aXvolxpVK5GndtRSMFP6sEdl7oa5PzN" alt="MHC Logo" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl object-contain shadow-sm bg-white p-0.5 border border-slate-200 dark:border-slate-700">
+            <img id="nav-school-logo" src="mhc-logo.png" onerror="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/19aXvolxpVK5GndtRSMFP6sEdl7oa5PzN'" alt="MHC Logo" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl object-contain shadow-sm bg-white p-0.5 border border-slate-200 dark:border-slate-700">
             <span class="absolute -bottom-1 -right-1 flex h-3 w-3">
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
@@ -263,7 +352,7 @@
           <div>
             <div class="flex items-center gap-1.5">
               <span class="text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/40 px-2 py-0.5 rounded-full border border-brand-200 dark:border-brand-800/50">Smart School</span>
-              <span class="text-[11px] text-slate-400 font-medium hidden sm:inline">v3.3.32</span>
+              <span class="text-[11px] text-slate-400 font-medium hidden sm:inline">v3.3.33</span>
             </div>
             <h1 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">ระบบลงทะเบียนชุมนุมออนไลน์</h1>
             <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[200px] sm:max-w-xs">โรงเรียนมหาชัยพิทยาคาร สพม.มหาสารคาม</p>
@@ -623,14 +712,14 @@
   <footer class="hidden lg:block border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 py-6 mt-12 text-xs">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <img src="https://lh3.googleusercontent.com/d/19aXvolxpVK5GndtRSMFP6sEdl7oa5PzN" alt="MHC" class="w-8 h-8 rounded-lg object-contain bg-white border border-slate-200 dark:border-slate-700">
+        <img src="mhc-logo.png" onerror="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/19aXvolxpVK5GndtRSMFP6sEdl7oa5PzN'" alt="MHC" class="w-8 h-8 rounded-lg object-contain bg-white border border-slate-200 dark:border-slate-700">
         <div>
           <p class="font-bold text-slate-700 dark:text-slate-300">ระบบลงทะเบียนชุมนุมออนไลน์ — โรงเรียนมหาชัยพิทยาคาร</p>
           <p class="text-[11px] text-slate-400">สำนักงานเขตพื้นที่การศึกษามัธยมศึกษามหาสารคาม (สพม.มหาสารคาม)</p>
         </div>
       </div>
       <div class="text-center md:text-right text-[11px]">
-        <p>ผู้พัฒนาระบบ: <strong class="text-brand-600 dark:text-brand-400 font-semibold">ครูก้องนที อุ่นเจริญ</strong> | MHC Smart School v3.3.32</p>
+        <p>ผู้พัฒนาระบบ: <strong class="text-brand-600 dark:text-brand-400 font-semibold">ครูก้องนที อุ่นเจริญ</strong> | MHC Smart School v3.3.33</p>
       </div>
     </div>
   </footer>
@@ -789,7 +878,7 @@
         <div class="ticket-container border-2 border-slate-100 shadow-none">
           <!-- Ticket Header -->
           <div class="ticket-header">
-            <img src="https://lh3.googleusercontent.com/d/19aXvolxpVK5GndtRSMFP6sEdl7oa5PzN" alt="MHC" class="w-12 h-12 mx-auto rounded-full bg-white p-1 mb-2 shadow-sm">
+            <img src="mhc-logo.png" onerror="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/19aXvolxpVK5GndtRSMFP6sEdl7oa5PzN'" alt="MHC" class="w-12 h-12 mx-auto rounded-full bg-white p-1 mb-2 shadow-sm">
             <h4 class="font-extrabold text-base tracking-tight leading-tight">บัตรประจำตัวการลงทะเบียนชุมนุม</h4>
             <p class="text-[11px] text-brand-100">โรงเรียนมหาชัยพิทยาคาร สพม.มหาสารคาม</p>
           </div>
@@ -1032,7 +1121,7 @@
     <!-- Drawer Header -->
     <div class="p-5 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
       <div class="flex items-center gap-2.5">
-        <img src="https://lh3.googleusercontent.com/d/19aXvolxpVK5GndtRSMFP6sEdl7oa5PzN" alt="MHC" class="w-8 h-8 rounded-lg object-contain bg-white border border-slate-200">
+        <img src="mhc-logo.png" onerror="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/19aXvolxpVK5GndtRSMFP6sEdl7oa5PzN'" alt="MHC" class="w-8 h-8 rounded-lg object-contain bg-white border border-slate-200">
         <div>
           <h4 class="text-sm font-bold text-slate-800 dark:text-white">เมนูระบบ</h4>
           <p class="text-[11px] text-slate-400">MHC Smart School</p>
@@ -1746,6 +1835,41 @@
       const hour = String(d.getHours()).padStart(2, '0');
       const min = String(d.getMinutes()).padStart(2, '0');
       return `${day} ${month} ${year} เวลา ${hour}:${min} น.`;
+    }
+
+    function formatThaiFullDate(dateInput) {
+      if (!dateInput) return '-';
+      const d = (dateInput instanceof Date) ? dateInput : new Date(dateInput);
+      if (isNaN(d.getTime())) return '-';
+      const thaiFullMonths = [
+        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+      ];
+      return `${d.getDate()} ${thaiFullMonths[d.getMonth()]} พ.ศ. ${d.getFullYear() + 543}`;
+    }
+
+    function triggerA4Print(printContainer) {
+      if (!printContainer) return;
+      printContainer.classList.remove('hidden');
+
+      const img = printContainer.querySelector('img');
+      const executePrint = () => {
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            window.print();
+            setTimeout(() => {
+              printContainer.classList.add('hidden');
+            }, 1200);
+          }, 120);
+        });
+      };
+
+      if (img && !img.complete) {
+        img.onload = executePrint;
+        img.onerror = executePrint;
+      } else {
+        executePrint();
+      }
     }
 
     function updateCountdownDisplay() {
@@ -2629,7 +2753,17 @@
     }
 
     function printTicket() {
-      window.print();
+      const ticketElem = document.getElementById('ticket-printable-area');
+      if (!ticketElem) return;
+      const printContainer = document.getElementById('print-area');
+      printContainer.innerHTML = `
+        <div style="font-family: 'TH Sarabun New', 'THSarabunNew', 'TH SarabunPSK', 'Sarabun', sans-serif; display: flex; justify-content: center; align-items: flex-start; padding-top: 15mm;">
+          <div style="max-width: 440px; width: 100%; border: 1.5px solid #cbd5e1; border-radius: 18px; overflow: hidden; background: #ffffff;">
+            ${ticketElem.innerHTML}
+          </div>
+        </div>
+      `;
+      triggerA4Print(printContainer);
     }
 
     /* --------------------------------------------------------
@@ -2761,9 +2895,12 @@
     }
 
     function printCheckResultsTable() {
-      const classFilter = document.getElementById('check-filter-class').value;
-      const clubFilter = document.getElementById('check-filter-club').value;
-      const nameQuery = document.getElementById('check-input-name').value.trim().toLowerCase();
+      const classSelect = document.getElementById('check-filter-class');
+      const clubSelect = document.getElementById('check-filter-club');
+      const classFilter = classSelect ? classSelect.value : 'all';
+      const clubFilter = clubSelect ? clubSelect.value : 'all';
+      const nameInput = document.getElementById('check-input-name');
+      const nameQuery = nameInput ? nameInput.value.trim().toLowerCase() : '';
 
       let matches = (dbCache.registrations || []).filter(r => {
         if (classFilter !== 'all' && r.classId != classFilter) return false;
@@ -2773,7 +2910,12 @@
       });
 
       if (matches.length === 0) {
-        Swal.fire('ไม่มีข้อมูล', 'ไม่พบรายชื่อนักเรียนสำหรับสั่งพิมพ์', 'warning');
+        Swal.fire({
+          icon: 'warning',
+          title: 'ไม่มีข้อมูล',
+          text: 'ไม่พบรายชื่อนักเรียนสำหรับสั่งพิมพ์ตามเงื่อนไขที่เลือก',
+          confirmButtonColor: '#4F46E5'
+        });
         return;
       }
 
@@ -2782,53 +2924,95 @@
         return a.studentName.localeCompare(b.studentName, 'th');
       });
 
+      const logoUrl = (typeof MHC_LOGO_BASE64 !== 'undefined' && MHC_LOGO_BASE64) ? MHC_LOGO_BASE64 : 'mhc-logo.png';
+      const reportDate = formatThaiFullDate(new Date());
+
+      const selectedClassText = classSelect && classSelect.selectedIndex >= 0 ? classSelect.options[classSelect.selectedIndex].text : 'ทุกระดับชั้น';
+      const selectedClubText = clubSelect && clubSelect.selectedIndex >= 0 ? clubSelect.options[clubSelect.selectedIndex].text : 'ทุกกิจกรรมชุมนุม';
+
       const printContainer = document.getElementById('print-area');
       printContainer.innerHTML = `
-        <div style="font-family: 'Sarabun', sans-serif; color: #000; line-height: 1.5; padding: 15mm 20mm;">
-          <div style="text-align: center; margin-bottom: 20px;">
-            <img src="https://lh3.googleusercontent.com/d/19aXvolxpVK5GndtRSMFP6sEdl7oa5PzN" style="width: 65px; height: 65px; object-fit: contain; margin-bottom: 6px;">
-            <h3 style="font-size: 16pt; font-weight: bold; margin: 0;">โรงเรียนมหาชัยพิทยาคาร</h3>
-            <p style="font-size: 13pt; margin: 4px 0 0 0;">ตารางตรวจสอบผลการลงทะเบียนกิจกรรมชุมนุม ประจำปีการศึกษา ๒๕๖๙</p>
-            <p style="font-size: 11pt; margin: 2px 0 0 0; color: #444;">จำนวนนักเรียนที่แสดงผล: ${matches.length} คน</p>
+        <div class="a4-print-sheet" style="font-family: 'TH Sarabun New', 'THSarabunNew', 'TH SarabunPSK', 'Sarabun', sans-serif; color: #000; width: 100%;">
+          
+          <!-- School Official Header -->
+          <div style="text-align: center; margin-bottom: 12px;">
+            <img src="${logoUrl}" alt="ตราประจำโรงเรียนมหาชัยพิทยาคาร" style="width: 72px; height: 72px; object-fit: contain; margin: 0 auto 6px auto; display: block;">
+            <h2 style="font-size: 18pt; font-weight: bold; margin: 0; line-height: 1.25; color: #000;">โรงเรียนมหาชัยพิทยาคาร</h2>
+            <h3 style="font-size: 16pt; font-weight: bold; margin: 3px 0 0 0; line-height: 1.25; color: #000;">ตารางตรวจสอบผลการลงทะเบียนกิจกรรมชุมนุม ประจำปีการศึกษา ๒๕๖๙</h3>
+            <div style="font-size: 14pt; margin-top: 4px; color: #111;">
+              ระดับชั้น: ${escapeHTML(selectedClassText)} &nbsp;|&nbsp; กิจกรรมชุมนุม: ${escapeHTML(selectedClubText)}
+            </div>
           </div>
 
-          <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 11pt;">
+          <!-- Document Info Bar -->
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 13.5pt; margin-bottom: 6px; padding-bottom: 2px; border-bottom: 1px solid #111;">
+            <div>
+              <strong>จำนวนนักเรียนที่แสดงผล:</strong> ${matches.length} คน
+            </div>
+            <div>
+              <strong>ข้อมูล ณ วันที่:</strong> ${reportDate}
+            </div>
+          </div>
+
+          <!-- Official Table -->
+          <table class="a4-print-table" style="width: 100%; border-collapse: collapse; font-size: 14pt;">
             <thead>
-              <tr style="background-color: #f2f2f2;">
-                <th style="border: 1px solid #333; padding: 6px; width: 8%; text-align: center;">ลำดับ</th>
-                <th style="border: 1px solid #333; padding: 6px; text-align: left;">ชื่อ - นามสกุล นักเรียน</th>
-                <th style="border: 1px solid #333; padding: 6px; width: 12%; text-align: center;">ระดับชั้น</th>
-                <th style="border: 1px solid #333; padding: 6px; width: 35%; text-align: left;">กิจกรรมชุมนุม</th>
-                <th style="border: 1px solid #333; padding: 6px; width: 20%; text-align: left;">ครูผู้ดูแล</th>
-                <th style="border: 1px solid #333; padding: 6px; width: 15%; text-align: center;">เวลาลงทะเบียน</th>
+              <tr style="background-color: #f1f5f9;">
+                <th style="width: 6%; text-align: center; border: 1px solid #111; padding: 5px;">ลำดับ</th>
+                <th style="width: 13%; text-align: center; border: 1px solid #111; padding: 5px;">เลขประจำตัว</th>
+                <th style="width: 25%; text-align: left; border: 1px solid #111; padding: 5px 8px;">ชื่อ - นามสกุล นักเรียน</th>
+                <th style="width: 11%; text-align: center; border: 1px solid #111; padding: 5px;">ระดับชั้น</th>
+                <th style="width: 23%; text-align: left; border: 1px solid #111; padding: 5px 8px;">กิจกรรมชุมนุม</th>
+                <th style="width: 22%; text-align: left; border: 1px solid #111; padding: 5px 8px;">ครูผู้ดูแล</th>
               </tr>
             </thead>
             <tbody>
               ${matches.map((r, i) => {
-                const cls = dbCache.classes.find(c => c.id == r.classId);
-                const clb = dbCache.clubs.find(c => c.id == r.clubId);
+                const cls = (dbCache.classes || []).find(c => c.id == r.classId);
+                const clb = (dbCache.clubs || []).find(c => c.id == r.clubId);
+                const stu = (dbCache.students || []).find(s => s.name.trim() === r.studentName.trim());
+                const studentCode = (stu && stu.studentCode) ? stu.studentCode : (r.studentCode || '-');
                 const tch = getClubTeachersText(clb);
                 return `
                   <tr>
-                    <td style="border: 1px solid #333; padding: 6px; text-align: center;">${i + 1}</td>
-                    <td style="border: 1px solid #333; padding: 6px;">${r.studentName}</td>
-                    <td style="border: 1px solid #333; padding: 6px; text-align: center;">${cls ? cls.name : '-'}</td>
-                    <td style="border: 1px solid #333; padding: 6px;">${clb ? clb.name : '-'}</td>
-                    <td style="border: 1px solid #333; padding: 6px;">${tch}</td>
-                    <td style="border: 1px solid #333; padding: 6px; text-align: center;">${formatThaiDateTime(r.timestamp)}</td>
+                    <td style="border: 1px solid #111; padding: 5px; text-align: center;">${i + 1}</td>
+                    <td style="border: 1px solid #111; padding: 5px; text-align: center; font-family: monospace, sans-serif;">${escapeHTML(studentCode)}</td>
+                    <td style="border: 1px solid #111; padding: 5px 8px; text-align: left;">${escapeHTML(r.studentName)}</td>
+                    <td style="border: 1px solid #111; padding: 5px; text-align: center;">${cls ? escapeHTML(cls.name) : '-'}</td>
+                    <td style="border: 1px solid #111; padding: 5px 8px; text-align: left;">${clb ? escapeHTML(clb.name) : '-'}</td>
+                    <td style="border: 1px solid #111; padding: 5px 8px; text-align: left;">${escapeHTML(tch)}</td>
                   </tr>
                 `;
               }).join('')}
             </tbody>
+            <tfoot>
+              <tr style="background-color: #f8fafc; font-weight: bold; border-top: 1.5px solid #111;">
+                <td colspan="2" style="border: 1px solid #111; padding: 6px; text-align: center;">รวมทั้งสิ้น</td>
+                <td colspan="4" style="border: 1px solid #111; padding: 6px 8px; text-align: left;">นักเรียนจำนวน ${matches.length} คน</td>
+              </tr>
+            </tfoot>
           </table>
+
+          <!-- Official Civil Service Signature Section -->
+          <div class="print-avoid-break" style="margin-top: 36px; display: flex; justify-content: space-between; font-size: 14pt; line-height: 1.6;">
+            <div style="width: 46%; text-align: center;">
+              <p style="margin: 0;">ลงชื่อ............................................................ผู้รายงาน</p>
+              <p style="margin: 4px 0 0 0;">( นายก้องนที อุ่นเจริญ )</p>
+              <p style="margin: 2px 0 0 0;">ตำแหน่ง ผู้ดูแลระบบ / ครู โรงเรียนมหาชัยพิทยาคาร</p>
+              <p style="margin: 4px 0 0 0;">วันที่ ......... เดือน ......................... พ.ศ. .............</p>
+            </div>
+            <div style="width: 46%; text-align: center;">
+              <p style="margin: 0;">ลงชื่อ............................................................ผู้อนุมัติ</p>
+              <p style="margin: 4px 0 0 0;">( ............................................................ )</p>
+              <p style="margin: 2px 0 0 0;">ตำแหน่ง หัวหน้ากลุ่มบริหารงานวิชาการ</p>
+              <p style="margin: 4px 0 0 0;">วันที่ ......... เดือน ......................... พ.ศ. .............</p>
+            </div>
+          </div>
+
         </div>
       `;
 
-      printContainer.classList.remove('hidden');
-      window.print();
-      setTimeout(() => {
-        printContainer.classList.add('hidden');
-      }, 1000);
+      triggerA4Print(printContainer);
     }
 
     function exportCheckResultsCSV() {
@@ -3328,81 +3512,123 @@
       const selectedClubId = select ? select.value : 'all';
       const selectedClubName = select && select.selectedIndex >= 0 ? select.options[select.selectedIndex].text : 'ทุกกิจกรรมชุมนุม';
 
-      let targetRegs = [...dbCache.registrations];
+      let targetRegs = [...(dbCache.registrations || [])];
       if (selectedClubId !== 'all') {
         targetRegs = targetRegs.filter(r => r.clubId == parseInt(selectedClubId));
       }
 
       if (targetRegs.length === 0) {
-        Swal.fire('ไม่มีข้อมูล', 'ไม่พบรายชื่อนักเรียนสำหรับออกรายงาน', 'warning');
+        Swal.fire({
+          icon: 'warning',
+          title: 'ไม่มีข้อมูล',
+          text: 'ไม่พบรายชื่อนักเรียนสำหรับออกรายงานการพิมพ์',
+          confirmButtonColor: '#4F46E5'
+        });
         return;
       }
 
+      // Sort by classId then studentName
       targetRegs.sort((a, b) => {
         if (a.classId !== b.classId) return a.classId - b.classId;
         return a.studentName.localeCompare(b.studentName, 'th');
       });
 
+      const selectedClub = (selectedClubId !== 'all') ? (dbCache.clubs || []).find(c => c.id == parseInt(selectedClubId)) : null;
+      const logoUrl = (typeof MHC_LOGO_BASE64 !== 'undefined' && MHC_LOGO_BASE64) ? MHC_LOGO_BASE64 : 'mhc-logo.png';
+      const reportDate = formatThaiFullDate(new Date());
+
       const printContainer = document.getElementById('print-area');
       printContainer.innerHTML = `
-        <div style="font-family: 'Sarabun', sans-serif; color: #000; line-height: 1.5; padding: 15mm 20mm;">
-          <div style="text-align: center; margin-bottom: 20px;">
-            <img src="https://lh3.googleusercontent.com/d/19aXvolxpVK5GndtRSMFP6sEdl7oa5PzN" style="width: 70px; height: 70px; object-fit: contain; margin-bottom: 8px;">
-            <h3 style="font-size: 18pt; font-weight: bold; margin: 0;">โรงเรียนมหาชัยพิทยาคาร</h3>
-            <p style="font-size: 14pt; margin: 4px 0 0 0;">แบบรายงานผลการลงทะเบียนกิจกรรมชุมนุม ประจำปีการศึกษา ๒๕๖๙</p>
-            <p style="font-size: 12pt; margin: 2px 0 0 0; color: #444;">${selectedClubName}</p>
+        <div class="a4-print-sheet" style="font-family: 'TH Sarabun New', 'THSarabunNew', 'TH SarabunPSK', 'Sarabun', sans-serif; color: #000; width: 100%;">
+          
+          <!-- School Official Header -->
+          <div style="text-align: center; margin-bottom: 12px;">
+            <img src="${logoUrl}" alt="ตราประจำโรงเรียนมหาชัยพิทยาคาร" style="width: 72px; height: 72px; object-fit: contain; margin: 0 auto 6px auto; display: block;">
+            <h2 style="font-size: 18pt; font-weight: bold; margin: 0; line-height: 1.25; color: #000;">โรงเรียนมหาชัยพิทยาคาร</h2>
+            <h3 style="font-size: 16pt; font-weight: bold; margin: 3px 0 0 0; line-height: 1.25; color: #000;">แบบรายงานผลการลงทะเบียนกิจกรรมชุมนุม ประจำปีการศึกษา ๒๕๖๙</h3>
+            ${selectedClub ? `
+              <div style="font-size: 15pt; font-weight: bold; margin-top: 4px; color: #000;">
+                กิจกรรมชุมนุม: ${escapeHTML(selectedClub.name)}
+              </div>
+              <div style="font-size: 14pt; margin-top: 2px; color: #222;">
+                ครูผู้ดูแลชุมนุม: ${escapeHTML(getClubTeachersText(selectedClub))} &nbsp;|&nbsp; จำนวนที่เปิดรับ: ${selectedClub.capacity} คน
+              </div>
+            ` : `
+              <div style="font-size: 15pt; font-weight: bold; margin-top: 4px; color: #000;">
+                แสดงรายชื่อนักเรียนจากทุกกิจกรรมชุมนุม
+              </div>
+            `}
           </div>
 
-          <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12pt;">
+          <!-- Document Info Bar -->
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 13.5pt; margin-bottom: 6px; padding-bottom: 2px; border-bottom: 1px solid #111;">
+            <div>
+              <strong>จำนวนนักเรียนที่ลงทะเบียน:</strong> ${targetRegs.length} คน
+            </div>
+            <div>
+              <strong>ข้อมูล ณ วันที่:</strong> ${reportDate}
+            </div>
+          </div>
+
+          <!-- Official Table -->
+          <table class="a4-print-table" style="width: 100%; border-collapse: collapse; font-size: 14pt;">
             <thead>
-              <tr style="background-color: #f2f2f2;">
-                <th style="border: 1px solid #333; padding: 6px; width: 6%; text-align: center;">ลำดับ</th>
-                <th style="border: 1px solid #333; padding: 6px; text-align: left;">ชื่อ - นามสกุล นักเรียน</th>
-                <th style="border: 1px solid #333; padding: 6px; width: 14%; text-align: center;">ระดับชั้น</th>
-                <th style="border: 1px solid #333; padding: 6px; width: 28%; text-align: left;">กิจกรรมชุมนุม</th>
-                <th style="border: 1px solid #333; padding: 6px; width: 26%; text-align: left;">ครูผู้ดูแลชุมนุม</th>
-                <th style="border: 1px solid #333; padding: 6px; width: 8%; text-align: center;">หมายเหตุ</th>
+              <tr style="background-color: #f1f5f9;">
+                <th style="width: 6%; text-align: center; border: 1px solid #111; padding: 5px;">ลำดับ</th>
+                <th style="width: 13%; text-align: center; border: 1px solid #111; padding: 5px;">เลขประจำตัว</th>
+                <th style="width: 27%; text-align: left; border: 1px solid #111; padding: 5px 8px;">ชื่อ - นามสกุล นักเรียน</th>
+                <th style="width: 11%; text-align: center; border: 1px solid #111; padding: 5px;">ระดับชั้น</th>
+                <th style="width: 23%; text-align: left; border: 1px solid #111; padding: 5px 8px;">กิจกรรมชุมนุม</th>
+                <th style="width: 20%; text-align: left; border: 1px solid #111; padding: 5px 8px;">ครูผู้ดูแล</th>
               </tr>
             </thead>
             <tbody>
               ${targetRegs.map((r, i) => {
-                const cls = dbCache.classes.find(c => c.id == r.classId);
-                const clb = dbCache.clubs.find(c => c.id == r.clubId);
+                const cls = (dbCache.classes || []).find(c => c.id == r.classId);
+                const clb = (dbCache.clubs || []).find(c => c.id == r.clubId);
+                const stu = (dbCache.students || []).find(s => s.name.trim() === r.studentName.trim());
+                const studentCode = (stu && stu.studentCode) ? stu.studentCode : (r.studentCode || '-');
                 const tch = getClubTeachersText(clb);
                 return `
                   <tr>
-                    <td style="border: 1px solid #333; padding: 6px; text-align: center;">${i + 1}</td>
-                    <td style="border: 1px solid #333; padding: 6px;">${escapeHTML(r.studentName)}</td>
-                    <td style="border: 1px solid #333; padding: 6px; text-align: center;">${cls ? escapeHTML(cls.name) : '-'}</td>
-                    <td style="border: 1px solid #333; padding: 6px;">${clb ? escapeHTML(clb.name) : '-'}</td>
-                    <td style="border: 1px solid #333; padding: 6px;">${escapeHTML(tch)}</td>
-                    <td style="border: 1px solid #333; padding: 6px; text-align: center;">-</td>
+                    <td style="border: 1px solid #111; padding: 5px; text-align: center;">${i + 1}</td>
+                    <td style="border: 1px solid #111; padding: 5px; text-align: center; font-family: monospace, sans-serif;">${escapeHTML(studentCode)}</td>
+                    <td style="border: 1px solid #111; padding: 5px 8px; text-align: left;">${escapeHTML(r.studentName)}</td>
+                    <td style="border: 1px solid #111; padding: 5px; text-align: center;">${cls ? escapeHTML(cls.name) : '-'}</td>
+                    <td style="border: 1px solid #111; padding: 5px 8px; text-align: left;">${clb ? escapeHTML(clb.name) : '-'}</td>
+                    <td style="border: 1px solid #111; padding: 5px 8px; text-align: left;">${escapeHTML(tch)}</td>
                   </tr>
                 `;
               }).join('')}
             </tbody>
+            <tfoot>
+              <tr style="background-color: #f8fafc; font-weight: bold; border-top: 1.5px solid #111;">
+                <td colspan="2" style="border: 1px solid #111; padding: 6px; text-align: center;">รวมทั้งสิ้น</td>
+                <td colspan="4" style="border: 1px solid #111; padding: 6px 8px; text-align: left;">นักเรียนจำนวน ${targetRegs.length} คน</td>
+              </tr>
+            </tfoot>
           </table>
 
-          <div style="margin-top: 40px; display: flex; justify-content: space-between; text-align: center; font-size: 12pt;">
-            <div style="width: 45%;">
-              <p>ลงชื่อ......................................................ผู้รายงาน</p>
-              <p>( ${currentUser ? escapeHTML(currentUser.name) : '......................................................'} )</p>
-              <p>ตำแหน่ง ผู้ดูแลระบบ / ครู โรงเรียนมหาชัยพิทยาคาร</p>
+          <!-- Official Civil Service Signature Section -->
+          <div class="print-avoid-break" style="margin-top: 36px; display: flex; justify-content: space-between; font-size: 14pt; line-height: 1.6;">
+            <div style="width: 46%; text-align: center;">
+              <p style="margin: 0;">ลงชื่อ............................................................ผู้รายงาน</p>
+              <p style="margin: 4px 0 0 0;">( นายก้องนที อุ่นเจริญ )</p>
+              <p style="margin: 2px 0 0 0;">ตำแหน่ง ผู้ดูแลระบบ / ครู โรงเรียนมหาชัยพิทยาคาร</p>
+              <p style="margin: 4px 0 0 0;">วันที่ ......... เดือน ......................... พ.ศ. .............</p>
             </div>
-            <div style="width: 45%;">
-              <p>ลงชื่อ......................................................ผู้อนุมัติ</p>
-              <p>( ...................................................... )</p>
-              <p>หัวหน้ากลุ่มบริหารงานวิชาการ</p>
+            <div style="width: 46%; text-align: center;">
+              <p style="margin: 0;">ลงชื่อ............................................................ผู้อนุมัติ</p>
+              <p style="margin: 4px 0 0 0;">( ............................................................ )</p>
+              <p style="margin: 2px 0 0 0;">ตำแหน่ง หัวหน้ากลุ่มบริหารงานวิชาการ</p>
+              <p style="margin: 4px 0 0 0;">วันที่ ......... เดือน ......................... พ.ศ. .............</p>
             </div>
           </div>
+
         </div>
       `;
 
-      printContainer.classList.remove('hidden');
-      window.print();
-      setTimeout(() => {
-        printContainer.classList.add('hidden');
-      }, 1000);
+      triggerA4Print(printContainer);
     }
 
     function exportReportToCSV() {

@@ -2,9 +2,9 @@
  * ============================================================
  *  ระบบลงทะเบียนชุมนุมออนไลน์ — โรงเรียนมหาชัยพิทยาคาร
  *  MHC Smart School Club Registration System
- *  เวอร์ชัน: v3.3.32 (29 ตุลาคม 2569)
+ *  เวอร์ชัน: v3.3.34 (11 พฤศจิกายน 2569)
  *  สถานศึกษา: โรงเรียนมหาชัยพิทยาคาร สพม.มหาสารคาม
- *  ผู้พัฒนาระบบ: ครูก้องนที อุ่นเจริญ | MHC Smart School v3.3.32
+ *  ผู้พัฒนาระบบ: ครูก้องนที อุ่นเจริญ | MHC Smart School v3.3.34
  * ============================================================
  */
 
@@ -12,7 +12,7 @@ const APP_CONFIG = {
   APP_NAME: 'ระบบลงทะเบียนชุมนุมออนไลน์ — โรงเรียนมหาชัยพิทยาคาร',
   SCHOOL_NAME: 'โรงเรียนมหาชัยพิทยาคาร',
   DEVELOPER_NAME: 'ครูก้องนที อุ่นเจริญ',
-  VERSION: 'v3.3.32',
+  VERSION: 'v3.3.34',
   CACHE_TTL: 30 // วินาทีสำหรับ CacheService ป้องกันโหลดเกินโควตาเมื่อ นร. เข้าพร้อมกัน
 };
 
@@ -197,10 +197,10 @@ function saveDatabaseToSheet(db) {
 
   const lock = LockService.getScriptLock();
   try {
-    // รอคิวเขียนข้อมูลสูงสุด 15 วินาที
-    lock.waitLock(15000);
+    // รอคิวเขียนข้อมูลสูงสุด 30 วินาที เพื่อรองรับการบันทึกพร้อมกัน
+    lock.waitLock(30000);
   } catch (e) {
-    throw new Error('ระบบกำลังมีผู้ใช้งานบันทึกข้อมูลหนาแน่น กรุณาลองใหม่อีกครั้ง');
+    throw new Error('ระบบกำลังมีผู้ใช้งานบันทึกข้อมูลหนาแน่น กรุณารอสักครู่แล้วลองใหม่อีกครั้ง');
   }
 
   try {
@@ -507,11 +507,17 @@ function registerStudent(studentName, classId, clubId) {
   let regSheet = ss.getSheetByName('Registrations');
   if (!regSheet) regSheet = ss.insertSheet('Registrations');
 
+  // อ่านข้อมูลชุมนุมล่วงหน้านอก Lock เพื่อลดเวลาการถือ Lock ให้เหลือน้อยที่สุด
+  const clubs = readClubsSheet(ss);
+  const targetClub = clubs.find(c => Number(c.id) === clbId);
+  if (!targetClub) throw new Error('ไม่พบข้อมูลชุมนุมที่เลือก');
+
   const lock = LockService.getScriptLock();
   try {
-    lock.waitLock(15000);
+    // ขยายเวลารอคิวเป็น 30 วินาที เพื่อรองรับนักเรียนส่งข้อมูลพร้อมกันได้อย่างราบรื่น
+    lock.waitLock(30000);
   } catch (_) {
-    throw new Error('ระบบกำลังมีผู้ใช้งานบันทึกข้อมูลหนาแน่น กรุณาลองใหม่อีกครั้ง');
+    throw new Error('ระบบกำลังมีผู้ใช้งานบันทึกข้อมูลหนาแน่น กรุณารอสักครู่แล้วลองใหม่อีกครั้ง');
   }
 
   try {
@@ -532,9 +538,6 @@ function registerStudent(studentName, classId, clubId) {
       }
     }
 
-    const clubs = readClubsSheet(ss);
-    const targetClub = clubs.find(c => Number(c.id) === clbId);
-    if (!targetClub) throw new Error('ไม่พบข้อมูลชุมนุมที่เลือก');
     if (countInClub >= Number(targetClub.capacity)) {
       throw new Error('ขออภัย ขณะนี้มีผู้ลงทะเบียนครบจำนวนโควตาแล้ว กรุณาเลือกชุมนุมอื่น');
     }

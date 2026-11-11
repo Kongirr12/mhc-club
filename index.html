@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&display=swap" rel="stylesheet">
 
   <!-- MHC Logo Base64 for instant zero-latency printing -->
-  <script src="logo.js?v=3.3.33"></script>
+  <script src="logo.js?v=3.3.34"></script>
 
   <!-- Font Awesome 6.6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
@@ -352,7 +352,7 @@
           <div>
             <div class="flex items-center gap-1.5">
               <span class="text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/40 px-2 py-0.5 rounded-full border border-brand-200 dark:border-brand-800/50">Smart School</span>
-              <span class="text-[11px] text-slate-400 font-medium hidden sm:inline">v3.3.33</span>
+              <span class="text-[11px] text-slate-400 font-medium hidden sm:inline">v3.3.34</span>
             </div>
             <h1 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">ระบบลงทะเบียนชุมนุมออนไลน์</h1>
             <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[200px] sm:max-w-xs">โรงเรียนมหาชัยพิทยาคาร สพม.มหาสารคาม</p>
@@ -719,7 +719,7 @@
         </div>
       </div>
       <div class="text-center md:text-right text-[11px]">
-        <p>ผู้พัฒนาระบบ: <strong class="text-brand-600 dark:text-brand-400 font-semibold">ครูก้องนที อุ่นเจริญ</strong> | MHC Smart School v3.3.33</p>
+        <p>ผู้พัฒนาระบบ: <strong class="text-brand-600 dark:text-brand-400 font-semibold">ครูก้องนที อุ่นเจริญ</strong> | MHC Smart School v3.3.34</p>
       </div>
     </div>
   </footer>
@@ -1654,8 +1654,8 @@
       }
     }
 
-    function registerStudentOnline(studentName, classId, clubId, callback) {
-      showLoading('กำลังบันทึกการลงทะเบียน...', 'บันทึกรายชื่อลง Google Sheets');
+    async function registerStudentOnline(studentName, classId, clubId, callback) {
+      showLoading('กำลังบันทึกการลงทะเบียน...', 'กำลังส่งข้อมูลไปยังฐานข้อมูล Google Sheets');
 
       const onSuccess = (reg) => {
         hideLoading();
@@ -1674,30 +1674,81 @@
       }
 
       const gasUrl = getGASUrl();
-      if (gasUrl) {
-        rpcGAS('registerStudent', studentName, classId, clubId)
-          .then(onSuccess)
-          .catch(async (err) => {
-            try {
-              const url = `${gasUrl}?action=registerStudent&studentName=${encodeURIComponent(studentName)}&classId=${classId}&clubId=${clubId}`;
-              const res = await fetch(url, { redirect: 'follow' });
-              const json = await res.json();
-              if (json && json.ok) {
-                onSuccess(json.data);
-                return;
-              }
-              if (json && json.message) throw new Error(json.message);
-            } catch (err2) {
-              hideLoading();
-              Swal.fire('ลงทะเบียนไม่สำเร็จ', err2.message || err.message, 'error');
+      if (!gasUrl) {
+        onSuccess({ id: Date.now(), studentName, classId, clubId, timestamp: new Date().toISOString() });
+        return;
+      }
+
+      // ระบบ Auto-Retry พร้อม Jitter รองรับนักเรียนส่งข้อมูลพร้อมกัน 140+ คน
+      const MAX_RETRIES = 3;
+      let lastErrorMessage = '';
+
+      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+          if (attempt > 1) {
+            showLoading(
+              'ระบบกำลังจัดคิวบันทึกข้อมูล...',
+              `มีผู้ใช้งานพร้อมกันจำนวนมาก กำลังลองบันทึกรอบที่ ${attempt}/${MAX_RETRIES} โปรดรอสักครู่`
+            );
+          }
+
+          // 1. วิธีหลัก: POST text/plain
+          const regData = await rpcGAS('registerStudent', studentName, classId, clubId);
+          onSuccess(regData);
+          return;
+        } catch (err) {
+          lastErrorMessage = err.message || '';
+
+          // ตรวจสอบว่าเป็นข้อผิดพลาดด้านกฎการลงทะเบียนหรือไม่ (ถ้าใช่ให้แจ้งทันที ไม่ต้อง Retry)
+          const isBusinessRule = lastErrorMessage.includes('ลงทะเบียนในระบบเรียบร้อยแล้ว') ||
+                                 lastErrorMessage.includes('ครบจำนวนโควตาแล้ว') ||
+                                 lastErrorMessage.includes('กรุณาระบุ');
+          if (isBusinessRule) {
+            hideLoading();
+            Swal.fire({
+              icon: 'warning',
+              title: 'ไม่สามารถลงทะเบียนได้',
+              text: lastErrorMessage,
+              confirmButtonColor: '#4F46E5'
+            });
+            return;
+          }
+
+          // 2. วิธีสำรอง: ลองผ่าน GET fallback หากเกิดปัญหาเครือข่ายชั่วคราว
+          try {
+            const fallbackUrl = `${gasUrl}?action=registerStudent&studentName=${encodeURIComponent(studentName)}&classId=${classId}&clubId=${clubId}`;
+            const res = await fetch(fallbackUrl, { redirect: 'follow' });
+            const json = await res.json();
+            if (json && json.ok) {
+              onSuccess(json.data);
               return;
             }
-            hideLoading();
-            Swal.fire('ลงทะเบียนไม่สำเร็จ', err.message || 'ไม่สามารถเชื่อมต่อ Google Sheets', 'error');
-          });
-      } else {
-        onSuccess({ id: Date.now(), studentName, classId, clubId, timestamp: new Date().toISOString() });
+            if (json && json.message) {
+              lastErrorMessage = json.message;
+              if (lastErrorMessage.includes('ลงทะเบียนในระบบเรียบร้อยแล้ว') || lastErrorMessage.includes('ครบจำนวนโควตาแล้ว')) {
+                hideLoading();
+                Swal.fire('ไม่สามารถลงทะเบียนได้', lastErrorMessage, 'warning');
+                return;
+              }
+            }
+          } catch (_) {}
+
+          // สุ่มเวลารอ 1.2 - 2.4 วินาที ก่อนลองรอบถัดไป (Jittered Backoff)
+          if (attempt < MAX_RETRIES) {
+            const jitterMs = 1200 + Math.floor(Math.random() * 1200);
+            await new Promise(res => setTimeout(res, jitterMs));
+          }
+        }
       }
+
+      // หากพยายามครบ 3 ครั้งแล้วยังติดคิว ให้แจ้งเตือนนักเรียนอย่างชัดเจน
+      hideLoading();
+      Swal.fire({
+        icon: 'error',
+        title: 'ลงทะเบียนไม่สำเร็จ',
+        html: `ขออภัย ขณะนี้มีผู้ใช้งานเข้าพร้อมกันหนาแน่นมาก:<br><span class="text-rose-600 font-bold">${escapeHTML(lastErrorMessage || 'การเชื่อมต่อหมดเวลา')}</span><br><br>กรุณากดปุ่ม <strong>"ยืนยันลงทะเบียน"</strong> อีกครั้งเพื่อเข้าคิวใหม่`,
+        confirmButtonColor: '#4F46E5'
+      });
     }
 
     function deleteRegistrationOnline(regId, callback) {

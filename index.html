@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&display=swap" rel="stylesheet">
 
   <!-- MHC Logo Base64 for instant zero-latency printing -->
-  <script src="logo.js?v=3.3.37"></script>
+  <script src="logo.js?v=3.3.38"></script>
 
   <!-- Font Awesome 6.6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
@@ -224,7 +224,7 @@
     .ticket-rip::after { right: -12px; }
 
     /* ========================================================
-       A4 OFFICIAL THAI CIVIL SERVICE PRINT STYLING (TH SARABUN)
+       A4 OFFICIAL THAI CIVIL SERVICE PRINT STYLING (TH SARABUN PSK 16PT)
        ======================================================== */
     @page {
       size: A4 portrait;
@@ -232,14 +232,26 @@
     }
 
     @font-face {
+      font-family: 'TH SarabunPSK';
+      src: local('TH SarabunPSK'), local('THSarabunPSK'), local('TH Sarabun New'), local('THSarabunNew'), url('https://fonts.gstatic.com/s/sarabun/v14/DtVmJxOaAag79-H1-6ikbZZKm-c.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'TH SarabunPSK';
+      src: local('TH SarabunPSK Bold'), local('THSarabunPSK-Bold'), local('TH Sarabun New Bold'), local('THSarabunNew-Bold'), url('https://fonts.gstatic.com/s/sarabun/v14/DtVkJxOaAag79-H1-6ikTZ1cm-0M.woff2') format('woff2');
+      font-weight: 700;
+      font-style: normal;
+    }
+    @font-face {
       font-family: 'TH Sarabun New';
-      src: local('TH Sarabun New'), local('THSarabunNew'), url('https://fonts.gstatic.com/s/sarabun/v14/DtVmJxOaAag79-H1-6ikbZZKm-c.woff2') format('woff2');
+      src: local('TH Sarabun New'), local('THSarabunNew'), local('TH SarabunPSK'), local('THSarabunPSK'), url('https://fonts.gstatic.com/s/sarabun/v14/DtVmJxOaAag79-H1-6ikbZZKm-c.woff2') format('woff2');
       font-weight: 400;
       font-style: normal;
     }
     @font-face {
       font-family: 'TH Sarabun New';
-      src: local('TH Sarabun New Bold'), local('THSarabunNew-Bold'), url('https://fonts.gstatic.com/s/sarabun/v14/DtVkJxOaAag79-H1-6ikTZ1cm-0M.woff2') format('woff2');
+      src: local('TH Sarabun New Bold'), local('THSarabunNew-Bold'), local('TH SarabunPSK Bold'), local('THSarabunPSK-Bold'), url('https://fonts.gstatic.com/s/sarabun/v14/DtVkJxOaAag79-H1-6ikTZ1cm-0M.woff2') format('woff2');
       font-weight: 700;
       font-style: normal;
     }
@@ -252,7 +264,9 @@
         padding: 0 !important;
         background: #ffffff !important;
         color: #000000 !important;
-        font-family: 'TH Sarabun New', 'THSarabunNew', 'TH SarabunPSK', 'Sarabun', 'Cordia New', sans-serif !important;
+        font-family: 'TH SarabunPSK', 'TH Sarabun New', 'THSarabunPSK', 'THSarabunNew', 'Sarabun', 'Cordia New', sans-serif !important;
+        font-size: 16pt !important;
+        line-height: 1.25 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
@@ -263,6 +277,7 @@
 
       #print-area, #print-area * {
         visibility: visible !important;
+        font-family: 'TH SarabunPSK', 'TH Sarabun New', 'THSarabunPSK', 'THSarabunNew', 'Sarabun', 'Cordia New', sans-serif !important;
       }
 
       #print-area {
@@ -274,29 +289,39 @@
         margin: 0 !important;
         padding: 0 !important;
         background: #ffffff !important;
-        font-family: 'TH Sarabun New', 'THSarabunNew', 'TH SarabunPSK', 'Sarabun', 'Cordia New', sans-serif !important;
+        color: #000000 !important;
+        font-family: 'TH SarabunPSK', 'TH Sarabun New', 'THSarabunPSK', 'THSarabunNew', 'Sarabun', 'Cordia New', sans-serif !important;
+        font-size: 16pt !important;
       }
 
       .no-print {
         display: none !important;
       }
 
-      /* Official Civil Service Table Formatting */
+      /* Official Civil Service Table Formatting (All 16pt TH SarabunPSK) */
       .a4-print-sheet {
         width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
         box-sizing: border-box !important;
         color: #000000 !important;
-        font-family: 'TH Sarabun New', 'THSarabunNew', 'TH SarabunPSK', 'Sarabun', 'Cordia New', sans-serif !important;
+        font-family: 'TH SarabunPSK', 'TH Sarabun New', 'THSarabunPSK', 'THSarabunNew', 'Sarabun', 'Cordia New', sans-serif !important;
+        font-size: 16pt !important;
+        line-height: 1.25 !important;
+      }
+
+      .a4-print-sheet h1, .a4-print-sheet h2, .a4-print-sheet h3, .a4-print-sheet h4, .a4-print-sheet p, .a4-print-sheet div, .a4-print-sheet span {
+        font-family: 'TH SarabunPSK', 'TH Sarabun New', 'THSarabunPSK', 'THSarabunNew', 'Sarabun', 'Cordia New', sans-serif !important;
+        font-size: 16pt !important;
       }
 
       .a4-print-table {
         width: 100% !important;
         border-collapse: collapse !important;
-        margin-top: 10px !important;
+        margin-top: 8px !important;
         page-break-inside: auto !important;
-        font-family: 'TH Sarabun New', 'THSarabunNew', 'TH SarabunPSK', 'Sarabun', 'Cordia New', sans-serif !important;
+        font-family: 'TH SarabunPSK', 'TH Sarabun New', 'THSarabunPSK', 'THSarabunNew', 'Sarabun', 'Cordia New', sans-serif !important;
+        font-size: 16pt !important;
       }
 
       .a4-print-table thead {
@@ -309,8 +334,10 @@
 
       .a4-print-table th, .a4-print-table td {
         border: 1px solid #111111 !important;
-        padding: 5px 6px !important;
-        line-height: 1.35 !important;
+        padding: 4px 6px !important;
+        line-height: 1.25 !important;
+        font-family: 'TH SarabunPSK', 'TH Sarabun New', 'THSarabunPSK', 'THSarabunNew', 'Sarabun', 'Cordia New', sans-serif !important;
+        font-size: 16pt !important;
       }
 
       .a4-print-table th {
@@ -327,6 +354,8 @@
       .print-avoid-break {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
+        font-family: 'TH SarabunPSK', 'TH Sarabun New', 'THSarabunPSK', 'THSarabunNew', 'Sarabun', 'Cordia New', sans-serif !important;
+        font-size: 16pt !important;
       }
     }
   </style>
@@ -352,7 +381,7 @@
           <div>
             <div class="flex items-center gap-1.5">
               <span class="text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/40 px-2 py-0.5 rounded-full border border-brand-200 dark:border-brand-800/50">Smart School</span>
-              <span class="text-[11px] text-slate-400 font-medium hidden sm:inline">v3.3.37</span>
+              <span class="text-[11px] text-slate-400 font-medium hidden sm:inline">v3.3.38</span>
             </div>
             <h1 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">ระบบลงทะเบียนชุมนุมออนไลน์</h1>
             <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[200px] sm:max-w-xs">โรงเรียนมหาชัยพิทยาคาร สพม.มหาสารคาม</p>
@@ -736,7 +765,7 @@
         </div>
       </div>
       <div class="text-center md:text-right text-[11px]">
-        <p>ผู้พัฒนาระบบ: <strong class="text-brand-600 dark:text-brand-400 font-semibold">ครูก้องนที อุ่นเจริญ</strong> | MHC Smart School v3.3.37</p>
+        <p>ผู้พัฒนาระบบ: <strong class="text-brand-600 dark:text-brand-400 font-semibold">ครูก้องนที อุ่นเจริญ</strong> | MHC Smart School v3.3.38</p>
       </div>
     </div>
   </footer>
@@ -2825,7 +2854,7 @@
       if (!ticketElem) return;
       const printContainer = document.getElementById('print-area');
       printContainer.innerHTML = `
-        <div style="font-family: 'TH Sarabun New', 'THSarabunNew', 'TH SarabunPSK', 'Sarabun', sans-serif; display: flex; justify-content: center; align-items: flex-start; padding-top: 15mm;">
+        <div style="font-family: 'TH SarabunPSK', 'TH Sarabun New', 'THSarabunPSK', 'THSarabunNew', 'Sarabun', sans-serif; font-size: 16pt; display: flex; justify-content: center; align-items: flex-start; padding-top: 15mm;">
           <div style="max-width: 440px; width: 100%; border: 1.5px solid #cbd5e1; border-radius: 18px; overflow: hidden; background: #ffffff;">
             ${ticketElem.innerHTML}
           </div>
@@ -3194,6 +3223,19 @@
           </xml>
           <![endif]-->
           <style>
+            @font-face {
+              font-family: "TH SarabunPSK";
+              panose-1: 2 11 5 0 4 2 0 2 0 4;
+              mso-font-charset: 222;
+              mso-generic-font-family: swiss;
+              mso-font-pitch: variable;
+              mso-font-signature: 16777219 0 0 0 65536 0;
+            }
+            @font-face {
+              font-family: "TH Sarabun New";
+              mso-font-charset: 222;
+              mso-generic-font-family: swiss;
+            }
             @page Section1 {
               size: 595.3pt 841.9pt;
               margin: 1.0in 1.0in 1.0in 1.0in;
@@ -3202,21 +3244,64 @@
               mso-paper-source: 0;
             }
             div.Section1 { page: Section1; }
+            p.MsoNormal, li.MsoNormal, div.MsoNormal {
+              mso-style-parent: "";
+              margin: 0cm;
+              margin-bottom: .0001pt;
+              mso-pagination: widow-orphan;
+              font-size: 16.0pt;
+              mso-bidi-font-size: 16.0pt;
+              font-family: "TH SarabunPSK", "TH Sarabun New", sans-serif;
+              mso-ascii-font-family: "TH SarabunPSK";
+              mso-fareast-font-family: "TH SarabunPSK";
+              mso-hansi-font-family: "TH SarabunPSK";
+              mso-bidi-font-family: "TH SarabunPSK";
+            }
             body {
-              font-family: 'TH SarabunPSK', 'TH Sarabun New', 'Sarabun', 'Cordia New', sans-serif;
-              font-size: 16pt;
+              font-family: "TH SarabunPSK", "TH Sarabun New", 'Sarabun', 'Cordia New', sans-serif;
+              font-size: 16.0pt;
+              mso-bidi-font-size: 16.0pt;
               line-height: 1.25;
               color: #000000;
+            }
+            h1, h2, h3, h4, h5, h6 {
+              margin: 0;
+              padding: 0;
+              font-family: "TH SarabunPSK", "TH Sarabun New", sans-serif !important;
+              font-size: 16.0pt !important;
+              mso-bidi-font-size: 16.0pt !important;
+              mso-ascii-font-family: "TH SarabunPSK";
+              mso-fareast-font-family: "TH SarabunPSK";
+              mso-hansi-font-family: "TH SarabunPSK";
+              mso-bidi-font-family: "TH SarabunPSK";
+              font-weight: bold;
             }
             table {
               border-collapse: collapse;
               width: 100%;
               mso-table-lspace: 0pt;
               mso-table-rspace: 0pt;
+              font-family: "TH SarabunPSK", "TH Sarabun New", sans-serif;
+              font-size: 16.0pt;
+              mso-bidi-font-size: 16.0pt;
             }
             th, td {
-              font-family: 'TH SarabunPSK', 'TH Sarabun New', 'Sarabun', 'Cordia New', sans-serif;
-              font-size: 16pt;
+              font-family: "TH SarabunPSK", "TH Sarabun New", sans-serif !important;
+              font-size: 16.0pt !important;
+              mso-bidi-font-size: 16.0pt !important;
+              mso-ascii-font-family: "TH SarabunPSK";
+              mso-fareast-font-family: "TH SarabunPSK";
+              mso-hansi-font-family: "TH SarabunPSK";
+              mso-bidi-font-family: "TH SarabunPSK";
+            }
+            span, p, div {
+              font-family: "TH SarabunPSK", "TH Sarabun New", sans-serif;
+              font-size: 16.0pt;
+              mso-bidi-font-size: 16.0pt;
+              mso-ascii-font-family: "TH SarabunPSK";
+              mso-fareast-font-family: "TH SarabunPSK";
+              mso-hansi-font-family: "TH SarabunPSK";
+              mso-bidi-font-family: "TH SarabunPSK";
             }
           </style>
         </head>
@@ -3259,28 +3344,28 @@
         matches.forEach((s, idx) => {
           rowsHtml += `
             <tr>
-              <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${idx + 1}</td>
-              <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.studentCode || '-')}</td>
-              <td style="border: 1px solid #000; padding: 4px 8px; text-align: left;">${escapeHTML(s.studentName)}</td>
-              <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.className)}</td>
-              <td style="border: 1px solid #000; padding: 4px 8px; text-align: left;"></td>
+              <td align="center" style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px; text-align: center;">${idx + 1}</td>
+              <td align="center" style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.studentCode || '-')}</td>
+              <td style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px 8px; text-align: left;">${escapeHTML(s.studentName)}</td>
+              <td align="center" style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.className)}</td>
+              <td style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px 8px; text-align: left;"></td>
             </tr>
           `;
         });
 
         const bodyHtml = `
           <div style="text-align: center; margin-bottom: 10px;">
-            <h2 style="font-size: 16pt; font-weight: bold; margin: 0; line-height: 1.3;">รายชื่อนักเรียนที่ยังไม่ลงทะเบียนชุมนุม</h2>
-            <h3 style="font-size: 16pt; font-weight: normal; margin: 2px 0 0 0; line-height: 1.3;">ภาคเรียนที่ 2 ปีการศึกษา 2569</h3>
+            <h2 style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; font-weight: bold; margin: 0; line-height: 1.3;">รายชื่อนักเรียนที่ยังไม่ลงทะเบียนชุมนุม</h2>
+            <h3 style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; font-weight: normal; margin: 2px 0 0 0; line-height: 1.3;">ภาคเรียนที่ 2 ปีการศึกษา 2569</h3>
           </div>
-          <table style="width: 100%; border-collapse: collapse; font-size: 16pt;">
+          <table style="width: 100%; border-collapse: collapse; font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt;">
             <thead>
               <tr style="background-color: #f1f5f9;">
-                <th style="width: 8%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ลำดับ</th>
-                <th style="width: 14%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">เลขประจำตัว</th>
-                <th style="width: 36%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">ชื่อ - นามสกุล นักเรียน</th>
-                <th style="width: 12%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ระดับชั้น</th>
-                <th style="width: 30%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">กิจกรรมชุมนุม</th>
+                <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 8%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ลำดับ</th>
+                <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 14%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">เลขประจำตัว</th>
+                <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 36%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">ชื่อ - นามสกุล นักเรียน</th>
+                <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 12%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ระดับชั้น</th>
+                <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 30%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">กิจกรรมชุมนุม</th>
               </tr>
             </thead>
             <tbody>
@@ -3320,11 +3405,11 @@
               const clubCell = s.isRegistered ? escapeHTML(s.clubName || '') : '';
               rowsHtml += `
                 <tr>
-                  <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${chunk.startIdx + rIdx}</td>
-                  <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.studentCode || '-')}</td>
-                  <td style="border: 1px solid #000; padding: 4px 8px; text-align: left;">${escapeHTML(s.studentName)}</td>
-                  <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.className)}</td>
-                  <td style="border: 1px solid #000; padding: 4px 8px; text-align: left;">${clubCell}</td>
+                  <td align="center" style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px; text-align: center;">${chunk.startIdx + rIdx}</td>
+                  <td align="center" style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.studentCode || '-')}</td>
+                  <td style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px 8px; text-align: left;">${escapeHTML(s.studentName)}</td>
+                  <td align="center" style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.className)}</td>
+                  <td style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px 8px; text-align: left;">${clubCell}</td>
                 </tr>
               `;
             });
@@ -3332,17 +3417,17 @@
             bodyHtml += `
               <div style="${pageBreakStyle}">
                 <div style="text-align: center; margin-bottom: 10px;">
-                  <h2 style="font-size: 16pt; font-weight: bold; margin: 0; line-height: 1.3;">${chunk.title}</h2>
-                  <h3 style="font-size: 16pt; font-weight: normal; margin: 2px 0 0 0; line-height: 1.3;">ภาคเรียนที่ 2 ปีการศึกษา 2569</h3>
+                  <h2 style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; font-weight: bold; margin: 0; line-height: 1.3;">${chunk.title}</h2>
+                  <h3 style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; font-weight: normal; margin: 2px 0 0 0; line-height: 1.3;">ภาคเรียนที่ 2 ปีการศึกษา 2569</h3>
                 </div>
-                <table style="width: 100%; border-collapse: collapse; font-size: 16pt;">
+                <table style="width: 100%; border-collapse: collapse; font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt;">
                   <thead>
                     <tr style="background-color: #f1f5f9;">
-                      <th style="width: 8%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ลำดับ</th>
-                      <th style="width: 14%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">เลขประจำตัว</th>
-                      <th style="width: 36%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">ชื่อ - นามสกุล นักเรียน</th>
-                      <th style="width: 12%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ระดับชั้น</th>
-                      <th style="width: 30%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">กิจกรรมชุมนุม</th>
+                      <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 8%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ลำดับ</th>
+                      <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 14%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">เลขประจำตัว</th>
+                      <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 36%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">ชื่อ - นามสกุล นักเรียน</th>
+                      <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 12%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ระดับชั้น</th>
+                      <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 30%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">กิจกรรมชุมนุม</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -3361,11 +3446,11 @@
           allUnregistered.forEach((s, idx) => {
             unregRows += `
               <tr>
-                <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${idx + 1}</td>
-                <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.studentCode || '-')}</td>
-                <td style="border: 1px solid #000; padding: 4px 8px; text-align: left;">${escapeHTML(s.studentName)}</td>
-                <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.className)}</td>
-                <td style="border: 1px solid #000; padding: 4px 8px; text-align: left;"></td>
+                <td align="center" style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px; text-align: center;">${idx + 1}</td>
+                <td align="center" style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.studentCode || '-')}</td>
+                <td style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px 8px; text-align: left;">${escapeHTML(s.studentName)}</td>
+                <td align="center" style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.className)}</td>
+                <td style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px 8px; text-align: left;"></td>
               </tr>
             `;
           });
@@ -3373,17 +3458,17 @@
           bodyHtml += `
             <div style="page-break-before: always; margin-top: 24pt;">
               <div style="text-align: center; margin-bottom: 10px;">
-                <h2 style="font-size: 16pt; font-weight: bold; margin: 0; line-height: 1.3;">รายชื่อนักเรียนที่ยังไม่ลงทะเบียนชุมนุม</h2>
-                <h3 style="font-size: 16pt; font-weight: normal; margin: 2px 0 0 0; line-height: 1.3;">ภาคเรียนที่ 2 ปีการศึกษา 2569</h3>
+                <h2 style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; font-weight: bold; margin: 0; line-height: 1.3;">รายชื่อนักเรียนที่ยังไม่ลงทะเบียนชุมนุม</h2>
+                <h3 style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; font-weight: normal; margin: 2px 0 0 0; line-height: 1.3;">ภาคเรียนที่ 2 ปีการศึกษา 2569</h3>
               </div>
-              <table style="width: 100%; border-collapse: collapse; font-size: 16pt;">
+              <table style="width: 100%; border-collapse: collapse; font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt;">
                 <thead>
                   <tr style="background-color: #f1f5f9;">
-                    <th style="width: 8%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ลำดับ</th>
-                    <th style="width: 14%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">เลขประจำตัว</th>
-                    <th style="width: 36%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">ชื่อ - นามสกุล นักเรียน</th>
-                    <th style="width: 12%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ระดับชั้น</th>
-                    <th style="width: 30%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">กิจกรรมชุมนุม</th>
+                    <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 8%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ลำดับ</th>
+                    <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 14%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">เลขประจำตัว</th>
+                    <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 36%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">ชื่อ - นามสกุล นักเรียน</th>
+                    <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 12%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ระดับชั้น</th>
+                    <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 30%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">กิจกรรมชุมนุม</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -3406,12 +3491,12 @@
           const teachers = getClubTeachersText(c);
           clubRows += `
             <tr>
-              <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${idx + 1}</td>
-              <td style="border: 1px solid #000; padding: 4px 8px; text-align: left;">${escapeHTML(c.name)}</td>
-              <td style="border: 1px solid #000; padding: 4px 8px; text-align: left;">${escapeHTML(teachers || '-')}</td>
-              <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${c.capacity || 0}</td>
-              <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${regCount}</td>
-              <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${remain}</td>
+              <td align="center" style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px; text-align: center;">${idx + 1}</td>
+              <td style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px 8px; text-align: left;">${escapeHTML(c.name)}</td>
+              <td style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px 8px; text-align: left;">${escapeHTML(teachers || '-')}</td>
+              <td align="center" style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px; text-align: center;">${c.capacity || 0}</td>
+              <td align="center" style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px; text-align: center;">${regCount}</td>
+              <td align="center" style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px; text-align: center;">${remain}</td>
             </tr>
           `;
         });
@@ -3419,18 +3504,18 @@
         bodyHtml += `
           <div style="page-break-before: always; margin-top: 24pt;">
             <div style="text-align: center; margin-bottom: 10px;">
-              <h2 style="font-size: 16pt; font-weight: bold; margin: 0; line-height: 1.3;">ผลการลงทะเบียนชุมนุม</h2>
-              <h3 style="font-size: 16pt; font-weight: normal; margin: 2px 0 0 0; line-height: 1.3;">ประจำภาคเรียนที่ 2 ปีการศึกษา 2569</h3>
+              <h2 style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; font-weight: bold; margin: 0; line-height: 1.3;">ผลการลงทะเบียนชุมนุม</h2>
+              <h3 style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; font-weight: normal; margin: 2px 0 0 0; line-height: 1.3;">ประจำภาคเรียนที่ 2 ปีการศึกษา 2569</h3>
             </div>
-            <table style="width: 100%; border-collapse: collapse; font-size: 16pt;">
+            <table style="width: 100%; border-collapse: collapse; font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt;">
               <thead>
                 <tr style="background-color: #f1f5f9;">
-                  <th style="width: 6%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ลำดับ</th>
-                  <th style="width: 30%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">ชื่อกิจกรรมชุมนุม</th>
-                  <th style="width: 32%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">ครูผู้ดูแลชุมนุม</th>
-                  <th style="width: 10%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">รับได้</th>
-                  <th style="width: 11%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ลงแล้ว</th>
-                  <th style="width: 11%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">คงเหลือ</th>
+                  <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 6%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ลำดับ</th>
+                  <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 30%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">ชื่อกิจกรรมชุมนุม</th>
+                  <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 32%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">ครูผู้ดูแลชุมนุม</th>
+                  <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 10%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">รับได้</th>
+                  <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 11%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ลงแล้ว</th>
+                  <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 11%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">คงเหลือ</th>
                 </tr>
               </thead>
               <tbody>
@@ -3438,10 +3523,10 @@
               </tbody>
               <tfoot>
                 <tr style="font-weight: bold; background-color: #f8fafc;">
-                  <td colspan="3" align="center" style="border: 1px solid #000; padding: 5px; text-align: center;">รวมทั้งสิ้น</td>
-                  <td align="center" style="border: 1px solid #000; padding: 5px; text-align: center;">${totalCap}</td>
-                  <td align="center" style="border: 1px solid #000; padding: 5px; text-align: center;">${totalReg}</td>
-                  <td align="center" style="border: 1px solid #000; padding: 5px; text-align: center;">${totalCap - totalReg}</td>
+                  <td colspan="3" align="center" style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; font-weight: bold; border: 1px solid #000; padding: 5px; text-align: center;">รวมทั้งสิ้น</td>
+                  <td align="center" style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 5px; text-align: center;">${totalCap}</td>
+                  <td align="center" style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 5px; text-align: center;">${totalReg}</td>
+                  <td align="center" style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 5px; text-align: center;">${totalCap - totalReg}</td>
                 </tr>
               </tfoot>
             </table>
@@ -3486,11 +3571,11 @@
           const clubCell = s.isRegistered ? escapeHTML(s.clubName || '') : '';
           rowsHtml += `
             <tr>
-              <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${chunk.startIdx + rIdx}</td>
-              <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.studentCode || '-')}</td>
-              <td style="border: 1px solid #000; padding: 4px 8px; text-align: left;">${escapeHTML(s.studentName)}</td>
-              <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.className)}</td>
-              <td style="border: 1px solid #000; padding: 4px 8px; text-align: left;">${clubCell}</td>
+              <td align="center" style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px; text-align: center;">${chunk.startIdx + rIdx}</td>
+              <td align="center" style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.studentCode || '-')}</td>
+              <td style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px 8px; text-align: left;">${escapeHTML(s.studentName)}</td>
+              <td align="center" style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.className)}</td>
+              <td style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; border: 1px solid #000; padding: 4px 8px; text-align: left;">${clubCell}</td>
             </tr>
           `;
         });
@@ -3498,17 +3583,17 @@
         bodyHtml += `
           <div style="${pageBreakStyle}">
             <div style="text-align: center; margin-bottom: 10px;">
-              <h2 style="font-size: 16pt; font-weight: bold; margin: 0; line-height: 1.3;">${chunk.title}</h2>
-              <h3 style="font-size: 16pt; font-weight: normal; margin: 2px 0 0 0; line-height: 1.3;">ภาคเรียนที่ 2 ปีการศึกษา 2569</h3>
+              <h2 style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; font-weight: bold; margin: 0; line-height: 1.3;">${chunk.title}</h2>
+              <h3 style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; font-weight: normal; margin: 2px 0 0 0; line-height: 1.3;">ภาคเรียนที่ 2 ปีการศึกษา 2569</h3>
             </div>
-            <table style="width: 100%; border-collapse: collapse; font-size: 16pt;">
+            <table style="width: 100%; border-collapse: collapse; font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt;">
               <thead>
                 <tr style="background-color: #f1f5f9;">
-                  <th style="width: 8%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ลำดับ</th>
-                  <th style="width: 14%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">เลขประจำตัว</th>
-                  <th style="width: 36%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">ชื่อ - นามสกุล นักเรียน</th>
-                  <th style="width: 12%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ระดับชั้น</th>
-                  <th style="width: 30%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">กิจกรรมชุมนุม</th>
+                  <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 8%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ลำดับ</th>
+                  <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 14%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">เลขประจำตัว</th>
+                  <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 36%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">ชื่อ - นามสกุล นักเรียน</th>
+                  <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 12%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ระดับชั้น</th>
+                  <th style="font-family: 'TH SarabunPSK', sans-serif; font-size: 16pt; mso-bidi-font-size: 16.0pt; width: 30%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">กิจกรรมชุมนุม</th>
                 </tr>
               </thead>
               <tbody>
@@ -3581,14 +3666,14 @@
 
         sectionsHtml += `
           <div style="${pageBreak}">
-            <div style="text-align: center; margin-bottom: 10px;">
-              <img src="${logoUrl}" alt="ตราโรงเรียนมหาชัยพิทยาคาร" style="width: 68px; height: 68px; object-fit: contain; margin: 0 auto 4px auto; display: block;">
-              <h2 style="font-size: 18pt; font-weight: bold; margin: 0; line-height: 1.25; color: #000;">โรงเรียนมหาชัยพิทยาคาร</h2>
-              <h3 style="font-size: 16pt; font-weight: bold; margin: 2px 0 0 0; line-height: 1.25; color: #000;">บัญชีรายชื่อการลงทะเบียนกิจกรรมชุมนุม ประจำปีการศึกษา ๒๕๖๙</h3>
-              <p style="font-size: 13.5pt; margin: 2px 0 0 0; color: #222;">สังกัดสำนักงานเขตพื้นที่การศึกษามัธยมศึกษามหาสารคาม (สพม.มหาสารคาม)</p>
+            <div style="text-align: center; margin-bottom: 8px;">
+              <img src="${logoUrl}" alt="ตราโรงเรียนมหาชัยพิทยาคาร" style="width: 60px; height: 60px; object-fit: contain; margin: 0 auto 4px auto; display: block;">
+              <h2 style="font-size: 16pt; font-weight: bold; margin: 0; line-height: 1.25; color: #000; font-family: 'TH SarabunPSK', sans-serif;">โรงเรียนมหาชัยพิทยาคาร</h2>
+              <h3 style="font-size: 16pt; font-weight: bold; margin: 2px 0 0 0; line-height: 1.25; color: #000; font-family: 'TH SarabunPSK', sans-serif;">บัญชีรายชื่อการลงทะเบียนกิจกรรมชุมนุม ประจำปีการศึกษา ๒๕๖๙</h3>
+              <p style="font-size: 16pt; margin: 2px 0 0 0; color: #222; font-family: 'TH SarabunPSK', sans-serif;">สังกัดสำนักงานเขตพื้นที่การศึกษามัธยมศึกษามหาสารคาม (สพม.มหาสารคาม)</p>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 13.5pt; margin-bottom: 6px; padding: 4px 0; border-top: 1px solid #111; border-bottom: 1px solid #111;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 16pt; margin-bottom: 6px; padding: 4px 0; border-top: 1px solid #111; border-bottom: 1px solid #111; font-family: 'TH SarabunPSK', sans-serif;">
               <div><strong>ระดับชั้น:</strong> ${escapeHTML(cls.name)}</div>
               <div>
                 นักเรียนทั้งหมด <strong>${stus.length}</strong> คน &nbsp;|&nbsp;
@@ -3597,59 +3682,59 @@
               </div>
             </div>
 
-            <table class="a4-print-table" style="width: 100%; border-collapse: collapse; font-size: 13.5pt;">
+            <table class="a4-print-table" style="width: 100%; border-collapse: collapse; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">
               <thead>
                 <tr style="background-color: #f1f5f9;">
-                  <th style="width: 6%; text-align: center; border: 1px solid #111; padding: 5px;">ลำดับ</th>
-                  <th style="width: 13%; text-align: center; border: 1px solid #111; padding: 5px;">เลขประจำตัว</th>
-                  <th style="width: 25%; text-align: left; border: 1px solid #111; padding: 5px 8px;">ชื่อ - นามสกุล นักเรียน</th>
-                  <th style="width: 11%; text-align: center; border: 1px solid #111; padding: 5px;">ระดับชั้น</th>
-                  <th style="width: 24%; text-align: left; border: 1px solid #111; padding: 5px 8px;">กิจกรรมชุมนุม</th>
-                  <th style="width: 21%; text-align: left; border: 1px solid #111; padding: 5px 8px;">ครูผู้ดูแล</th>
+                  <th style="width: 6%; text-align: center; border: 1px solid #111; padding: 4px; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif; font-weight: bold;">ลำดับ</th>
+                  <th style="width: 13%; text-align: center; border: 1px solid #111; padding: 4px; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif; font-weight: bold;">เลขประจำตัว</th>
+                  <th style="width: 25%; text-align: left; border: 1px solid #111; padding: 4px 6px; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif; font-weight: bold;">ชื่อ - นามสกุล นักเรียน</th>
+                  <th style="width: 11%; text-align: center; border: 1px solid #111; padding: 4px; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif; font-weight: bold;">ระดับชั้น</th>
+                  <th style="width: 24%; text-align: left; border: 1px solid #111; padding: 4px 6px; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif; font-weight: bold;">กิจกรรมชุมนุม</th>
+                  <th style="width: 21%; text-align: left; border: 1px solid #111; padding: 4px 6px; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif; font-weight: bold;">ครูผู้ดูแล</th>
                 </tr>
               </thead>
               <tbody>
                 ${stus.map((r, i) => {
                   const isUnreg = !r.isRegistered;
                   const clubDisplay = isUnreg
-                    ? `<span style="color: #dc2626; font-weight: bold;">ยังไม่ลงทะเบียน</span>`
-                    : `<span>${escapeHTML(r.clubName)}</span>`;
+                    ? `<span style="color: #dc2626; font-weight: bold; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">ยังไม่ลงทะเบียน</span>`
+                    : `<span style="font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">${escapeHTML(r.clubName)}</span>`;
                   const teacherDisplay = isUnreg ? '-' : escapeHTML(r.teachersText || '-');
 
                   return `
                     <tr style="${isUnreg ? 'background-color: #fef2f2;' : ''}">
-                      <td style="border: 1px solid #111; padding: 5px; text-align: center;">${i + 1}</td>
-                      <td style="border: 1px solid #111; padding: 5px; text-align: center; font-family: monospace, sans-serif;">${escapeHTML(r.studentCode || '-')}</td>
-                      <td style="border: 1px solid #111; padding: 5px 8px; text-align: left;">${escapeHTML(r.studentName)}</td>
-                      <td style="border: 1px solid #111; padding: 5px; text-align: center;">${escapeHTML(r.className)}</td>
-                      <td style="border: 1px solid #111; padding: 5px 8px; text-align: left;">${clubDisplay}</td>
-                      <td style="border: 1px solid #111; padding: 5px 8px; text-align: left;">${teacherDisplay}</td>
+                      <td style="border: 1px solid #111; padding: 4px; text-align: center; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">${i + 1}</td>
+                      <td style="border: 1px solid #111; padding: 4px; text-align: center; font-size: 16pt; font-family: 'TH SarabunPSK', monospace, sans-serif;">${escapeHTML(r.studentCode || '-')}</td>
+                      <td style="border: 1px solid #111; padding: 4px 6px; text-align: left; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">${escapeHTML(r.studentName)}</td>
+                      <td style="border: 1px solid #111; padding: 4px; text-align: center; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">${escapeHTML(r.className)}</td>
+                      <td style="border: 1px solid #111; padding: 4px 6px; text-align: left; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">${clubDisplay}</td>
+                      <td style="border: 1px solid #111; padding: 4px 6px; text-align: left; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">${teacherDisplay}</td>
                     </tr>
                   `;
                 }).join('')}
               </tbody>
               <tfoot>
                 <tr style="background-color: #f8fafc; font-weight: bold; border-top: 1.5px solid #111;">
-                  <td colspan="2" style="border: 1px solid #111; padding: 5px; text-align: center;">รวม</td>
-                  <td colspan="4" style="border: 1px solid #111; padding: 5px 8px; text-align: left;">
+                  <td colspan="2" style="border: 1px solid #111; padding: 4px; text-align: center; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">รวม</td>
+                  <td colspan="4" style="border: 1px solid #111; padding: 4px 6px; text-align: left; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">
                     นักเรียน ${stus.length} คน (ลงทะเบียนแล้ว ${regC} คน, ยังไม่ลงทะเบียน ${unregC} คน)
                   </td>
                 </tr>
               </tfoot>
             </table>
 
-            <div class="print-avoid-break" style="margin-top: 28px; display: flex; justify-content: space-between; font-size: 13.5pt; line-height: 1.55;">
+            <div class="print-avoid-break" style="margin-top: 24px; display: flex; justify-content: space-between; font-size: 16pt; line-height: 1.4; font-family: 'TH SarabunPSK', sans-serif;">
               <div style="width: 46%; text-align: center;">
-                <p style="margin: 0;">ลงชื่อ............................................................ผู้รายงาน</p>
-                <p style="margin: 3px 0 0 0;">( นายก้องนที อุ่นเจริญ )</p>
-                <p style="margin: 2px 0 0 0;">ตำแหน่ง ผู้ดูแลระบบ / ครู โรงเรียนมหาชัยพิทยาคาร</p>
-                <p style="margin: 3px 0 0 0;">วันที่ ......... เดือน ......................... พ.ศ. .............</p>
+                <p style="margin: 0; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">ลงชื่อ............................................................ผู้รายงาน</p>
+                <p style="margin: 3px 0 0 0; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">( นายก้องนที อุ่นเจริญ )</p>
+                <p style="margin: 2px 0 0 0; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">ตำแหน่ง ผู้ดูแลระบบ / ครู โรงเรียนมหาชัยพิทยาคาร</p>
+                <p style="margin: 3px 0 0 0; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">วันที่ ......... เดือน ......................... พ.ศ. .............</p>
               </div>
               <div style="width: 46%; text-align: center;">
-                <p style="margin: 0;">ลงชื่อ............................................................ผู้อนุมัติ</p>
-                <p style="margin: 3px 0 0 0;">( ............................................................ )</p>
-                <p style="margin: 2px 0 0 0;">ตำแหน่ง หัวหน้ากลุ่มบริหารงานวิชาการ</p>
-                <p style="margin: 3px 0 0 0;">วันที่ ......... เดือน ......................... พ.ศ. .............</p>
+                <p style="margin: 0; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">ลงชื่อ............................................................ผู้อนุมัติ</p>
+                <p style="margin: 3px 0 0 0; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">( ............................................................ )</p>
+                <p style="margin: 2px 0 0 0; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">ตำแหน่ง หัวหน้ากลุ่มบริหารงานวิชาการ</p>
+                <p style="margin: 3px 0 0 0; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">วันที่ ......... เดือน ......................... พ.ศ. .............</p>
               </div>
             </div>
           </div>
@@ -3658,7 +3743,7 @@
 
       const printContainer = document.getElementById('print-area');
       printContainer.innerHTML = `
-        <div class="a4-print-sheet" style="font-family: 'TH Sarabun New', 'THSarabunNew', 'TH SarabunPSK', 'Sarabun', sans-serif; color: #000; width: 100%;">
+        <div class="a4-print-sheet" style="font-family: 'TH SarabunPSK', 'TH Sarabun New', 'THSarabunPSK', 'THSarabunNew', 'Sarabun', sans-serif; font-size: 16pt; color: #000; width: 100%;">
           ${sectionsHtml}
         </div>
       `;
@@ -4414,29 +4499,29 @@
 
       const printContainer = document.getElementById('print-area');
       printContainer.innerHTML = `
-        <div class="a4-print-sheet" style="font-family: 'TH Sarabun New', 'THSarabunNew', 'TH SarabunPSK', 'Sarabun', sans-serif; color: #000; width: 100%;">
+        <div class="a4-print-sheet" style="font-family: 'TH SarabunPSK', 'TH Sarabun New', 'THSarabunPSK', 'THSarabunNew', 'Sarabun', sans-serif; font-size: 16pt; color: #000; width: 100%;">
           
           <!-- School Official Header -->
-          <div style="text-align: center; margin-bottom: 12px;">
-            <img src="${logoUrl}" alt="ตราประจำโรงเรียนมหาชัยพิทยาคาร" style="width: 72px; height: 72px; object-fit: contain; margin: 0 auto 6px auto; display: block;">
-            <h2 style="font-size: 18pt; font-weight: bold; margin: 0; line-height: 1.25; color: #000;">โรงเรียนมหาชัยพิทยาคาร</h2>
-            <h3 style="font-size: 16pt; font-weight: bold; margin: 3px 0 0 0; line-height: 1.25; color: #000;">แบบรายงานผลการลงทะเบียนกิจกรรมชุมนุม ประจำปีการศึกษา ๒๕๖๙</h3>
+          <div style="text-align: center; margin-bottom: 8px;">
+            <img src="${logoUrl}" alt="ตราประจำโรงเรียนมหาชัยพิทยาคาร" style="width: 60px; height: 60px; object-fit: contain; margin: 0 auto 4px auto; display: block;">
+            <h2 style="font-size: 16pt; font-weight: bold; margin: 0; line-height: 1.25; color: #000; font-family: 'TH SarabunPSK', sans-serif;">โรงเรียนมหาชัยพิทยาคาร</h2>
+            <h3 style="font-size: 16pt; font-weight: bold; margin: 2px 0 0 0; line-height: 1.25; color: #000; font-family: 'TH SarabunPSK', sans-serif;">แบบรายงานผลการลงทะเบียนกิจกรรมชุมนุม ประจำปีการศึกษา ๒๕๖๙</h3>
             ${selectedClub ? `
-              <div style="font-size: 15pt; font-weight: bold; margin-top: 4px; color: #000;">
+              <div style="font-size: 16pt; font-weight: bold; margin-top: 3px; color: #000; font-family: 'TH SarabunPSK', sans-serif;">
                 กิจกรรมชุมนุม: ${escapeHTML(selectedClub.name)}
               </div>
-              <div style="font-size: 14pt; margin-top: 2px; color: #222;">
+              <div style="font-size: 16pt; margin-top: 2px; color: #222; font-family: 'TH SarabunPSK', sans-serif;">
                 ครูผู้ดูแลชุมนุม: ${escapeHTML(getClubTeachersText(selectedClub))} &nbsp;|&nbsp; จำนวนที่เปิดรับ: ${selectedClub.capacity} คน
               </div>
             ` : `
-              <div style="font-size: 15pt; font-weight: bold; margin-top: 4px; color: #000;">
+              <div style="font-size: 16pt; font-weight: bold; margin-top: 3px; color: #000; font-family: 'TH SarabunPSK', sans-serif;">
                 แสดงรายชื่อนักเรียนจากทุกกิจกรรมชุมนุม
               </div>
             `}
           </div>
 
           <!-- Document Info Bar -->
-          <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 13.5pt; margin-bottom: 6px; padding-bottom: 2px; border-bottom: 1px solid #111;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 16pt; margin-bottom: 6px; padding-bottom: 2px; border-bottom: 1px solid #111; font-family: 'TH SarabunPSK', sans-serif;">
             <div>
               <strong>จำนวนนักเรียนที่ลงทะเบียน:</strong> ${targetRegs.length} คน
             </div>
@@ -4446,15 +4531,15 @@
           </div>
 
           <!-- Official Table -->
-          <table class="a4-print-table" style="width: 100%; border-collapse: collapse; font-size: 14pt;">
+          <table class="a4-print-table" style="width: 100%; border-collapse: collapse; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">
             <thead>
               <tr style="background-color: #f1f5f9;">
-                <th style="width: 6%; text-align: center; border: 1px solid #111; padding: 5px;">ลำดับ</th>
-                <th style="width: 13%; text-align: center; border: 1px solid #111; padding: 5px;">เลขประจำตัว</th>
-                <th style="width: 27%; text-align: left; border: 1px solid #111; padding: 5px 8px;">ชื่อ - นามสกุล นักเรียน</th>
-                <th style="width: 11%; text-align: center; border: 1px solid #111; padding: 5px;">ระดับชั้น</th>
-                <th style="width: 23%; text-align: left; border: 1px solid #111; padding: 5px 8px;">กิจกรรมชุมนุม</th>
-                <th style="width: 20%; text-align: left; border: 1px solid #111; padding: 5px 8px;">ครูผู้ดูแล</th>
+                <th style="width: 6%; text-align: center; border: 1px solid #111; padding: 4px; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif; font-weight: bold;">ลำดับ</th>
+                <th style="width: 13%; text-align: center; border: 1px solid #111; padding: 4px; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif; font-weight: bold;">เลขประจำตัว</th>
+                <th style="width: 27%; text-align: left; border: 1px solid #111; padding: 4px 6px; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif; font-weight: bold;">ชื่อ - นามสกุล นักเรียน</th>
+                <th style="width: 11%; text-align: center; border: 1px solid #111; padding: 4px; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif; font-weight: bold;">ระดับชั้น</th>
+                <th style="width: 23%; text-align: left; border: 1px solid #111; padding: 4px 6px; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif; font-weight: bold;">กิจกรรมชุมนุม</th>
+                <th style="width: 20%; text-align: left; border: 1px solid #111; padding: 4px 6px; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif; font-weight: bold;">ครูผู้ดูแล</th>
               </tr>
             </thead>
             <tbody>
@@ -4466,37 +4551,37 @@
                 const tch = getClubTeachersText(clb);
                 return `
                   <tr>
-                    <td style="border: 1px solid #111; padding: 5px; text-align: center;">${i + 1}</td>
-                    <td style="border: 1px solid #111; padding: 5px; text-align: center; font-family: monospace, sans-serif;">${escapeHTML(studentCode)}</td>
-                    <td style="border: 1px solid #111; padding: 5px 8px; text-align: left;">${escapeHTML(r.studentName)}</td>
-                    <td style="border: 1px solid #111; padding: 5px; text-align: center;">${cls ? escapeHTML(cls.name) : '-'}</td>
-                    <td style="border: 1px solid #111; padding: 5px 8px; text-align: left;">${clb ? escapeHTML(clb.name) : '-'}</td>
-                    <td style="border: 1px solid #111; padding: 5px 8px; text-align: left;">${escapeHTML(tch)}</td>
+                    <td style="border: 1px solid #111; padding: 4px; text-align: center; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">${i + 1}</td>
+                    <td style="border: 1px solid #111; padding: 4px; text-align: center; font-size: 16pt; font-family: 'TH SarabunPSK', monospace, sans-serif;">${escapeHTML(studentCode)}</td>
+                    <td style="border: 1px solid #111; padding: 4px 6px; text-align: left; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">${escapeHTML(r.studentName)}</td>
+                    <td style="border: 1px solid #111; padding: 4px; text-align: center; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">${cls ? escapeHTML(cls.name) : '-'}</td>
+                    <td style="border: 1px solid #111; padding: 4px 6px; text-align: left; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">${clb ? escapeHTML(clb.name) : '-'}</td>
+                    <td style="border: 1px solid #111; padding: 4px 6px; text-align: left; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">${escapeHTML(tch)}</td>
                   </tr>
                 `;
               }).join('')}
             </tbody>
             <tfoot>
               <tr style="background-color: #f8fafc; font-weight: bold; border-top: 1.5px solid #111;">
-                <td colspan="2" style="border: 1px solid #111; padding: 6px; text-align: center;">รวมทั้งสิ้น</td>
-                <td colspan="4" style="border: 1px solid #111; padding: 6px 8px; text-align: left;">นักเรียนจำนวน ${targetRegs.length} คน</td>
+                <td colspan="2" style="border: 1px solid #111; padding: 4px; text-align: center; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">รวมทั้งสิ้น</td>
+                <td colspan="4" style="border: 1px solid #111; padding: 4px 6px; text-align: left; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">นักเรียนจำนวน ${targetRegs.length} คน</td>
               </tr>
             </tfoot>
           </table>
 
           <!-- Official Civil Service Signature Section -->
-          <div class="print-avoid-break" style="margin-top: 36px; display: flex; justify-content: space-between; font-size: 14pt; line-height: 1.6;">
+          <div class="print-avoid-break" style="margin-top: 28px; display: flex; justify-content: space-between; font-size: 16pt; line-height: 1.4; font-family: 'TH SarabunPSK', sans-serif;">
             <div style="width: 46%; text-align: center;">
-              <p style="margin: 0;">ลงชื่อ............................................................ผู้รายงาน</p>
-              <p style="margin: 4px 0 0 0;">( นายก้องนที อุ่นเจริญ )</p>
-              <p style="margin: 2px 0 0 0;">ตำแหน่ง ผู้ดูแลระบบ / ครู โรงเรียนมหาชัยพิทยาคาร</p>
-              <p style="margin: 4px 0 0 0;">วันที่ ......... เดือน ......................... พ.ศ. .............</p>
+              <p style="margin: 0; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">ลงชื่อ............................................................ผู้รายงาน</p>
+              <p style="margin: 3px 0 0 0; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">( นายก้องนที อุ่นเจริญ )</p>
+              <p style="margin: 2px 0 0 0; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">ตำแหน่ง ผู้ดูแลระบบ / ครู โรงเรียนมหาชัยพิทยาคาร</p>
+              <p style="margin: 3px 0 0 0; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">วันที่ ......... เดือน ......................... พ.ศ. .............</p>
             </div>
             <div style="width: 46%; text-align: center;">
-              <p style="margin: 0;">ลงชื่อ............................................................ผู้อนุมัติ</p>
-              <p style="margin: 4px 0 0 0;">( ............................................................ )</p>
-              <p style="margin: 2px 0 0 0;">ตำแหน่ง หัวหน้ากลุ่มบริหารงานวิชาการ</p>
-              <p style="margin: 4px 0 0 0;">วันที่ ......... เดือน ......................... พ.ศ. .............</p>
+              <p style="margin: 0; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">ลงชื่อ............................................................ผู้อนุมัติ</p>
+              <p style="margin: 3px 0 0 0; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">( ............................................................ )</p>
+              <p style="margin: 2px 0 0 0; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">ตำแหน่ง หัวหน้ากลุ่มบริหารงานวิชาการ</p>
+              <p style="margin: 3px 0 0 0; font-size: 16pt; font-family: 'TH SarabunPSK', sans-serif;">วันที่ ......... เดือน ......................... พ.ศ. .............</p>
             </div>
           </div>
 

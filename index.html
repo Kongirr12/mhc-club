@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&display=swap" rel="stylesheet">
 
   <!-- MHC Logo Base64 for instant zero-latency printing -->
-  <script src="logo.js?v=3.3.36"></script>
+  <script src="logo.js?v=3.3.37"></script>
 
   <!-- Font Awesome 6.6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
@@ -352,7 +352,7 @@
           <div>
             <div class="flex items-center gap-1.5">
               <span class="text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/40 px-2 py-0.5 rounded-full border border-brand-200 dark:border-brand-800/50">Smart School</span>
-              <span class="text-[11px] text-slate-400 font-medium hidden sm:inline">v3.3.36</span>
+              <span class="text-[11px] text-slate-400 font-medium hidden sm:inline">v3.3.37</span>
             </div>
             <h1 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">ระบบลงทะเบียนชุมนุมออนไลน์</h1>
             <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[200px] sm:max-w-xs">โรงเรียนมหาชัยพิทยาคาร สพม.มหาสารคาม</p>
@@ -736,7 +736,7 @@
         </div>
       </div>
       <div class="text-center md:text-right text-[11px]">
-        <p>ผู้พัฒนาระบบ: <strong class="text-brand-600 dark:text-brand-400 font-semibold">ครูก้องนที อุ่นเจริญ</strong> | MHC Smart School v3.3.36</p>
+        <p>ผู้พัฒนาระบบ: <strong class="text-brand-600 dark:text-brand-400 font-semibold">ครูก้องนที อุ่นเจริญ</strong> | MHC Smart School v3.3.37</p>
       </div>
     </div>
   </footer>
@@ -2842,7 +2842,7 @@
        -------------------------------------------------------- */
     function cleanThaiText(str) {
       return (str || '')
-        .replace(/[\uFFFD\s\u200B-\u200D\uFEFF]/g, '')
+        .replace(/[\s\u200B-\u200D\uFEFF]/g, '')
         .replace(/^เด็กชาย|^เด็กหญิง|^นาย|^นางสาว|^ด\.ช\.|^ด\.ญ\./g, '')
         .trim()
         .toLowerCase();
@@ -2864,27 +2864,26 @@
         }
       }
 
-      // 2. Direct cleaned Thai name match
+      // 2. Direct cleaned Thai name match (without FFFD)
+      const sPure = sClean.replace(/\uFFFD+/g, '');
       for (const r of registrations) {
         if (usedRegIds.has(r.id)) continue;
-        const rClean = cleanThaiText(r.studentName);
-        if (sClean && rClean && sClean === rClean) {
+        const rClean = cleanThaiText(r.studentName).replace(/\uFFFD+/g, '');
+        if (sPure && rClean && sPure === rClean) {
           usedRegIds.add(r.id);
           return r;
         }
       }
 
-      // 3. Substring / Token match in same class (recovers OCR / minor spelling artifacts)
-      for (const r of registrations) {
-        if (usedRegIds.has(r.id)) continue;
-        if (student.classId === r.classId) {
-          const rClean = cleanThaiText(r.studentName);
-          if (sClean && rClean && (sClean.includes(rClean) || rClean.includes(sClean))) {
-            usedRegIds.add(r.id);
-            return r;
-          }
-          if (sClean.length >= 6 && rClean.length >= 6) {
-            if (sClean.slice(0, 4) === rClean.slice(0, 4) || sClean.slice(-4) === rClean.slice(-4)) {
+      // 3. FFFD wildcard match within same class (handles corrupted OCR characters)
+      if (sClean.includes('\uFFFD')) {
+        const pattern = '^' + sClean.split(/\uFFFD+/).map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('.*') + '$';
+        const regExp = new RegExp(pattern);
+        for (const r of registrations) {
+          if (usedRegIds.has(r.id)) continue;
+          if (student.classId === r.classId) {
+            const rClean = cleanThaiText(r.studentName);
+            if (regExp.test(rClean)) {
               usedRegIds.add(r.id);
               return r;
             }
@@ -2892,7 +2891,50 @@
         }
       }
 
+      // 4. Substring match within same class (one contains the other)
+      for (const r of registrations) {
+        if (usedRegIds.has(r.id)) continue;
+        if (student.classId === r.classId) {
+          const rClean = cleanThaiText(r.studentName);
+          if (sPure && rClean && (sPure.includes(rClean) || rClean.includes(sPure))) {
+            usedRegIds.add(r.id);
+            return r;
+          }
+        }
+      }
+
       return null;
+    }
+
+    /* --------------------------------------------------------
+       STUDENT SORTING & CLASSIFICATION LOGIC
+       -------------------------------------------------------- */
+    function getStudentSortKey(student, classId) {
+      const name = (student.name || student.studentName || '').trim();
+      let prefixRank = 9;
+      const cid = Number(classId);
+      if (cid <= 3) {
+        if (name.startsWith('เด็กชาย') || name.startsWith('ด.ช.')) prefixRank = 1;
+        else if (name.startsWith('เด็กหญิง') || name.startsWith('ด.ญ.')) prefixRank = 2;
+        else if (name.startsWith('นางสาว') || name.startsWith('น.ส.')) prefixRank = 3;
+        else if (name.startsWith('นาย')) prefixRank = 4;
+      } else {
+        if (name.startsWith('นาย')) prefixRank = 1;
+        else if (name.startsWith('นางสาว') || name.startsWith('น.ส.')) prefixRank = 2;
+        else if (name.startsWith('เด็กชาย') || name.startsWith('ด.ช.')) prefixRank = 3;
+        else if (name.startsWith('เด็กหญิง') || name.startsWith('ด.ญ.')) prefixRank = 4;
+      }
+      const coreName = name.replace(/^เด็กชาย|^เด็กหญิง|^นาย|^นางสาว|^ด\.ช\.|^ด\.ญ\./g, '').trim();
+      return { prefixRank, coreName };
+    }
+
+    function sortClassStudents(students, classId) {
+      return (students || []).slice().sort((a, b) => {
+        const keyA = getStudentSortKey(a, classId);
+        const keyB = getStudentSortKey(b, classId);
+        if (keyA.prefixRank !== keyB.prefixRank) return keyA.prefixRank - keyB.prefixRank;
+        return keyA.coreName.localeCompare(keyB.coreName, 'th');
+      });
     }
 
     function buildClassRosterData(targetClassId = 'all', statusFilter = 'all', clubFilter = 'all', searchQuery = '') {
@@ -2908,10 +2950,9 @@
       const q = (searchQuery || '').trim().toLowerCase();
 
       targetClasses.forEach(cls => {
-        // Enrolled students in natural classroom roster order
-        const classStudents = (dbCache.students || [])
-          .filter(s => s.classId == cls.id)
-          .slice();
+        // Enrolled students in exact classroom roster order
+        const rawClassStudents = (dbCache.students || []).filter(s => s.classId == cls.id);
+        const classStudents = sortClassStudents(rawClassStudents, cls.id);
 
         classStudents.forEach((s, idx) => {
           const reg = findStudentRegistration(s, dbCache.registrations || [], usedRegIds);
@@ -2931,7 +2972,7 @@
             isRegistered: isReg,
             registrationId: reg ? reg.id : null,
             clubId: club ? club.id : null,
-            clubName: isReg ? (club ? club.name : 'ลงทะเบียนแล้ว') : 'ยังไม่ลงทะเบียน',
+            clubName: isReg ? (club ? club.name : 'ลงทะเบียนแล้ว') : '',
             teachersText: teacher,
             timestamp: reg ? reg.timestamp : null,
             rawReg: reg || null
@@ -3135,113 +3176,9 @@
 
     /* --------------------------------------------------------
        OFFICIAL WORD (.DOC) GENERATION ENGINE
+       (Exact layout matching โรงเรียนมหาชัยพิทยาคาร template)
        -------------------------------------------------------- */
-    function generateOfficialWordDocument({
-      fileName,
-      docTitle = 'แบบรายงานและบัญชีรายชื่อการลงทะเบียนกิจกรรมชุมนุม',
-      subTitle = 'ประจำปีการศึกษา ๒๕๖๙',
-      sections = []
-    }) {
-      const logoData = (typeof MHC_LOGO_BASE64 !== 'undefined' && MHC_LOGO_BASE64) ? MHC_LOGO_BASE64 : '';
-
-      let sectionsHtml = '';
-      sections.forEach((sec, sIdx) => {
-        const pageBreakStyle = (sIdx > 0) ? 'page-break-before: always; margin-top: 24pt;' : '';
-
-        let rowsHtml = '';
-        sec.students.forEach((st, idx) => {
-          const isUnreg = !st.isRegistered;
-          const clubDisplay = isUnreg
-            ? '<b style="color: #dc2626; background-color: #fee2e2; padding: 2px 6px;">ยังไม่ลงทะเบียน</b>'
-            : `<b>${escapeHTML(st.clubName)}</b>`;
-          const teacherDisplay = isUnreg ? '-' : escapeHTML(st.teachersText || '-');
-          const timeDisplay = (st.isRegistered && st.timestamp) ? formatThaiDateTime(st.timestamp) : '-';
-
-          rowsHtml += `
-            <tr style="${isUnreg ? 'background-color: #fef2f2;' : ''}">
-              <td align="center" style="border: 1px solid #111; padding: 4px 6px; text-align: center;">${idx + 1}</td>
-              <td align="center" style="border: 1px solid #111; padding: 4px 6px; text-align: center; font-family: monospace, sans-serif;">${escapeHTML(st.studentCode || '-')}</td>
-              <td style="border: 1px solid #111; padding: 4px 8px; text-align: left;">${escapeHTML(st.studentName)}</td>
-              <td align="center" style="border: 1px solid #111; padding: 4px 6px; text-align: center;">${escapeHTML(st.className)}</td>
-              <td style="border: 1px solid #111; padding: 4px 8px; text-align: left;">${clubDisplay}</td>
-              <td style="border: 1px solid #111; padding: 4px 8px; text-align: left;">${teacherDisplay}</td>
-              <td align="center" style="border: 1px solid #111; padding: 4px 6px; text-align: center;">${timeDisplay}</td>
-            </tr>
-          `;
-        });
-
-        sectionsHtml += `
-          <div style="${pageBreakStyle}">
-            <!-- Official School Header -->
-            <div style="text-align: center; margin-bottom: 10px;">
-              ${logoData ? `<img src="${logoData}" alt="ตราโรงเรียนมหาชัยพิทยาคาร" width="65" height="65" style="display: block; margin: 0 auto 4px auto;" />` : ''}
-              <h2 style="font-size: 17pt; font-weight: bold; margin: 0; line-height: 1.25; color: #000;">โรงเรียนมหาชัยพิทยาคาร</h2>
-              <h3 style="font-size: 15.5pt; font-weight: bold; margin: 2px 0 0 0; line-height: 1.25; color: #000;">${docTitle} ${subTitle}</h3>
-              <p style="font-size: 13.5pt; margin: 2px 0 0 0; color: #222;">สังกัดสำนักงานเขตพื้นที่การศึกษามัธยมศึกษามหาสารคาม (สพม.มหาสารคาม)</p>
-            </div>
-
-            <!-- Info & Statistics Bar -->
-            <table style="width: 100%; border: none; margin-bottom: 6px; border-top: 1px solid #111; border-bottom: 1px solid #111; font-size: 13.5pt;">
-              <tr>
-                <td style="border: none; padding: 4px 0; text-align: left;">
-                  <strong>ระดับชั้น:</strong> ${escapeHTML(sec.className)}
-                </td>
-                <td style="border: none; padding: 4px 0; text-align: right;">
-                  นักเรียนทั้งหมด <strong>${sec.totalCount}</strong> คน &nbsp;|&nbsp;
-                  ลงทะเบียนแล้ว <strong style="color: #16a34a;">${sec.regCount}</strong> คน &nbsp;|&nbsp;
-                  ยังไม่ลงทะเบียน <strong style="color: #dc2626;">${sec.unregCount}</strong> คน
-                </td>
-              </tr>
-            </table>
-
-            <!-- Student Roster Table -->
-            <table style="width: 100%; border-collapse: collapse; font-size: 13.5pt; margin-top: 4px;">
-              <thead>
-                <tr style="background-color: #f1f5f9;">
-                  <th style="width: 6%; border: 1px solid #111; padding: 5px 4px; text-align: center;">ลำดับ</th>
-                  <th style="width: 12%; border: 1px solid #111; padding: 5px 4px; text-align: center;">เลขประจำตัว</th>
-                  <th style="width: 24%; border: 1px solid #111; padding: 5px 8px; text-align: left;">ชื่อ - นามสกุล นักเรียน</th>
-                  <th style="width: 10%; border: 1px solid #111; padding: 5px 4px; text-align: center;">ระดับชั้น</th>
-                  <th style="width: 20%; border: 1px solid #111; padding: 5px 8px; text-align: left;">กิจกรรมชุมนุม</th>
-                  <th style="width: 15%; border: 1px solid #111; padding: 5px 8px; text-align: left;">ครูผู้ดูแล</th>
-                  <th style="width: 13%; border: 1px solid #111; padding: 5px 4px; text-align: center;">เวลาลงทะเบียน</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${rowsHtml}
-              </tbody>
-              <tfoot>
-                <tr style="background-color: #f8fafc; font-weight: bold; border-top: 1.5px solid #111;">
-                  <td colspan="2" style="border: 1px solid #111; padding: 5px; text-align: center;">รวม</td>
-                  <td colspan="5" style="border: 1px solid #111; padding: 5px 8px; text-align: left;">
-                    นักเรียนทั้งหมด ${sec.totalCount} คน &nbsp;(ลงทะเบียนสำเร็จ ${sec.regCount} คน, ยังไม่ลงทะเบียน ${sec.unregCount} คน)
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-
-            <!-- Official Signatures Block -->
-            <table style="width: 100%; border: none; margin-top: 28px; font-size: 13.5pt; line-height: 1.55;">
-              <tr>
-                <td style="width: 48%; border: none; text-align: center; vertical-align: top;">
-                  <p style="margin: 0;">ลงชื่อ............................................................ผู้รายงาน</p>
-                  <p style="margin: 3px 0 0 0;">( นายก้องนที อุ่นเจริญ )</p>
-                  <p style="margin: 2px 0 0 0;">ตำแหน่ง ผู้ดูแลระบบ / ครู โรงเรียนมหาชัยพิทยาคาร</p>
-                  <p style="margin: 3px 0 0 0;">วันที่ ......... เดือน ......................... พ.ศ. .............</p>
-                </td>
-                <td style="width: 4%; border: none;"></td>
-                <td style="width: 48%; border: none; text-align: center; vertical-align: top;">
-                  <p style="margin: 0;">ลงชื่อ............................................................ผู้อนุมัติ</p>
-                  <p style="margin: 3px 0 0 0;">( ............................................................ )</p>
-                  <p style="margin: 2px 0 0 0;">ตำแหน่ง หัวหน้ากลุ่มบริหารงานวิชาการ</p>
-                  <p style="margin: 3px 0 0 0;">วันที่ ......... เดือน ......................... พ.ศ. .............</p>
-                </td>
-              </tr>
-            </table>
-          </div>
-        `;
-      });
-
+    function downloadWordFile(bodyHtml, fileName, docTitle = 'รายชื่อชุมนุม ภาคเรียนที่ 2 ปีการศึกษา 2569') {
       const fullWordHtml = `
         <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
         <head>
@@ -3259,83 +3196,331 @@
           <style>
             @page Section1 {
               size: 595.3pt 841.9pt;
-              margin: 1.0in 0.8in 1.0in 0.8in;
+              margin: 1.0in 1.0in 1.0in 1.0in;
               mso-header-margin: 35.4pt;
               mso-footer-margin: 35.4pt;
               mso-paper-source: 0;
             }
             div.Section1 { page: Section1; }
             body {
-              font-family: 'TH Sarabun New', 'TH SarabunPSK', 'Sarabun', 'Cordia New', sans-serif;
-              font-size: 14pt;
-              line-height: 1.35;
+              font-family: 'TH SarabunPSK', 'TH Sarabun New', 'Sarabun', 'Cordia New', sans-serif;
+              font-size: 16pt;
+              line-height: 1.25;
               color: #000000;
             }
-            table { border-collapse: collapse; }
+            table {
+              border-collapse: collapse;
+              width: 100%;
+              mso-table-lspace: 0pt;
+              mso-table-rspace: 0pt;
+            }
+            th, td {
+              font-family: 'TH SarabunPSK', 'TH Sarabun New', 'Sarabun', 'Cordia New', sans-serif;
+              font-size: 16pt;
+            }
           </style>
         </head>
         <body>
           <div class="Section1">
-            ${sectionsHtml}
+            ${bodyHtml}
           </div>
         </body>
         </html>
       `;
 
-      const blob = new Blob([fullWordHtml], { type: 'application/msword;charset=utf-8;' });
+      const blob = new Blob(['\uFEFF' + fullWordHtml], { type: 'application/msword;charset=utf-8;' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = fileName;
       link.click();
     }
 
+    function generateOfficialWordDocument({
+      fileName,
+      docTitle = 'แบบรายงานและบัญชีรายชื่อการลงทะเบียนกิจกรรมชุมนุม',
+      subTitle = 'ประจำปีการศึกษา ๒๕๖๙',
+      sections = []
+    }) {
+      exportClassRosterWord('all', 'all', 'all', '');
+    }
+
     function exportClassRosterWord(targetClassId = 'all', statusFilter = 'all', clubFilter = 'all', searchQuery = '') {
       if (!dbCache) return;
 
+      // 1. If filtering specifically for unregistered students
+      if (statusFilter === 'unregistered') {
+        const matches = buildClassRosterData(targetClassId, 'unregistered', clubFilter, searchQuery);
+        if (matches.length === 0) {
+          Swal.fire('ไม่มีข้อมูล', 'ไม่พบรายชื่อนักเรียนที่ยังไม่ลงทะเบียน', 'warning');
+          return;
+        }
+
+        let rowsHtml = '';
+        matches.forEach((s, idx) => {
+          rowsHtml += `
+            <tr>
+              <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${idx + 1}</td>
+              <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.studentCode || '-')}</td>
+              <td style="border: 1px solid #000; padding: 4px 8px; text-align: left;">${escapeHTML(s.studentName)}</td>
+              <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.className)}</td>
+              <td style="border: 1px solid #000; padding: 4px 8px; text-align: left;"></td>
+            </tr>
+          `;
+        });
+
+        const bodyHtml = `
+          <div style="text-align: center; margin-bottom: 10px;">
+            <h2 style="font-size: 16pt; font-weight: bold; margin: 0; line-height: 1.3;">รายชื่อนักเรียนที่ยังไม่ลงทะเบียนชุมนุม</h2>
+            <h3 style="font-size: 16pt; font-weight: normal; margin: 2px 0 0 0; line-height: 1.3;">ภาคเรียนที่ 2 ปีการศึกษา 2569</h3>
+          </div>
+          <table style="width: 100%; border-collapse: collapse; font-size: 16pt;">
+            <thead>
+              <tr style="background-color: #f1f5f9;">
+                <th style="width: 8%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ลำดับ</th>
+                <th style="width: 14%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">เลขประจำตัว</th>
+                <th style="width: 36%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">ชื่อ - นามสกุล นักเรียน</th>
+                <th style="width: 12%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ระดับชั้น</th>
+                <th style="width: 30%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">กิจกรรมชุมนุม</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        `;
+        downloadWordFile(bodyHtml, `รายชื่อนักเรียนยังไม่ลงทะเบียนชุมนุม_${new Date().toISOString().slice(0, 10)}.doc`, 'รายชื่อนักเรียนที่ยังไม่ลงทะเบียนชุมนุม');
+        return;
+      }
+
+      // 2. If exporting combined file for all classes (standard "ไฟล์รวม")
+      if (targetClassId === 'all' && statusFilter === 'all' && clubFilter === 'all' && !searchQuery) {
+        let bodyHtml = '';
+        let pageCounter = 0;
+
+        const classesList = (dbCache.classes || []).slice().sort((a, b) => a.id - b.id);
+        classesList.forEach(cls => {
+          const sortedStudents = buildClassRosterData(cls.id, 'all', 'all', '');
+          if (sortedStudents.length === 0) return;
+
+          const classNum = String(cls.id);
+          const chunks = [];
+          if (sortedStudents.length > 28) {
+            chunks.push({ title: `รายชื่อชุมนุม มัธยมศึกษาปีที่ ${classNum}`, rows: sortedStudents.slice(0, 25), startIdx: 1 });
+            chunks.push({ title: `รายชื่อชุมนุม มัธยมศึกษาปีที่ ${classNum} (ต่อ)`, rows: sortedStudents.slice(25), startIdx: 26 });
+          } else {
+            chunks.push({ title: `รายชื่อชุมนุม มัธยมศึกษาปีที่ ${classNum}`, rows: sortedStudents, startIdx: 1 });
+          }
+
+          chunks.forEach(chunk => {
+            const pageBreakStyle = (pageCounter > 0) ? 'page-break-before: always; margin-top: 24pt;' : '';
+            pageCounter++;
+
+            let rowsHtml = '';
+            chunk.rows.forEach((s, rIdx) => {
+              const clubCell = s.isRegistered ? escapeHTML(s.clubName || '') : '';
+              rowsHtml += `
+                <tr>
+                  <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${chunk.startIdx + rIdx}</td>
+                  <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.studentCode || '-')}</td>
+                  <td style="border: 1px solid #000; padding: 4px 8px; text-align: left;">${escapeHTML(s.studentName)}</td>
+                  <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.className)}</td>
+                  <td style="border: 1px solid #000; padding: 4px 8px; text-align: left;">${clubCell}</td>
+                </tr>
+              `;
+            });
+
+            bodyHtml += `
+              <div style="${pageBreakStyle}">
+                <div style="text-align: center; margin-bottom: 10px;">
+                  <h2 style="font-size: 16pt; font-weight: bold; margin: 0; line-height: 1.3;">${chunk.title}</h2>
+                  <h3 style="font-size: 16pt; font-weight: normal; margin: 2px 0 0 0; line-height: 1.3;">ภาคเรียนที่ 2 ปีการศึกษา 2569</h3>
+                </div>
+                <table style="width: 100%; border-collapse: collapse; font-size: 16pt;">
+                  <thead>
+                    <tr style="background-color: #f1f5f9;">
+                      <th style="width: 8%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ลำดับ</th>
+                      <th style="width: 14%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">เลขประจำตัว</th>
+                      <th style="width: 36%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">ชื่อ - นามสกุล นักเรียน</th>
+                      <th style="width: 12%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ระดับชั้น</th>
+                      <th style="width: 30%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">กิจกรรมชุมนุม</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${rowsHtml}
+                  </tbody>
+                </table>
+              </div>
+            `;
+          });
+        });
+
+        // Section: Unregistered students
+        const allUnregistered = buildClassRosterData('all', 'unregistered', 'all', '');
+        if (allUnregistered.length > 0) {
+          let unregRows = '';
+          allUnregistered.forEach((s, idx) => {
+            unregRows += `
+              <tr>
+                <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${idx + 1}</td>
+                <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.studentCode || '-')}</td>
+                <td style="border: 1px solid #000; padding: 4px 8px; text-align: left;">${escapeHTML(s.studentName)}</td>
+                <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.className)}</td>
+                <td style="border: 1px solid #000; padding: 4px 8px; text-align: left;"></td>
+              </tr>
+            `;
+          });
+
+          bodyHtml += `
+            <div style="page-break-before: always; margin-top: 24pt;">
+              <div style="text-align: center; margin-bottom: 10px;">
+                <h2 style="font-size: 16pt; font-weight: bold; margin: 0; line-height: 1.3;">รายชื่อนักเรียนที่ยังไม่ลงทะเบียนชุมนุม</h2>
+                <h3 style="font-size: 16pt; font-weight: normal; margin: 2px 0 0 0; line-height: 1.3;">ภาคเรียนที่ 2 ปีการศึกษา 2569</h3>
+              </div>
+              <table style="width: 100%; border-collapse: collapse; font-size: 16pt;">
+                <thead>
+                  <tr style="background-color: #f1f5f9;">
+                    <th style="width: 8%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ลำดับ</th>
+                    <th style="width: 14%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">เลขประจำตัว</th>
+                    <th style="width: 36%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">ชื่อ - นามสกุล นักเรียน</th>
+                    <th style="width: 12%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ระดับชั้น</th>
+                    <th style="width: 30%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">กิจกรรมชุมนุม</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${unregRows}
+                </tbody>
+              </table>
+            </div>
+          `;
+        }
+
+        // Section: Club registration summary
+        let clubRows = '';
+        let totalCap = 0;
+        let totalReg = 0;
+        (dbCache.clubs || []).forEach((c, idx) => {
+          const regCount = (dbCache.registrations || []).filter(r => r.clubId == c.id).length;
+          const remain = Math.max(0, (c.capacity || 0) - regCount);
+          totalCap += (c.capacity || 0);
+          totalReg += regCount;
+          const teachers = getClubTeachersText(c);
+          clubRows += `
+            <tr>
+              <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${idx + 1}</td>
+              <td style="border: 1px solid #000; padding: 4px 8px; text-align: left;">${escapeHTML(c.name)}</td>
+              <td style="border: 1px solid #000; padding: 4px 8px; text-align: left;">${escapeHTML(teachers || '-')}</td>
+              <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${c.capacity || 0}</td>
+              <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${regCount}</td>
+              <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${remain}</td>
+            </tr>
+          `;
+        });
+
+        bodyHtml += `
+          <div style="page-break-before: always; margin-top: 24pt;">
+            <div style="text-align: center; margin-bottom: 10px;">
+              <h2 style="font-size: 16pt; font-weight: bold; margin: 0; line-height: 1.3;">ผลการลงทะเบียนชุมนุม</h2>
+              <h3 style="font-size: 16pt; font-weight: normal; margin: 2px 0 0 0; line-height: 1.3;">ประจำภาคเรียนที่ 2 ปีการศึกษา 2569</h3>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; font-size: 16pt;">
+              <thead>
+                <tr style="background-color: #f1f5f9;">
+                  <th style="width: 6%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ลำดับ</th>
+                  <th style="width: 30%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">ชื่อกิจกรรมชุมนุม</th>
+                  <th style="width: 32%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">ครูผู้ดูแลชุมนุม</th>
+                  <th style="width: 10%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">รับได้</th>
+                  <th style="width: 11%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ลงแล้ว</th>
+                  <th style="width: 11%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">คงเหลือ</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${clubRows}
+              </tbody>
+              <tfoot>
+                <tr style="font-weight: bold; background-color: #f8fafc;">
+                  <td colspan="3" align="center" style="border: 1px solid #000; padding: 5px; text-align: center;">รวมทั้งสิ้น</td>
+                  <td align="center" style="border: 1px solid #000; padding: 5px; text-align: center;">${totalCap}</td>
+                  <td align="center" style="border: 1px solid #000; padding: 5px; text-align: center;">${totalReg}</td>
+                  <td align="center" style="border: 1px solid #000; padding: 5px; text-align: center;">${totalCap - totalReg}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        `;
+
+        downloadWordFile(bodyHtml, `รายชื่อชุมนุม_รวมทุกระดับชั้น_${new Date().toISOString().slice(0, 10)}.doc`, 'รายชื่อชุมนุม ภาคเรียนที่ 2 ปีการศึกษา 2569');
+        return;
+      }
+
+      // 3. Specific class or filtered view
       const matches = buildClassRosterData(targetClassId, statusFilter, clubFilter, searchQuery);
       if (matches.length === 0) {
         Swal.fire('ไม่มีข้อมูล', 'ไม่พบรายชื่อนักเรียนสำหรับสร้างเอกสาร Word', 'warning');
         return;
       }
 
-      const classesList = (dbCache.classes || []).slice().sort((a, b) => a.id - b.id);
-      const targetClasses = (targetClassId !== 'all')
-        ? classesList.filter(c => c.id == targetClassId)
-        : classesList;
-
-      const sections = [];
-      targetClasses.forEach(cls => {
-        const studentsInClass = matches.filter(m => m.classId == cls.id);
-        if (studentsInClass.length > 0) {
-          const regCount = studentsInClass.filter(s => s.isRegistered).length;
-          sections.push({
-            classId: cls.id,
-            className: cls.name,
-            totalCount: studentsInClass.length,
-            regCount: regCount,
-            unregCount: studentsInClass.length - regCount,
-            students: studentsInClass
-          });
-        }
-      });
-
-      if (sections.length === 0) {
-        Swal.fire('ไม่มีข้อมูล', 'ไม่พบรายชื่อนักเรียนสำหรับสร้างเอกสาร Word', 'warning');
-        return;
-      }
-
-      let classFileName = 'รวมทุกระดับชั้น';
+      let title = 'รายชื่อชุมนุม';
       if (targetClassId !== 'all') {
-        const cObj = classesList.find(c => c.id == targetClassId);
-        classFileName = cObj ? cObj.name.replace(/[/\\?%*:|"<>]/g, '-').replace(/\s+/g, '_') : `ห้อง_${targetClassId}`;
+        const cObj = (dbCache.classes || []).find(c => c.id == targetClassId);
+        const cName = cObj ? cObj.name : `ม.${targetClassId}`;
+        const cNum = cName.replace(/[^0-9]/g, '');
+        title = cNum ? `รายชื่อชุมนุม มัธยมศึกษาปีที่ ${cNum}` : `รายชื่อชุมนุม ${cName}`;
+      } else if (clubFilter !== 'all') {
+        const clb = (dbCache.clubs || []).find(c => c.id == clubFilter);
+        title = clb ? `รายชื่อนักเรียน ${clb.name}` : 'รายชื่อนักเรียนชุมนุม';
       }
 
-      generateOfficialWordDocument({
-        fileName: `ใบรายชื่อนักเรียนลงทะเบียนชุมนุม_${classFileName}_${new Date().toISOString().slice(0, 10)}.doc`,
-        docTitle: 'แบบรายงานและบัญชีรายชื่อการลงทะเบียนกิจกรรมชุมนุม',
-        subTitle: 'ประจำปีการศึกษา ๒๕๖๙',
-        sections: sections
+      const chunks = [];
+      if (matches.length > 28) {
+        chunks.push({ title: title, rows: matches.slice(0, 25), startIdx: 1 });
+        chunks.push({ title: `${title} (ต่อ)`, rows: matches.slice(25), startIdx: 26 });
+      } else {
+        chunks.push({ title: title, rows: matches, startIdx: 1 });
+      }
+
+      let bodyHtml = '';
+      chunks.forEach((chunk, chunkIdx) => {
+        const pageBreakStyle = (chunkIdx > 0) ? 'page-break-before: always; margin-top: 24pt;' : '';
+        let rowsHtml = '';
+        chunk.rows.forEach((s, rIdx) => {
+          const clubCell = s.isRegistered ? escapeHTML(s.clubName || '') : '';
+          rowsHtml += `
+            <tr>
+              <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${chunk.startIdx + rIdx}</td>
+              <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.studentCode || '-')}</td>
+              <td style="border: 1px solid #000; padding: 4px 8px; text-align: left;">${escapeHTML(s.studentName)}</td>
+              <td align="center" style="border: 1px solid #000; padding: 4px; text-align: center;">${escapeHTML(s.className)}</td>
+              <td style="border: 1px solid #000; padding: 4px 8px; text-align: left;">${clubCell}</td>
+            </tr>
+          `;
+        });
+
+        bodyHtml += `
+          <div style="${pageBreakStyle}">
+            <div style="text-align: center; margin-bottom: 10px;">
+              <h2 style="font-size: 16pt; font-weight: bold; margin: 0; line-height: 1.3;">${chunk.title}</h2>
+              <h3 style="font-size: 16pt; font-weight: normal; margin: 2px 0 0 0; line-height: 1.3;">ภาคเรียนที่ 2 ปีการศึกษา 2569</h3>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; font-size: 16pt;">
+              <thead>
+                <tr style="background-color: #f1f5f9;">
+                  <th style="width: 8%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ลำดับ</th>
+                  <th style="width: 14%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">เลขประจำตัว</th>
+                  <th style="width: 36%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">ชื่อ - นามสกุล นักเรียน</th>
+                  <th style="width: 12%; border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">ระดับชั้น</th>
+                  <th style="width: 30%; border: 1px solid #000; padding: 4px 8px; text-align: left; font-weight: bold;">กิจกรรมชุมนุม</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+          </div>
+        `;
       });
+
+      const cleanFileName = title.replace(/[/\\?%*:|"<>]/g, '-').replace(/\s+/g, '_');
+      downloadWordFile(bodyHtml, `${cleanFileName}_${new Date().toISOString().slice(0, 10)}.doc`, title);
     }
 
     function exportClassRosterCSV(targetClassId = 'all', statusFilter = 'all', clubFilter = 'all', searchQuery = '') {
@@ -3345,23 +3530,25 @@
         return;
       }
 
-      let csv = '\uFEFFลำดับที่,เลขประจำตัว,ชื่อ - นามสกุล นักเรียน,ระดับชั้น,สถานะลงทะเบียน,กิจกรรมชุมนุม,ครูผู้ดูแลชุมนุม,วันเวลาลงทะเบียน\n';
+      let csv = '\uFEFFลำดับ,เลขประจำตัว,ชื่อ - นามสกุล นักเรียน,ระดับชั้น,กิจกรรมชุมนุม,ครูผู้ดูแลชุมนุม,เวลาลงทะเบียน\n';
       matches.forEach((item, idx) => {
+        const safeIdx = idx + 1;
         const safeCode = String(item.studentCode || '-').replace(/"/g, '""');
         const safeName = String(item.studentName || '').replace(/"/g, '""');
         const safeClass = String(item.className || '-').replace(/"/g, '""');
-        const statusText = item.isRegistered ? 'ลงทะเบียนแล้ว' : 'ยังไม่ลงทะเบียน';
-        const safeClub = String(item.clubName || '-').replace(/"/g, '""');
-        const safeTeacher = String(item.teachersText || '-').replace(/"/g, '""');
-        const safeTime = item.timestamp ? formatThaiDateTime(item.timestamp).replace(/"/g, '""') : '-';
+        const safeClub = item.isRegistered ? String(item.clubName || '').replace(/"/g, '""') : 'ยังไม่ลงทะเบียน';
+        const safeTeacher = item.isRegistered ? String(item.teachersText || '-').replace(/"/g, '""') : '-';
+        const safeTime = (item.isRegistered && item.timestamp) ? formatThaiDateTime(item.timestamp).replace(/"/g, '""') : '-';
 
-        csv += `"${idx + 1}","${safeCode}","${safeName}","${safeClass}","${statusText}","${safeClub}","${safeTeacher}","${safeTime}"\n`;
+        csv += `"${safeIdx}","${safeCode}","${safeName}","${safeClass}","${safeClub}","${safeTeacher}","${safeTime}"\n`;
       });
 
       let classFileName = 'รวมทุกระดับชั้น';
       if (targetClassId !== 'all') {
         const cObj = (dbCache.classes || []).find(c => c.id == targetClassId);
         classFileName = cObj ? cObj.name.replace(/[/\\?%*:|"<>]/g, '-').replace(/\s+/g, '_') : `ห้อง_${targetClassId}`;
+      } else if (statusFilter === 'unregistered') {
+        classFileName = 'รายชื่อยังไม่ลงทะเบียน';
       }
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -5298,55 +5485,7 @@
       const selectedStatus = statusSelect ? statusSelect.value : 'all';
       const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
 
-      let list = [...(dbCache.students || [])];
-
-      if (selectedClass !== 'all') {
-        const clsId = parseInt(selectedClass);
-        list = list.filter(s => s.classId == clsId);
-      }
-
-      if (selectedStatus === 'registered') {
-        list = list.filter(s => (dbCache.registrations || []).some(r => r.studentName.trim() === s.name.trim()));
-      } else if (selectedStatus === 'unregistered') {
-        list = list.filter(s => !(dbCache.registrations || []).some(r => r.studentName.trim() === s.name.trim()));
-      }
-
-      if (query) {
-        list = list.filter(s => {
-          const nameMatch = (s.name || '').toLowerCase().includes(query);
-          const codeMatch = (s.studentCode || '').toLowerCase().includes(query);
-          return nameMatch || codeMatch;
-        });
-      }
-
-      list.sort((a, b) => {
-        if (a.classId !== b.classId) return a.classId - b.classId;
-        if (a.studentCode && b.studentCode) {
-          return a.studentCode.localeCompare(b.studentCode, undefined, { numeric: true });
-        }
-        return (a.name || '').localeCompare(b.name || '', 'th');
-      });
-
-      if (list.length === 0) {
-        Swal.fire('ไม่พบข้อมูล', 'ไม่มีรายชื่อนักเรียนตามเงื่อนไขที่เลือกสำหรับส่งออก CSV', 'warning');
-        return;
-      }
-
-      let csv = '\uFEFFลำดับ,เลขประจำตัว,ชื่อ-นามสกุล,ระดับชั้น,สถานะลงทะเบียน,กิจกรรมชุมนุม\n';
-      list.forEach((s, idx) => {
-        const cls = (dbCache.classes || []).find(c => c.id == s.classId);
-        const reg = (dbCache.registrations || []).find(r => r.studentName.trim() === s.name.trim());
-        const regClub = reg ? (dbCache.clubs || []).find(c => c.id == reg.clubId) : null;
-        const statusText = reg ? 'ลงทะเบียนแล้ว' : 'ยังไม่ลงทะเบียน';
-        const clubName = regClub ? regClub.name : '-';
-        csv += `"${idx + 1}","${s.studentCode || ''}","${s.name}","${cls ? cls.name : ''}","${statusText}","${clubName}"\n`;
-      });
-
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `รายชื่อนักเรียน_${new Date().toISOString().slice(0, 10)}.csv`;
-      link.click();
+      exportClassRosterCSV(selectedClass, selectedStatus, 'all', query);
     }
 
     /* --------------------------------------------------------
